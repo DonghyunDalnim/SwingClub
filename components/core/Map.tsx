@@ -10,6 +10,8 @@ import {
   DEFAULT_ZOOM_LEVEL
 } from '@/lib/kakao-map';
 import { KakaoMapProps, KakaoLatLng } from '@/lib/types/kakao-map';
+import { Studio } from '@/lib/types/studio';
+import StudioMarker from '@/components/location/StudioMarker';
 
 interface MapState {
   isLoading: boolean;
@@ -17,7 +19,14 @@ interface MapState {
   map: any | null;
 }
 
-export const Map: React.FC<KakaoMapProps> = ({
+// 확장된 Map 컴포넌트 props
+interface ExtendedMapProps extends KakaoMapProps {
+  studios?: Studio[];
+  selectedStudioId?: string;
+  onStudioSelect?: (studio: Studio) => void;
+}
+
+export const Map: React.FC<ExtendedMapProps> = ({
   width = '100%',
   height = '400px',
   center = DEFAULT_CENTER,
@@ -25,6 +34,9 @@ export const Map: React.FC<KakaoMapProps> = ({
   className = '',
   onMapCreated,
   onCenterChanged,
+  studios = [],
+  selectedStudioId,
+  onStudioSelect,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [mapState, setMapState] = useState<MapState>({
@@ -191,6 +203,17 @@ export const Map: React.FC<KakaoMapProps> = ({
           현재 위치: {currentLocation.lat.toFixed(4)}, {currentLocation.lng.toFixed(4)}
         </div>
       )}
+
+      {/* 스튜디오 마커들 */}
+      {mapState.map && studios.map((studio) => (
+        <StudioMarker
+          key={studio.id}
+          studio={studio}
+          map={mapState.map}
+          isSelected={studio.id === selectedStudioId}
+          onClick={onStudioSelect || (() => {})}
+        />
+      ))}
     </div>
   );
 };
