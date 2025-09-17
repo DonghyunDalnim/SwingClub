@@ -28,3 +28,6 @@ export {
   Small
 } from './Typography';
 export type { TypographyProps } from './Typography';
+
+export { default as Map } from './Map';
+export type { KakaoMapProps } from '@/lib/types/kakao-map';

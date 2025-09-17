@@ -1,8 +1,24 @@
+'use client';
+
+import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { ArrowLeft, Search, Settings, MapPin, Users, Star, Filter } from 'lucide-react'
+
+// Map 컴포넌트를 동적으로 로드 (SSR 비활성화)
+const Map = dynamic(() => import('@/components/core/Map'), {
+  ssr: false,
+  loading: () => (
+    <div className="h-64 flex items-center justify-center bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg">
+      <div className="text-center space-y-3">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+        <p className="text-gray-600 text-sm">지도 컴포넌트를 불러오는 중...</p>
+      </div>
+    </div>
+  )
+});
 
 export default function LocationPage() {
   return (
@@ -22,83 +38,19 @@ export default function LocationPage() {
       </header>
 
       <div className="container mx-auto px-4 py-6 space-y-6">
-        {/* Map Placeholder */}
-        <Card className="h-64 bg-blue-50 border-2 border-dashed border-blue-200">
-          <CardContent className="h-full flex items-center justify-center">
-            <div className="text-center space-y-4">
-              <div className="text-4xl">🗺️</div>
-              <div>
-                <h3 className="font-semibold text-gray-800">서울시 지도</h3>
-                <p className="text-sm text-gray-600">카카오맵 연동 예정</p>
-              </div>
-
-              {/* Sample Locations */}
-              <div className="grid grid-cols-2 gap-4 mt-6">
-                <div className="bg-white p-3 rounded-lg shadow-sm border">
-                  <div className="flex items-center space-x-2">
-                    <MapPin className="h-4 w-4 text-blue-500" />
-                    <span className="text-sm font-medium">강남</span>
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    <div>스튜디오A</div>
-                    <div className="flex items-center space-x-1">
-                      <Star className="h-3 w-3 text-yellow-400" />
-                      <span>4.8</span>
-                      <Users className="h-3 w-3 ml-2" />
-                      <span>12명</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white p-3 rounded-lg shadow-sm border">
-                  <div className="flex items-center space-x-2">
-                    <MapPin className="h-4 w-4 text-green-500" />
-                    <span className="text-sm font-medium">홍대</span>
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    <div>댄스홀B</div>
-                    <div className="flex items-center space-x-1">
-                      <Star className="h-3 w-3 text-yellow-400" />
-                      <span>4.6</span>
-                      <Users className="h-3 w-3 ml-2" />
-                      <span>8명</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white p-3 rounded-lg shadow-sm border">
-                  <div className="flex items-center space-x-2">
-                    <MapPin className="h-4 w-4 text-purple-500" />
-                    <span className="text-sm font-medium">신촌</span>
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    <div>연습실C</div>
-                    <div className="flex items-center space-x-1">
-                      <Star className="h-3 w-3 text-yellow-400" />
-                      <span>4.9</span>
-                      <Users className="h-3 w-3 ml-2" />
-                      <span>15명</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white p-3 rounded-lg shadow-sm border">
-                  <div className="flex items-center space-x-2">
-                    <MapPin className="h-4 w-4 text-red-500" />
-                    <span className="text-sm font-medium">이태원</span>
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    <div>클럽D</div>
-                    <div className="flex items-center space-x-1">
-                      <Star className="h-3 w-3 text-yellow-400" />
-                      <span>4.7</span>
-                      <Users className="h-3 w-3 ml-2" />
-                      <span>20명</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+        {/* 카카오맵 */}
+        <Card className="overflow-hidden">
+          <CardContent className="p-0">
+            <Map
+              height="320px"
+              className="w-full"
+              onMapCreated={(map) => {
+                console.log('카카오맵이 생성되었습니다:', map);
+              }}
+              onCenterChanged={(center) => {
+                console.log('지도 중심이 변경되었습니다:', center);
+              }}
+            />
           </CardContent>
         </Card>
 

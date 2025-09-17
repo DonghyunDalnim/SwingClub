@@ -1,6 +1,9 @@
 // Jest setup file
 require('@testing-library/jest-dom')
 
+// Set test environment variables before any other imports
+process.env.NEXT_PUBLIC_KAKAO_MAP_API_KEY = 'test-kakao-api-key'
+
 // Mock ResizeObserver (required for some UI components)
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),
