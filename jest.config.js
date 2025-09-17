@@ -8,7 +8,11 @@ module.exports = {
     '**/*.(test|spec).+(ts|tsx|js)'
   ],
   transform: {
-    '^.+\\.(ts|tsx)$': 'ts-jest',
+    '^.+\\.(ts|tsx)$': ['ts-jest', {
+      tsconfig: {
+        jsx: 'react-jsx',
+      },
+    }],
   },
   collectCoverageFrom: [
     'lib/**/*.{ts,tsx}',
@@ -26,5 +30,14 @@ module.exports = {
   // React 19 compatibility
   testEnvironmentOptions: {
     customExportConditions: [''],
+  },
+  // Coverage thresholds
+  coverageThreshold: {
+    global: {
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80,
+    },
   },
 };
