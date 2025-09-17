@@ -1,0 +1,123 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isStudioOwner(studioData) {
+      return isAuthenticated() &&
+             (request.auth.uid == studioData.metadata.createdBy || isAdmin());
+    }
+
+    function isValidStudioData(data) {
+      return data.keys().hasAll(['name', 'category', 'location', 'metadata']) &&
+             data.name is string &&
+             data.name.size() > 0 &&
+             data.category in ['studio', 'practice_room', 'club', 'public_space', 'cafe'] &&
+             data.location.keys().hasAll(['geopoint', 'address', 'region']) &&
+             data.location.geopoint is latlng &&
+             data.location.address is string &&
+             data.location.region is string &&
+             data.metadata.keys().hasAll(['createdAt', 'updatedAt', 'createdBy', 'verified', 'featured', 'status']) &&
+             data.metadata.createdAt is timestamp &&
+             data.metadata.updatedAt is timestamp &&
+             data.metadata.createdBy is string &&
+             data.metadata.verified is bool &&
+             data.metadata.featured is bool &&
+             data.metadata.status in ['active', 'temporarily_closed', 'permanently_closed'];
+    }
+
+    // Users collection rules
+    match /users/{userId} {
+      allow read: if true; // Public profiles can be read by anyone
+      allow write: if isOwner(userId) || isAdmin();
+    }
+
+    // Studios collection rules
+    match /studios/{studioId} {
+      // Read permissions - anyone can read active studios
+      allow read: if resource.data.metadata.status == 'active' ||
+                     isStudioOwner(resource.data) ||
+                     isAdmin();
+
+      // Create permissions - authenticated users can create studios
+      allow create: if isAuthenticated() &&
+                       isValidStudioData(request.resource.data) &&
+                       request.resource.data.metadata.createdBy == request.auth.uid;
+
+      // Update permissions - only studio owners can update
+      allow update: if isStudioOwner(resource.data) &&
+                       isValidStudioData(request.resource.data) &&
+                       // Prevent changing the owner
+                       request.resource.data.metadata.createdBy == resource.data.metadata.createdBy &&
+                       // Prevent non-admins from changing verification status
+                       (isAdmin() || request.resource.data.metadata.verified == resource.data.metadata.verified) &&
+                       // Prevent non-admins from changing featured status
+                       (isAdmin() || request.resource.data.metadata.featured == resource.data.metadata.featured);
+
+      // Delete permissions - only studio owners can delete
+      allow delete: if isStudioOwner(resource.data) || isAdmin();
+    }
+
+    // Studio reviews subcollection (for future extension)
+    match /studios/{studioId}/reviews/{reviewId} {
+      allow read: if true; // Anyone can read reviews
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid &&
+                       request.resource.data.keys().hasAll(['rating', 'comment', 'createdAt']) &&
+                       request.resource.data.rating is number &&
+                       request.resource.data.rating >= 1 &&
+                       request.resource.data.rating <= 5;
+      allow update: if isOwner(resource.data.userId);
+      allow delete: if isOwner(resource.data.userId) || isAdmin();
+    }
+
+    // Studio images subcollection (for future extension)
+    match /studios/{studioId}/images/{imageId} {
+      allow read: if true; // Anyone can read images
+      allow create, update, delete: if isAuthenticated() &&
+                                       exists(/databases/$(database)/documents/studios/$(studioId)) &&
+                                       isStudioOwner(get(/databases/$(database)/documents/studios/$(studioId)).data);
+    }
+
+    // Studio favorites tracking (for future extension)
+    match /users/{userId}/favorites/{studioId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Analytics and stats (admin only)
+    match /analytics/{document=**} {
+      allow read, write: if isAdmin();
+    }
+
+    // System configuration (admin only)
+    match /config/{document=**} {
+      allow read: if true; // Public config can be read by anyone
+      allow write: if isAdmin();
+    }
+
+    // Reports and moderation (for future extension)
+    match /reports/{reportId} {
+      allow create: if isAuthenticated() &&
+                       request.resource.data.reportedBy == request.auth.uid;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Batch operations for seeding (temporary - remove in production)
+    match /{document=**} {
+      allow read, write: if false; // Explicitly deny all other operations
+    }
+  }
+}
