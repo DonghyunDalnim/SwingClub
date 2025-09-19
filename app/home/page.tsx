@@ -84,7 +84,7 @@ export default function HomePage() {
                 <CardTitle>
                   <Flex align="center" gap="sm">
                     <MapPin className="h-5 w-5" style={{ color: theme.colors.accent.blue }} />
-                    <Typography variant="h4">내 주변 댄스 정보</Typography>
+                    <span>내 주변 댄스 정보</span>
                   </Flex>
                 </CardTitle>
               </CardHeader>
@@ -107,7 +107,7 @@ export default function HomePage() {
                 <CardTitle>
                   <Flex align="center" gap="sm">
                     <Users className="h-5 w-5" style={{ color: theme.colors.primary.main }} />
-                    <Typography variant="h4">커뮤니티</Typography>
+                    <span>커뮤니티</span>
                   </Flex>
                 </CardTitle>
               </CardHeader>
@@ -115,7 +115,6 @@ export default function HomePage() {
                 <div className="space-y-2">
                   {[
                     { icon: MessageCircle, text: '자유게시판' },
-                    { icon: Users, text: '파트너찾기' },
                     { icon: HelpCircle, text: '질문답변' },
                     { icon: Calendar, text: '공연/대회 정보' }
                   ].map((item) => (
@@ -135,7 +134,7 @@ export default function HomePage() {
           <Card>
             <CardHeader>
               <CardTitle>
-                <Typography variant="h4">🔥 HOT TOPICS</Typography>
+                🔥 HOT TOPICS
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -208,20 +207,12 @@ export default function HomePage() {
           </Card>
 
           {/* Quick Actions */}
-          <Grid cols={2} gap="sm">
-            <Button variant="secondary" size="lg" className="h-12">
-              <Flex align="center" gap="sm">
-                <Users className="h-4 w-4" />
-                <span>파트너 찾기</span>
-              </Flex>
-            </Button>
-            <Button variant="secondary" size="lg" className="h-12">
-              <Flex align="center" gap="sm">
-                <ShoppingBag className="h-4 w-4" />
-                <span>중고거래</span>
-              </Flex>
-            </Button>
-          </Grid>
+          <Button variant="secondary" size="lg" className="h-12 w-full">
+            <Flex align="center" gap="sm">
+              <ShoppingBag className="h-4 w-4" />
+              <span>중고거래</span>
+            </Flex>
+          </Button>
         </Section>
       </Container>
     </div>

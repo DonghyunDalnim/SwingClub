@@ -1,16 +1,18 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import dynamic from 'next/dynamic';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Search, Settings, MapPin, Users, Star, Filter } from 'lucide-react';
+import { ArrowLeft, Settings } from 'lucide-react';
 import { Studio } from '@/lib/types/studio';
 import { searchStudiosByLocation } from '@/lib/actions/studios';
 import { KakaoLatLng } from '@/lib/types/kakao-map';
 import { DEFAULT_CENTER } from '@/lib/kakao-map';
 import StudioPopup from '@/components/location/StudioPopup';
+import ViewToggle, { ViewMode } from '@/components/location/ViewToggle';
+import SearchInput from '@/components/location/SearchInput';
+import StudioFilter from '@/components/location/StudioFilter';
+import StudioList from '@/components/location/StudioList';
 
 // Map 컴포넌트를 동적으로 로드 (SSR 비활성화)
 const Map = dynamic(() => import('@/components/core/Map'), {
@@ -32,6 +34,8 @@ export default function LocationPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [mapCenter, setMapCenter] = useState<KakaoLatLng>(DEFAULT_CENTER);
   const [currentCategory, setCurrentCategory] = useState<string>('all');
+  const [viewMode, setViewMode] = useState<ViewMode>('map');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   // 스튜디오 데이터 로딩 함수
   const loadStudios = useCallback(async (center: KakaoLatLng, category?: string) => {
@@ -90,6 +94,44 @@ export default function LocationPage() {
     loadStudios(mapCenter, category);
   }, [loadStudios, mapCenter]);
 
+  // 뷰 모드 변경 핸들러
+  const handleViewModeChange = useCallback((mode: ViewMode) => {
+    setViewMode(mode);
+  }, []);
+
+  // 검색어 변경 핸들러
+  const handleSearchQueryChange = useCallback((query: string) => {
+    setSearchQuery(query);
+  }, []);
+
+  // 필터링된 스튜디오 목록 계산
+  const filteredStudios = useMemo(() => {
+    let filtered = studios;
+
+    // 검색어 필터링
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (studio) =>
+          studio.name.toLowerCase().includes(query) ||
+          studio.location.address.toLowerCase().includes(query) ||
+          studio.location.region.toLowerCase().includes(query) ||
+          (studio.description && studio.description.toLowerCase().includes(query))
+      );
+    }
+
+    return filtered;
+  }, [studios, searchQuery]);
+
+  // 카테고리별 스튜디오 개수 계산
+  const studioCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    filteredStudios.forEach((studio) => {
+      counts[studio.category] = (counts[studio.category] || 0) + 1;
+    });
+    return counts;
+  }, [filteredStudios]);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -100,148 +142,73 @@ export default function LocationPage() {
             <span className="font-semibold text-lg">내 주변 댄스 정보</span>
           </div>
           <div className="flex items-center space-x-3">
-            <Search className="h-6 w-6" />
             <Settings className="h-6 w-6" />
           </div>
         </div>
       </header>
 
       <div className="container mx-auto px-4 py-6 space-y-6">
-        {/* 카카오맵 */}
-        <Card className="overflow-hidden">
-          <CardContent className="p-0 relative">
-            <Map
-              height="320px"
-              className="w-full"
-              onMapCreated={(map) => {
-                console.log('카카오맵이 생성되었습니다:', map);
-              }}
-              onCenterChanged={handleMapCenterChanged}
-              studios={studios}
-              selectedStudioId={selectedStudio?.id}
-              onStudioSelect={handleStudioSelect}
+        {/* 검색 및 뷰 토글 */}
+        <div className="flex items-center gap-4">
+          <div className="flex-1">
+            <SearchInput
+              value={searchQuery}
+              onChange={handleSearchQueryChange}
+              placeholder="스튜디오명 또는 주소로 검색"
             />
-
-            {/* 로딩 오버레이 */}
-            {isLoading && (
-              <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center">
-                <div className="text-center space-y-2">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
-                  <p className="text-sm text-gray-600">스튜디오를 검색 중...</p>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Filter Bar */}
-        <div className="flex items-center space-x-2 overflow-x-auto pb-2">
-          <Badge
-            variant={currentCategory === 'all' ? 'default' : 'outline'}
-            className="whitespace-nowrap cursor-pointer"
-            onClick={() => handleCategoryChange('all')}
-          >
-            전체 ({studios.length})
-          </Badge>
-          <Badge
-            variant={currentCategory === 'studio' ? 'default' : 'outline'}
-            className="whitespace-nowrap cursor-pointer"
-            onClick={() => handleCategoryChange('studio')}
-          >
-            스튜디오
-          </Badge>
-          <Badge
-            variant={currentCategory === 'practice_room' ? 'default' : 'outline'}
-            className="whitespace-nowrap cursor-pointer"
-            onClick={() => handleCategoryChange('practice_room')}
-          >
-            연습실
-          </Badge>
-          <Badge
-            variant={currentCategory === 'club' ? 'default' : 'outline'}
-            className="whitespace-nowrap cursor-pointer"
-            onClick={() => handleCategoryChange('club')}
-          >
-            클럽/파티
-          </Badge>
-          <Button variant="outline" size="sm" className="ml-auto">
-            <Filter className="h-4 w-4 mr-1" />
-            리스트뷰
-          </Button>
+          </div>
+          <ViewToggle
+            currentView={viewMode}
+            onViewChange={handleViewModeChange}
+          />
         </div>
 
-        {/* Location List */}
-        <div className="space-y-4">
-          {studios.length === 0 && !isLoading ? (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <p className="text-gray-500">주변에 스튜디오가 없습니다.</p>
-                <p className="text-sm text-gray-400 mt-2">지도를 이동해서 다른 지역을 탐색해보세요.</p>
-              </CardContent>
-            </Card>
-          ) : (
-            studios.slice(0, 10).map((studio) => (
-              <Card
-                key={studio.id}
-                className={`hover:shadow-md transition-shadow cursor-pointer ${
-                  selectedStudio?.id === studio.id ? 'ring-2 ring-blue-500' : ''
-                }`}
-                onClick={() => handleStudioSelect(studio)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <h3 className="font-semibold">{studio.name}</h3>
-                        <Badge variant="secondary" className="text-xs">
-                          {studio.category === 'studio' ? '스튜디오' :
-                           studio.category === 'practice_room' ? '연습실' :
-                           studio.category === 'club' ? '클럽' : studio.category}
-                        </Badge>
-                        {studio.metadata.verified && (
-                          <Badge variant="default" className="text-xs bg-green-100 text-green-800">
-                            인증
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="flex items-center space-x-4 text-sm text-gray-600">
-                        <div className="flex items-center space-x-1">
-                          <MapPin className="h-4 w-4" />
-                          <span>{studio.location.region}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Star className="h-4 w-4 text-yellow-400" />
-                          <span>{studio.stats.avgRating.toFixed(1)}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Users className="h-4 w-4" />
-                          <span>{studio.stats.favorites}명 즐겨찾기</span>
-                        </div>
-                      </div>
-                      {studio.description && (
-                        <p className="text-sm text-gray-500 mt-2 line-clamp-2">
-                          {studio.description}
-                        </p>
-                      )}
-                    </div>
-                    <Button variant="outline" size="sm">
-                      상세보기
-                    </Button>
+        {/* 필터 */}
+        <StudioFilter
+          currentCategory={currentCategory}
+          onCategoryChange={handleCategoryChange}
+          studioCounts={studioCounts}
+        />
+
+        {/* 지도뷰 */}
+        {viewMode === 'map' && (
+          <Card className="overflow-hidden">
+            <CardContent className="p-0 relative">
+              <Map
+                height="320px"
+                className="w-full"
+                onMapCreated={(map) => {
+                  console.log('카카오맵이 생성되었습니다:', map);
+                }}
+                onCenterChanged={handleMapCenterChanged}
+                studios={filteredStudios}
+                selectedStudioId={selectedStudio?.id}
+                onStudioSelect={handleStudioSelect}
+              />
+
+              {/* 로딩 오버레이 */}
+              {isLoading && (
+                <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center">
+                  <div className="text-center space-y-2">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="text-sm text-gray-600">스튜디오를 검색 중...</p>
                   </div>
-                </CardContent>
-              </Card>
-            ))
-          )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
-          {/* 더보기 버튼 */}
-          {studios.length > 10 && (
-            <div className="text-center">
-              <Button variant="outline" className="w-full">
-                더 많은 스튜디오 보기 ({studios.length - 10}개 더)
-              </Button>
-            </div>
-          )}
-        </div>
+        {/* 리스트뷰 */}
+        {viewMode === 'list' && (
+          <StudioList
+            studios={filteredStudios}
+            selectedStudioId={selectedStudio?.id}
+            onStudioSelect={handleStudioSelect}
+            isLoading={isLoading}
+            searchQuery={searchQuery}
+          />
+        )}
       </div>
 
       {/* 스튜디오 정보 팝업 */}
