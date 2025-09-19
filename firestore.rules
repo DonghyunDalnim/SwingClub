@@ -39,6 +39,45 @@ service cloud.firestore {
              data.metadata.status in ['active', 'temporarily_closed', 'permanently_closed'];
     }
 
+    // Community helper functions
+    function isPostAuthor(postData) {
+      return isAuthenticated() && request.auth.uid == postData.metadata.authorId;
+    }
+
+    function isCommentAuthor(commentData) {
+      return isAuthenticated() && request.auth.uid == commentData.authorId;
+    }
+
+    function isValidPostData(data) {
+      return data.keys().hasAll(['title', 'content', 'category', 'status', 'visibility', 'stats', 'metadata']) &&
+             data.title is string &&
+             data.title.size() > 0 &&
+             data.title.size() <= 200 &&
+             data.content is string &&
+             data.content.size() > 0 &&
+             data.content.size() <= 10000 &&
+             data.category in ['general', 'qna', 'event', 'marketplace', 'lesson', 'review'] &&
+             data.status in ['active', 'hidden', 'deleted', 'reported'] &&
+             data.visibility in ['public', 'members_only', 'region_only'] &&
+             data.metadata.authorId is string &&
+             data.metadata.authorName is string &&
+             data.metadata.createdAt is timestamp &&
+             data.metadata.updatedAt is timestamp;
+    }
+
+    function isValidCommentData(data) {
+      return data.keys().hasAll(['postId', 'content', 'authorId', 'authorName', 'status', 'createdAt', 'updatedAt']) &&
+             data.postId is string &&
+             data.content is string &&
+             data.content.size() > 0 &&
+             data.content.size() <= 1000 &&
+             data.authorId is string &&
+             data.authorName is string &&
+             data.status in ['active', 'hidden', 'deleted', 'reported'] &&
+             data.createdAt is timestamp &&
+             data.updatedAt is timestamp;
+    }
+
     // Users collection rules
     match /users/{userId} {
       allow read: if true; // Public profiles can be read by anyone
@@ -108,11 +147,120 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Reports and moderation (for future extension)
-    match /reports/{reportId} {
+    // Community Posts collection rules
+    match /posts/{postId} {
+      // Read permissions - anyone can read active public posts
+      allow read: if resource.data.status == 'active' &&
+                     (resource.data.visibility == 'public' ||
+                      (resource.data.visibility == 'members_only' && isAuthenticated()));
+
+      // Create permissions - authenticated users can create posts
       allow create: if isAuthenticated() &&
-                       request.resource.data.reportedBy == request.auth.uid;
-      allow read, update, delete: if isAdmin();
+                       isValidPostData(request.resource.data) &&
+                       request.resource.data.metadata.authorId == request.auth.uid &&
+                       request.resource.data.status == 'active';
+
+      // Update permissions - only post authors and admins
+      allow update: if (isPostAuthor(resource.data) || isAdmin()) &&
+                       isValidPostData(request.resource.data) &&
+                       // Prevent changing author
+                       request.resource.data.metadata.authorId == resource.data.metadata.authorId &&
+                       // Non-admins can't change certain fields
+                       (isAdmin() ||
+                        (request.resource.data.metadata.createdAt == resource.data.metadata.createdAt &&
+                         request.resource.data.isPinned == resource.data.isPinned &&
+                         request.resource.data.isFeatured == resource.data.isFeatured));
+
+      // Delete permissions - post authors and admins (soft delete by changing status)
+      allow delete: if isPostAuthor(resource.data) || isAdmin();
+    }
+
+    // Community Comments collection rules
+    match /comments/{commentId} {
+      // Read permissions - anyone can read active comments on readable posts
+      allow read: if resource.data.status == 'active' &&
+                     exists(/databases/$(database)/documents/posts/$(resource.data.postId));
+
+      // Create permissions - authenticated users can create comments
+      allow create: if isAuthenticated() &&
+                       isValidCommentData(request.resource.data) &&
+                       request.resource.data.authorId == request.auth.uid &&
+                       request.resource.data.status == 'active' &&
+                       exists(/databases/$(database)/documents/posts/$(request.resource.data.postId));
+
+      // Update permissions - only comment authors and admins
+      allow update: if (isCommentAuthor(resource.data) || isAdmin()) &&
+                       isValidCommentData(request.resource.data) &&
+                       // Prevent changing author and post
+                       request.resource.data.authorId == resource.data.authorId &&
+                       request.resource.data.postId == resource.data.postId &&
+                       request.resource.data.createdAt == resource.data.createdAt;
+
+      // Delete permissions - comment authors and admins
+      allow delete: if isCommentAuthor(resource.data) || isAdmin();
+    }
+
+    // Likes collection rules
+    match /likes/{likeId} {
+      // Read permissions - authenticated users can read their own likes
+      allow read: if isAuthenticated() && request.auth.uid == resource.data.userId;
+
+      // Create permissions - authenticated users can like posts/comments
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid &&
+                       request.resource.data.targetType in ['post', 'comment'] &&
+                       // Verify target exists
+                       (request.resource.data.targetType == 'post' &&
+                        exists(/databases/$(database)/documents/posts/$(request.resource.data.targetId)) ||
+                        request.resource.data.targetType == 'comment' &&
+                        exists(/databases/$(database)/documents/comments/$(request.resource.data.targetId)));
+
+      // Delete permissions - users can remove their own likes
+      allow delete: if isAuthenticated() && request.auth.uid == resource.data.userId;
+    }
+
+    // Community Notifications collection rules
+    match /notifications/{notificationId} {
+      // Read permissions - users can read their own notifications
+      allow read: if isAuthenticated() && request.auth.uid == resource.data.recipientId;
+
+      // Create permissions - system only (through server-side functions)
+      allow create: if false;
+
+      // Update permissions - users can mark their notifications as read
+      allow update: if isAuthenticated() &&
+                       request.auth.uid == resource.data.recipientId &&
+                       // Only allow updating isRead field
+                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isRead']) &&
+                       request.resource.data.isRead == true;
+
+      // Delete permissions - users can delete their own notifications
+      allow delete: if isAuthenticated() && request.auth.uid == resource.data.recipientId;
+    }
+
+    // Community Reports collection rules
+    match /reports/{reportId} {
+      // Read permissions - admin only
+      allow read: if isAdmin();
+
+      // Create permissions - authenticated users can create reports
+      allow create: if isAuthenticated() &&
+                       request.resource.data.reporterId == request.auth.uid &&
+                       request.resource.data.targetType in ['post', 'comment', 'user'] &&
+                       request.resource.data.reason in ['spam', 'inappropriate_content', 'harassment', 'false_information', 'copyright_violation', 'other'] &&
+                       request.resource.data.status == 'pending';
+
+      // Update permissions - admin only
+      allow update: if isAdmin();
+
+      // Delete permissions - admin only
+      allow delete: if isAdmin();
+    }
+
+    // Community Stats collection rules
+    match /communityStats/{document=**} {
+      allow read: if true; // Public stats
+      allow write: if false; // System only
     }
 
     // Batch operations for seeding (temporary - remove in production)

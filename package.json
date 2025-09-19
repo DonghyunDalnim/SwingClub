@@ -10,6 +10,7 @@
     "lint": "next lint",
     "type-check": "tsc --noEmit",
     "validate-firebase": "npx tsx scripts/validate-firebase-setup.ts",
+    "seed:community": "npx tsx scripts/seed-community-data.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"

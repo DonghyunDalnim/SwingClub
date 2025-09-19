@@ -48,19 +48,28 @@ let db: Firestore
 let storage: FirebaseStorage
 let analytics: Analytics | null = null
 
-try {
-  app = initializeApp(firebaseConfig)
-  auth = getAuth(app)
-  db = getFirestore(app)
-  storage = getStorage(app)
+// Check if we have valid Firebase config (not placeholder values)
+const hasValidConfig = firebaseConfig.apiKey !== 'demo-api-key' &&
+                      firebaseConfig.projectId !== 'demo-project'
 
-  // Initialize analytics only in browser environment
-  if (typeof window !== 'undefined' && firebaseConfig.measurementId) {
-    analytics = getAnalytics(app)
+if (hasValidConfig) {
+  try {
+    app = initializeApp(firebaseConfig)
+    auth = getAuth(app)
+    db = getFirestore(app)
+    storage = getStorage(app)
+
+    // Initialize analytics only in browser environment
+    if (typeof window !== 'undefined' && firebaseConfig.measurementId && firebaseConfig.measurementId !== 'G-ABC123DEF4') {
+      analytics = getAnalytics(app)
+    }
+  } catch (error) {
+    console.error('Failed to initialize Firebase:', error)
+    // Don't throw error in development - just warn
+    console.warn('Firebase not configured properly. Using mock services.')
   }
-} catch (error) {
-  console.error('Failed to initialize Firebase:', error)
-  throw new Error('Firebase initialization failed')
+} else {
+  console.warn('Firebase not configured. Using placeholder values for development.')
 }
 
 // Export Firebase services
