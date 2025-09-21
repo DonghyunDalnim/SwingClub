@@ -31,12 +31,19 @@ const requiredEnvVars = [
   'NEXT_PUBLIC_FIREBASE_APP_ID'
 ]
 
-// Only validate environment variables in production/development mode, not during build
+// Only validate environment variables on server-side in development mode
 const isBuildTime = process.env.NODE_ENV === undefined || process.env.NODE_ENV === 'test'
-if (!isBuildTime) {
+const isServer = typeof window === 'undefined'
+
+if (!isBuildTime && process.env.NODE_ENV === 'development' && isServer) {
+  // Debug environment variables (server-side only)
+  console.log('🔧 Firebase Environment Variables Check:')
   for (const envVar of requiredEnvVars) {
-    if (!process.env[envVar]) {
-      console.warn(`Missing Firebase environment variable: ${envVar}`)
+    const value = process.env[envVar]
+    if (!value || value === '') {
+      console.warn(`❌ Missing Firebase environment variable: ${envVar}`)
+    } else {
+      console.log(`✅ ${envVar}: ${value.substring(0, 10)}...`)
     }
   }
 }
