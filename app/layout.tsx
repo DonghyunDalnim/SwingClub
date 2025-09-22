@@ -3,6 +3,8 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import BottomNav from '../components/navigation/BottomNav'
 import { AuthProvider } from '../lib/auth/context'
+import ErrorBoundary from '../components/error/ErrorBoundary'
+import { Toaster } from 'react-hot-toast'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,10 +22,22 @@ export default function RootLayout({
     <html lang="ko">
       <body className={inter.className}>
         <AuthProvider>
-          <main className="pb-16">
-            {children}
-          </main>
-          <BottomNav />
+          <ErrorBoundary>
+            <main className="pb-16">
+              {children}
+            </main>
+            <BottomNav />
+          </ErrorBoundary>
+          <Toaster
+            position="top-center"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                background: '#363636',
+                color: '#fff'
+              }
+            }}
+          />
         </AuthProvider>
       </body>
     </html>

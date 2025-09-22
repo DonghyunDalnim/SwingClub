@@ -1,23 +1,25 @@
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Button, Card, CardContent, CardHeader, CardTitle, Badge, Typography } from '@/components/core'
+import { Container, Section, Flex } from '@/components/layout'
+import { theme } from '@/lib/theme'
 import { ArrowLeft, Edit, Settings, MapPin, Calendar, Award, Heart, MessageCircle, Users, FileText, Bell, Lock, Smartphone, HelpCircle, Mail, LogOut } from 'lucide-react'
 
 export default function ProfilePage() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ backgroundColor: theme.colors.neutral.background }}>
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center space-x-3">
+      <header className="sticky top-0 z-40" style={{ backgroundColor: theme.colors.white, borderBottom: `1px solid ${theme.colors.neutral.lightest}` }}>
+        <Container>
+          <Flex justify="between" align="center" className="py-3">
+          <Flex align="center" gap="md">
             <ArrowLeft className="h-6 w-6" />
-            <span className="font-semibold text-lg">내 정보</span>
-          </div>
-          <div className="flex items-center space-x-3">
+            <Typography variant="h4" className="font-semibold">내 정보</Typography>
+          </Flex>
+          <Flex align="center" gap="md">
             <Edit className="h-6 w-6" />
             <Settings className="h-6 w-6" />
-          </div>
-        </div>
+          </Flex>
+          </Flex>
+        </Container>
       </header>
 
       <div className="container mx-auto px-4 py-6 space-y-6">

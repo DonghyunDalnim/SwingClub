@@ -1,26 +1,28 @@
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Button, Card, CardContent, CardHeader, CardTitle, Badge, Typography } from '@/components/core'
+import { Container, Section, Flex } from '@/components/layout'
+import { theme } from '@/lib/theme'
 import { Search, Edit, Star, Clock } from 'lucide-react'
 
 export default function MarketplacePage() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ backgroundColor: theme.colors.neutral.background }}>
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="flex items-center justify-between px-4 py-3">
-          <span className="font-semibold text-lg">중고거래</span>
-          <div className="flex items-center space-x-3">
+      <header className="sticky top-0 z-40" style={{ backgroundColor: theme.colors.white, borderBottom: `1px solid ${theme.colors.neutral.lightest}` }}>
+        <Container>
+          <Flex justify="between" align="center" className="py-3">
+          <Typography variant="h4" className="font-semibold">중고거래</Typography>
+          <Flex align="center" gap="md">
             <Search className="h-6 w-6" />
             <Edit className="h-6 w-6" />
-          </div>
-        </div>
+          </Flex>
+          </Flex>
+        </Container>
       </header>
 
       <div className="container mx-auto px-4 py-6 space-y-6">
         {/* Category Filter */}
         <div className="flex items-center space-x-2 overflow-x-auto pb-2">
-          <Badge variant="default" className="whitespace-nowrap">👠신발</Badge>
+          <Badge variant="category" className="whitespace-nowrap">👠신발</Badge>
           <Badge variant="outline" className="whitespace-nowrap">👗의상</Badge>
           <Badge variant="outline" className="whitespace-nowrap">💍액세서리</Badge>
           <Badge variant="outline" className="whitespace-nowrap">📱기타</Badge>
@@ -105,7 +107,7 @@ export default function MarketplacePage() {
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="font-semibold text-sm">스윙댄스 액세서리 세트</h3>
-                    <Badge variant="secondary" className="text-xs">세트</Badge>
+                    <Badge variant="status" color="secondary" className="text-xs">세트</Badge>
                   </div>
                   <div className="flex items-center space-x-2 mb-2">
                     <span className="text-sm font-medium">액세사랑</span>
