@@ -89,13 +89,15 @@ export const tokens = {
 };
 
 // 공통 스타일 조합 함수들
-export const createButtonStyle = (variant: 'primary' | 'secondary' | 'ghost' = 'primary') => {
+export const createButtonStyle = (variant: 'primary' | 'secondary' | 'ghost' | 'outline' | 'default' = 'primary') => {
   const base = 'inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none';
 
   const variants = {
     primary: 'bg-[#693BF2] text-white hover:bg-[#5A2FD9] focus:ring-[#693BF2]',
     secondary: 'bg-transparent text-[#293341] border border-[#E0E5EB] hover:bg-[#F6F7F9] focus:ring-[#693BF2]',
-    ghost: 'bg-transparent text-[#693BF2] hover:bg-[#F1EEFF] focus:ring-[#693BF2]'
+    ghost: 'bg-transparent text-[#693BF2] hover:bg-[#F1EEFF] focus:ring-[#693BF2]',
+    outline: 'bg-transparent text-[#693BF2] border border-[#693BF2] hover:bg-[#F1EEFF] focus:ring-[#693BF2]',
+    default: 'bg-[#693BF2] text-white hover:bg-[#5A2FD9] focus:ring-[#693BF2]'
   };
 
   return `${base} ${variants[variant]}`;

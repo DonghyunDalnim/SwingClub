@@ -240,7 +240,7 @@ export function CommentPreview({
         <>
           {previewComments.map((comment) => (
             <div key={comment.id} className="mb-2 last:mb-0">
-              <span className="font-medium">{comment.metadata.authorName}</span>
+              <span className="font-medium">{comment.authorName}</span>
               <span className="ml-2">
                 {comment.content.slice(0, 50)}
                 {comment.content.length > 50 && '...'}

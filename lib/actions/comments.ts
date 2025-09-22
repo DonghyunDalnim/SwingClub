@@ -16,6 +16,7 @@ import {
   createNotification
 } from '@/lib/firebase/collections'
 import type {
+  Comment,
   CreateCommentData,
   UpdateCommentData
 } from '@/lib/types/community'
@@ -173,10 +174,10 @@ export async function unlikeCommentAction(commentId: string): Promise<{ success:
 export async function getCommentsAction(
   postId: string,
   options?: { limit?: number; lastCommentId?: string }
-): Promise<{ success: boolean; comments?: any[]; error?: string }> {
+): Promise<{ success: boolean; comments?: Comment[]; error?: string }> {
   try {
-    const comments = await getComments(postId, options)
-    return { success: true, comments }
+    const result = await getComments(postId, options?.limit || 50)
+    return { success: true, comments: result.comments }
 
   } catch (error) {
     console.error('Failed to get comments:', error)
