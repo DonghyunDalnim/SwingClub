@@ -1,13 +1,14 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useSignIn, useAuthError, useAuthLoading, useIsAuthenticated } from '@/lib/auth/hooks'
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { signInWithGoogle, signInWithKakao, signInWithNaver, clearError } = useSignIn()
   const error = useAuthError()
   const loading = useAuthLoading()
@@ -15,10 +16,13 @@ export default function LoginPage() {
   const [activeProvider, setActiveProvider] = useState<string | null>(null)
 
   // Redirect if already authenticated
-  if (isAuthenticated) {
-    router.push('/home')
-    return null
-  }
+  useEffect(() => {
+    if (isAuthenticated) {
+      const redirectTo = searchParams.get('redirectTo')
+      const targetPath = redirectTo || '/home'
+      router.push(targetPath)
+    }
+  }, [isAuthenticated, router, searchParams])
 
   const handleProviderSignIn = async (provider: 'google' | 'kakao' | 'naver') => {
     setActiveProvider(provider)
@@ -28,17 +32,22 @@ export default function LoginPage() {
       switch (provider) {
         case 'google':
           await signInWithGoogle()
+          // Redirect to intended page or home on success
+          const redirectTo = searchParams.get('redirectTo')
+          const targetPath = redirectTo || '/home'
+          router.push(targetPath)
           break
         case 'kakao':
           await signInWithKakao()
+          // For now, just clear the error after showing message
+          setTimeout(() => clearError(), 3000)
           break
         case 'naver':
           await signInWithNaver()
+          // For now, just clear the error after showing message
+          setTimeout(() => clearError(), 3000)
           break
       }
-
-      // Redirect to home on success
-      router.push('/home')
     } catch (error) {
       console.error('Login error:', error)
       // Error is handled by the auth context

@@ -1,0 +1,2 @@
+# Keep upload directories in git but ignore uploaded files
+# Uploaded files will be ignored by .gitignore

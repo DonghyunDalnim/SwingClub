@@ -132,26 +132,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const handleSignInWithGoogle = () => handleAuthAction(signInWithGoogle)
 
   const handleSignInWithKakao = async () => {
+    dispatch({ type: 'AUTH_START' })
     try {
-      await handleAuthAction(signInWithKakao)
+      // Show friendly message for now
+      dispatch({ type: 'AUTH_ERROR', payload: '카카오 로그인은 곧 지원 예정입니다. 현재는 구글 로그인을 이용해주세요.' })
     } catch (error: any) {
-      if (error.message === 'kakao-not-implemented') {
-        dispatch({ type: 'AUTH_ERROR', payload: '카카오 로그인은 곧 지원 예정입니다' })
-      } else {
-        dispatch({ type: 'AUTH_ERROR', payload: '카카오 로그인에 실패했습니다' })
-      }
+      dispatch({ type: 'AUTH_ERROR', payload: '카카오 로그인에 실패했습니다' })
     }
   }
 
   const handleSignInWithNaver = async () => {
+    dispatch({ type: 'AUTH_START' })
     try {
-      await handleAuthAction(signInWithNaver)
+      // Show friendly message for now
+      dispatch({ type: 'AUTH_ERROR', payload: '네이버 로그인은 곧 지원 예정입니다. 현재는 구글 로그인을 이용해주세요.' })
     } catch (error: any) {
-      if (error.message === 'naver-not-implemented') {
-        dispatch({ type: 'AUTH_ERROR', payload: '네이버 로그인은 곧 지원 예정입니다' })
-      } else {
-        dispatch({ type: 'AUTH_ERROR', payload: '네이버 로그인에 실패했습니다' })
-      }
+      dispatch({ type: 'AUTH_ERROR', payload: '네이버 로그인에 실패했습니다' })
     }
   }
 
@@ -190,33 +186,65 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Listen to Firebase auth state changes
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
-      if (firebaseUser) {
-        try {
-          // Convert Firebase user and fetch profile
-          const user: User = {
-            id: firebaseUser.uid,
-            email: firebaseUser.email,
-            displayName: firebaseUser.displayName,
-            photoURL: firebaseUser.photoURL,
-            provider: 'google', // Default - this should be stored/detected properly
-            createdAt: new Date(firebaseUser.metadata.creationTime || Date.now()),
-            lastLoginAt: new Date(firebaseUser.metadata.lastSignInTime || Date.now())
+    // Check if Firebase auth is properly initialized
+    if (!auth) {
+      console.error('Firebase Auth is not initialized')
+      dispatch({
+        type: 'AUTH_ERROR',
+        payload: 'Firebase 인증 서비스가 초기화되지 않았습니다. Firebase 콘솔에서 Authentication을 활성화해주세요.'
+      })
+      return
+    }
+
+    let unsubscribe: (() => void) | null = null
+
+    try {
+      unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
+        if (firebaseUser) {
+          try {
+            // Convert Firebase user and fetch profile
+            const user: User = {
+              id: firebaseUser.uid,
+              email: firebaseUser.email,
+              displayName: firebaseUser.displayName,
+              photoURL: firebaseUser.photoURL,
+              provider: 'google', // Default - this should be stored/detected properly
+              createdAt: new Date(firebaseUser.metadata.creationTime || Date.now()),
+              lastLoginAt: new Date(firebaseUser.metadata.lastSignInTime || Date.now())
+            }
+
+            const profile = await getUserProfile(user.id)
+            const userWithProfile = { ...user, profile: profile || undefined }
+
+            // Store authentication state in cookies for server-side access
+            document.cookie = `auth-token=${firebaseUser.uid}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
+            document.cookie = `user-data=${encodeURIComponent(JSON.stringify(userWithProfile))}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
+
+            dispatch({ type: 'AUTH_SUCCESS', payload: userWithProfile })
+          } catch (error) {
+            dispatch({ type: 'AUTH_ERROR', payload: '사용자 정보를 불러오는데 실패했습니다' })
           }
+        } else {
+          // Clear cookies on logout
+          document.cookie = 'auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC'
+          document.cookie = 'user-data=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC'
 
-          const profile = await getUserProfile(user.id)
-          const userWithProfile = { ...user, profile: profile || undefined }
-
-          dispatch({ type: 'AUTH_SUCCESS', payload: userWithProfile })
-        } catch (error) {
-          dispatch({ type: 'AUTH_ERROR', payload: '사용자 정보를 불러오는데 실패했습니다' })
+          dispatch({ type: 'AUTH_SIGNOUT' })
         }
-      } else {
-        dispatch({ type: 'AUTH_SIGNOUT' })
-      }
-    })
+      })
+    } catch (error: any) {
+      console.error('Error setting up auth listener:', error)
+      dispatch({
+        type: 'AUTH_ERROR',
+        payload: 'Firebase 인증 리스너 설정에 실패했습니다. Firebase 콘솔에서 Authentication이 활성화되어 있는지 확인해주세요.'
+      })
+    }
 
-    return () => unsubscribe()
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    }
   }, [])
 
   const value: AuthContextType = {

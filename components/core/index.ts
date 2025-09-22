@@ -1,5 +1,5 @@
 // Core UI Components Export
-export { default as Button } from './Button';
+export { Button } from './Button';
 export type { ButtonProps } from './Button';
 
 export {
@@ -12,7 +12,7 @@ export {
 } from './Card';
 export type { CardProps } from './Card';
 
-export { default as Badge } from './Badge';
+export { Badge } from './Badge';
 export type { BadgeProps } from './Badge';
 
 export { default as SearchInput } from './SearchInput';

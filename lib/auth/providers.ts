@@ -72,6 +72,20 @@ export const signInWithGoogle = async (): Promise<User> => {
     return await createOrUpdateUserDoc(user)
   } catch (error: any) {
     console.error('Google sign-in error:', error)
+
+    // Handle specific Firebase auth errors
+    if (error.code === 'auth/configuration-not-found') {
+      throw new Error('Google 인증이 Firebase 프로젝트에서 활성화되지 않았습니다. Firebase 콘솔에서 Google 인증을 활성화해주세요.')
+    }
+
+    if (error.code === 'auth/popup-blocked') {
+      throw new Error('팝업이 차단되었습니다. 브라우저 설정에서 팝업을 허용해주세요.')
+    }
+
+    if (error.code === 'auth/popup-closed-by-user') {
+      throw new Error('로그인이 취소되었습니다.')
+    }
+
     throw error
   }
 }
