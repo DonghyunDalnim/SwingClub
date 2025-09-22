@@ -2,9 +2,9 @@
 
 import React from 'react';
 import { Studio, STUDIO_CATEGORIES } from '@/lib/types/studio';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, Badge, Button, Typography } from '@/components/core';
+import { Flex } from '@/components/layout';
+import { theme } from '@/lib/theme';
 import {
   X,
   MapPin,
@@ -83,11 +83,11 @@ export const StudioPopup: React.FC<StudioPopupProps> = ({
                   </CardTitle>
                 </div>
                 <div className="flex items-center gap-2 mb-2">
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge variant="status" color="secondary" className="text-xs">
                     {STUDIO_CATEGORIES[studio.category]}
                   </Badge>
                   {studio.metadata.verified && (
-                    <Badge variant="default" className="text-xs bg-green-100 text-green-800">
+                    <Badge variant="status" color="success" className="text-xs">
                       인증완료
                     </Badge>
                   )}

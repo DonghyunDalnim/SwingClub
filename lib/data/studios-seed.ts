@@ -441,7 +441,7 @@ export async function seedStudios(createdBy: string = 'seed-admin'): Promise<{
 
   for (const studioData of SEED_STUDIOS) {
     try {
-      const result = await createStudio(studioData, createdBy)
+      const result = await createStudio(studioData)
 
       if (result.success) {
         results.createdCount++
@@ -495,7 +495,7 @@ export async function seedStudiosByRegion(
 
   for (const studioData of regionStudios) {
     try {
-      const result = await createStudio(studioData, createdBy)
+      const result = await createStudio(studioData)
 
       if (result.success) {
         results.createdCount++

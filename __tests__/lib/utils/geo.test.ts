@@ -421,8 +421,8 @@ describe('Geographic Utilities', () => {
         expect(hash12).toHaveLength(12)
 
         // Shorter hash should be prefix of longer hash
-        expect(hash8).toStartWith(hash4)
-        expect(hash12).toStartWith(hash8)
+        expect(hash8).toMatch(new RegExp(`^${hash4}`))
+        expect(hash12).toMatch(new RegExp(`^${hash8}`))
       })
 
       it('should use default precision of 8', () => {

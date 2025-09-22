@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Button, Card, CardContent, Badge, Typography } from '@/components/core';
+import { Container, Section, Flex } from '@/components/layout';
+import { theme } from '@/lib/theme';
 import { ArrowLeft, Search, Settings, MapPin, Users, Star, Filter } from 'lucide-react';
 import { Studio } from '@/lib/types/studio';
 import { searchStudiosByLocation } from '@/lib/actions/studios';
@@ -137,34 +137,34 @@ export default function LocationPage() {
         {/* Filter Bar */}
         <div className="flex items-center space-x-2 overflow-x-auto pb-2">
           <Badge
-            variant={currentCategory === 'all' ? 'default' : 'outline'}
+            variant={currentCategory === 'all' ? 'category' : 'outline'}
             className="whitespace-nowrap cursor-pointer"
             onClick={() => handleCategoryChange('all')}
           >
             전체 ({studios.length})
           </Badge>
           <Badge
-            variant={currentCategory === 'studio' ? 'default' : 'outline'}
+            variant={currentCategory === 'studio' ? 'category' : 'outline'}
             className="whitespace-nowrap cursor-pointer"
             onClick={() => handleCategoryChange('studio')}
           >
             스튜디오
           </Badge>
           <Badge
-            variant={currentCategory === 'practice_room' ? 'default' : 'outline'}
+            variant={currentCategory === 'practice_room' ? 'category' : 'outline'}
             className="whitespace-nowrap cursor-pointer"
             onClick={() => handleCategoryChange('practice_room')}
           >
             연습실
           </Badge>
           <Badge
-            variant={currentCategory === 'club' ? 'default' : 'outline'}
+            variant={currentCategory === 'club' ? 'category' : 'outline'}
             className="whitespace-nowrap cursor-pointer"
             onClick={() => handleCategoryChange('club')}
           >
             클럽/파티
           </Badge>
-          <Button variant="outline" size="sm" className="ml-auto">
+          <Button variant="secondary" size="sm" className="ml-auto">
             <Filter className="h-4 w-4 mr-1" />
             리스트뷰
           </Button>
@@ -193,13 +193,13 @@ export default function LocationPage() {
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-2">
                         <h3 className="font-semibold">{studio.name}</h3>
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge variant="status" color="secondary" className="text-xs">
                           {studio.category === 'studio' ? '스튜디오' :
                            studio.category === 'practice_room' ? '연습실' :
                            studio.category === 'club' ? '클럽' : studio.category}
                         </Badge>
                         {studio.metadata.verified && (
-                          <Badge variant="default" className="text-xs bg-green-100 text-green-800">
+                          <Badge variant="status" color="success" className="text-xs">
                             인증
                           </Badge>
                         )}
@@ -224,7 +224,7 @@ export default function LocationPage() {
                         </p>
                       )}
                     </div>
-                    <Button variant="outline" size="sm">
+                    <Button variant="secondary" size="sm">
                       상세보기
                     </Button>
                   </div>
@@ -236,7 +236,7 @@ export default function LocationPage() {
           {/* 더보기 버튼 */}
           {studios.length > 10 && (
             <div className="text-center">
-              <Button variant="outline" className="w-full">
+              <Button variant="secondary" className="w-full">
                 더 많은 스튜디오 보기 ({studios.length - 10}개 더)
               </Button>
             </div>

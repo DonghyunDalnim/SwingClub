@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Typography } from '@/components/core'
+import { Container, Section } from '@/components/layout'
+import { theme } from '@/lib/theme'
 import { useSignIn, useAuthError, useAuthLoading, useIsAuthenticated } from '@/lib/auth/hooks'
 
 export default function LoginPage() {

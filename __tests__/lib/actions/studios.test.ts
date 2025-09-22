@@ -212,6 +212,10 @@ describe('Studios Server Actions', () => {
     mockWhere.mockImplementation((field, operator, value) => ({ field, operator, value }))
     mockOrderBy.mockImplementation((field, direction) => ({ field, direction }))
     mockLimit.mockImplementation((value) => ({ limit: value }))
+
+    // Document reference mocks
+    mockDoc.mockReturnValue({ _path: 'mock-doc-path' } as any)
+    mockCollection.mockReturnValue({ _path: 'mock-collection-path' } as any)
   })
 
   describe('createStudio', () => {
@@ -234,11 +238,23 @@ describe('Studios Server Actions', () => {
         expect.anything(), // collection reference
         expect.objectContaining({
           name: mockCreateStudioData.name,
+          description: mockCreateStudioData.description,
           category: mockCreateStudioData.category,
           location: expect.objectContaining({
             geopoint: mockGeoPoint,
-            region: '강남'
+            region: '강남',
+            coordinates: mockCreateStudioData.location.coordinates,
+            address: mockCreateStudioData.location.address,
+            addressDetail: mockCreateStudioData.location.addressDetail,
+            district: mockCreateStudioData.location.district,
+            subway: mockCreateStudioData.location.subway,
+            landmarks: mockCreateStudioData.location.landmarks
           }),
+          contact: mockCreateStudioData.contact,
+          facilities: mockCreateStudioData.facilities,
+          pricing: mockCreateStudioData.pricing,
+          operatingHours: mockCreateStudioData.operatingHours,
+          images: mockCreateStudioData.images,
           stats: {
             views: 0,
             favorites: 0,
@@ -249,7 +265,9 @@ describe('Studios Server Actions', () => {
             createdBy: 'user-123',
             verified: false,
             featured: false,
-            status: 'active'
+            status: 'active',
+            tags: mockCreateStudioData.tags,
+            keywords: expect.any(Array)
           })
         })
       )
@@ -373,7 +391,8 @@ describe('Studios Server Actions', () => {
           name: '업데이트된 스튜디오',
           description: '새로운 설명',
           metadata: expect.objectContaining({
-            updatedAt: mockTimestampValue
+            updatedAt: mockTimestampValue,
+            keywords: expect.any(Array)
           })
         })
       )
@@ -453,7 +472,13 @@ describe('Studios Server Actions', () => {
         expect.objectContaining({
           location: expect.objectContaining({
             geopoint: newGeoPoint,
-            region: '홍대'
+            region: '홍대',
+            coordinates: newCoords,
+            address: '새로운 주소'
+          }),
+          metadata: expect.objectContaining({
+            updatedAt: mockTimestampValue,
+            keywords: expect.any(Array)
           })
         })
       )
@@ -650,8 +675,22 @@ describe('Studios Server Actions', () => {
         radius: 10
       }
 
-      const farStudioData = { ...mockStudio, name: 'Far Studio' }
-      const nearStudioData = { ...mockStudio, name: 'Near Studio' }
+      const farStudioData = {
+        ...mockStudio,
+        name: 'Far Studio',
+        location: {
+          ...mockStudio.location,
+          geopoint: new GeoPoint(37.6, 127.1) // Different coordinates for far studio
+        }
+      }
+      const nearStudioData = {
+        ...mockStudio,
+        name: 'Near Studio',
+        location: {
+          ...mockStudio.location,
+          geopoint: new GeoPoint(37.52, 127.05) // Closer coordinates for near studio
+        }
+      }
       delete (farStudioData as any).id
       delete (nearStudioData as any).id
 
@@ -662,12 +701,23 @@ describe('Studios Server Actions', () => {
       const mockQuerySnapshot = { docs: mockDocs }
       mockGetDocs.mockResolvedValue(mockQuerySnapshot as any)
 
-      // Mock distance calculations for filtering and sorting
-      mockCalculateDistance
-        .mockReturnValueOnce(8)  // Far studio during filtering
-        .mockReturnValueOnce(2)  // Near studio during filtering
-        .mockReturnValueOnce(8)  // Far studio during sorting
-        .mockReturnValueOnce(2)  // Near studio during sorting
+      // Mock distance calculations based on coordinates
+      mockCalculateDistance.mockImplementation((center, coords) => {
+        // We need to differentiate by the geopoint passed
+        // Assume geoPointToKakao returns the lat/lng from the geopoint
+        mockGeoPointToKakao.mockImplementation((geopoint) => ({
+          lat: geopoint.latitude,
+          lng: geopoint.longitude
+        }))
+
+        // Return distance based on coordinates
+        if (coords && coords.lat === 37.6) {
+          return 8  // Far studio
+        } else if (coords && coords.lat === 37.52) {
+          return 2  // Near studio
+        }
+        return 5  // Default
+      })
 
       // Act
       const result = await searchStudiosByLocation(searchParams)
@@ -695,7 +745,17 @@ describe('Studios Server Actions', () => {
       const hongdaeStudio = {
         ...mockStudio,
         name: '홍대 스튜디오',
-        location: { ...mockStudio.location, region: '홍대' }
+        location: {
+          ...mockStudio.location,
+          region: '홍대',
+          address: '서울시 마포구 홍익로 123',
+          district: '서울특별시 마포구'
+        },
+        metadata: {
+          ...mockStudio.metadata,
+          keywords: ['홍대', '스튜디오', 'studio', 'hongdae'],
+          tags: ['스윙댄스', '사교댄스', '홍대']
+        }
       }
       delete (gangnamStudio as any).id
       delete (hongdaeStudio as any).id

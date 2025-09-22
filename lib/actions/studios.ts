@@ -25,6 +25,8 @@ import {
   writeBatch
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
+import { handleFirebaseError } from '@/lib/error'
+import { requireAuth, getCurrentUserId, requireResourceAccess } from '@/lib/server-auth'
 import type {
   Studio,
   CreateStudioData,
@@ -51,10 +53,12 @@ const STUDIOS_COLLECTION = 'studios'
  * 스튜디오 생성
  */
 export async function createStudio(
-  data: CreateStudioData,
-  createdBy: string
+  data: CreateStudioData
 ): Promise<{ success: boolean; studioId?: string; error?: string }> {
   try {
+    // 사용자 인증 확인
+    const user = await requireAuth()
+
     // 데이터 유효성 검증
     const validationErrors = validateStudioData(data)
     if (validationErrors.length > 0) {
@@ -92,7 +96,7 @@ export async function createStudio(
       metadata: {
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
-        createdBy,
+        createdBy: user.uid,
         verified: false,
         featured: false,
         status: 'active',
@@ -109,7 +113,7 @@ export async function createStudio(
       studioId: docRef.id
     }
   } catch (error) {
-    console.error('Error creating studio:', error)
+    const appError = handleFirebaseError(error, 'createStudio', { action: 'create', data: { data } })
     return {
       success: false,
       error: '스튜디오 생성 중 오류가 발생했습니다.'
@@ -134,7 +138,7 @@ export async function getStudio(studioId: string): Promise<Studio | null> {
       ...docSnap.data()
     } as Studio
   } catch (error) {
-    console.error('Error getting studio:', error)
+    const appError = handleFirebaseError(error, 'getStudio', { action: 'read', data: { studioId } })
     return null
   }
 }
@@ -144,19 +148,20 @@ export async function getStudio(studioId: string): Promise<Studio | null> {
  */
 export async function updateStudio(
   studioId: string,
-  data: UpdateStudioData,
-  userId: string
+  data: UpdateStudioData
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    // 권한 확인 (스튜디오 소유자 또는 관리자만 수정 가능)
+    // 사용자 인증 확인
+    const user = await requireAuth()
+
+    // 스튜디오 조회 및 권한 확인
     const studio = await getStudio(studioId)
     if (!studio) {
       return { success: false, error: '스튜디오를 찾을 수 없습니다.' }
     }
 
-    if (studio.metadata.createdBy !== userId) {
-      return { success: false, error: '수정 권한이 없습니다.' }
-    }
+    // 리소스 접근 권한 확인 (소유자 또는 관리자만 수정 가능)
+    await requireResourceAccess(studio.metadata.createdBy)
 
     // 업데이트 데이터 준비
     const updateData: Partial<Studio> = {
@@ -210,7 +215,7 @@ export async function updateStudio(
 
     return { success: true }
   } catch (error) {
-    console.error('Error updating studio:', error)
+    const appError = handleFirebaseError(error, 'updateStudio', { action: 'update', data: { studioId, data } })
     return { success: false, error: '스튜디오 업데이트 중 오류가 발생했습니다.' }
   }
 }
@@ -219,26 +224,27 @@ export async function updateStudio(
  * 스튜디오 삭제
  */
 export async function deleteStudio(
-  studioId: string,
-  userId: string
+  studioId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    // 권한 확인
+    // 사용자 인증 확인
+    const user = await requireAuth()
+
+    // 스튜디오 조회 및 권한 확인
     const studio = await getStudio(studioId)
     if (!studio) {
       return { success: false, error: '스튜디오를 찾을 수 없습니다.' }
     }
 
-    if (studio.metadata.createdBy !== userId) {
-      return { success: false, error: '삭제 권한이 없습니다.' }
-    }
+    // 리소스 접근 권한 확인 (소유자 또는 관리자만 삭제 가능)
+    await requireResourceAccess(studio.metadata.createdBy)
 
     const docRef = doc(db, STUDIOS_COLLECTION, studioId)
     await deleteDoc(docRef)
 
     return { success: true }
   } catch (error) {
-    console.error('Error deleting studio:', error)
+    const appError = handleFirebaseError(error, 'deleteStudio', { action: 'delete', data: { studioId } })
     return { success: false, error: '스튜디오 삭제 중 오류가 발생했습니다.' }
   }
 }
@@ -297,7 +303,7 @@ export async function getStudios(
       }
     }
   } catch (error) {
-    console.error('Error getting studios:', error)
+    const appError = handleFirebaseError(error, 'getStudios', { action: 'list', data: { page, pageSize } })
     return {
       data: [],
       pagination: {

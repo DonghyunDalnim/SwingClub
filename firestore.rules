@@ -39,6 +39,43 @@ service cloud.firestore {
              data.metadata.status in ['active', 'temporarily_closed', 'permanently_closed'];
     }
 
+    function isItemOwner(itemData) {
+      return isAuthenticated() &&
+             (request.auth.uid == itemData.metadata.sellerId || isAdmin());
+    }
+
+    function isValidItemData(data) {
+      return data.keys().hasAll(['title', 'description', 'category', 'pricing', 'specs', 'location', 'metadata', 'images']) &&
+             data.title is string &&
+             data.title.size() > 0 &&
+             data.title.size() <= 100 &&
+             data.description is string &&
+             data.description.size() > 0 &&
+             data.description.size() <= 2000 &&
+             data.category in ['shoes', 'clothing', 'accessories', 'other'] &&
+             data.pricing.keys().hasAll(['price', 'currency', 'negotiable', 'tradeMethod']) &&
+             data.pricing.price is number &&
+             data.pricing.price > 0 &&
+             data.pricing.currency == 'KRW' &&
+             data.pricing.negotiable is bool &&
+             data.pricing.tradeMethod in ['direct', 'delivery', 'both'] &&
+             data.specs.keys().hasAll(['condition']) &&
+             data.specs.condition in ['new', 'like_new', 'good', 'fair', 'poor'] &&
+             data.location.keys().hasAll(['region', 'deliveryAvailable']) &&
+             data.location.region is string &&
+             data.location.deliveryAvailable is bool &&
+             data.metadata.keys().hasAll(['createdAt', 'updatedAt', 'sellerId', 'status', 'featured', 'reported']) &&
+             data.metadata.createdAt is timestamp &&
+             data.metadata.updatedAt is timestamp &&
+             data.metadata.sellerId is string &&
+             data.metadata.status in ['available', 'reserved', 'sold'] &&
+             data.metadata.featured is bool &&
+             data.metadata.reported is bool &&
+             data.images is list &&
+             data.images.size() >= 1 &&
+             data.images.size() <= 10;
+    }
+
     // Users collection rules
     match /users/{userId} {
       allow read: if true; // Public profiles can be read by anyone
@@ -95,6 +132,78 @@ service cloud.firestore {
     // Studio favorites tracking (for future extension)
     match /users/{userId}/favorites/{studioId} {
       allow read, write: if isOwner(userId);
+    }
+
+    // Marketplace items collection rules
+    match /marketplace_items/{itemId} {
+      // Read permissions - anyone can read available items, owners can read their own items
+      allow read: if resource.data.metadata.status == 'available' &&
+                     !resource.data.metadata.reported ||
+                     isItemOwner(resource.data) ||
+                     isAdmin();
+
+      // Create permissions - authenticated users can create items
+      allow create: if isAuthenticated() &&
+                       isValidItemData(request.resource.data) &&
+                       request.resource.data.metadata.sellerId == request.auth.uid &&
+                       request.resource.data.metadata.status == 'available' &&
+                       request.resource.data.metadata.featured == false &&
+                       request.resource.data.metadata.reported == false;
+
+      // Update permissions - only item owners can update, with restrictions
+      allow update: if isItemOwner(resource.data) &&
+                       isValidItemData(request.resource.data) &&
+                       // Prevent changing the seller
+                       request.resource.data.metadata.sellerId == resource.data.metadata.sellerId &&
+                       // Prevent non-admins from changing featured status
+                       (isAdmin() || request.resource.data.metadata.featured == resource.data.metadata.featured) &&
+                       // Prevent non-admins from changing reported status
+                       (isAdmin() || request.resource.data.metadata.reported == resource.data.metadata.reported) &&
+                       // Allow status changes (available -> reserved -> sold)
+                       request.resource.data.metadata.status in ['available', 'reserved', 'sold'];
+
+      // Delete permissions - only item owners can delete
+      allow delete: if isItemOwner(resource.data) || isAdmin();
+    }
+
+    // Item inquiries collection rules
+    match /item_inquiries/{inquiryId} {
+      // Read permissions - only buyer, seller, or admin can read inquiries
+      allow read: if isAuthenticated() &&
+                     (request.auth.uid == resource.data.buyerId ||
+                      request.auth.uid == resource.data.sellerId ||
+                      isAdmin());
+
+      // Create permissions - authenticated users can create inquiries
+      allow create: if isAuthenticated() &&
+                       request.resource.data.buyerId == request.auth.uid &&
+                       request.resource.data.keys().hasAll(['itemId', 'buyerId', 'sellerId', 'message', 'status', 'createdAt']) &&
+                       request.resource.data.itemId is string &&
+                       request.resource.data.buyerId is string &&
+                       request.resource.data.sellerId is string &&
+                       request.resource.data.message is string &&
+                       request.resource.data.message.size() > 0 &&
+                       request.resource.data.message.size() <= 1000 &&
+                       request.resource.data.status == 'pending' &&
+                       request.resource.data.createdAt is timestamp;
+
+      // Update permissions - buyer and seller can update status and add replies
+      allow update: if isAuthenticated() &&
+                       (request.auth.uid == resource.data.buyerId ||
+                        request.auth.uid == resource.data.sellerId) &&
+                       // Allow status updates
+                       request.resource.data.status in ['pending', 'replied', 'closed'];
+
+      // Delete permissions - only admin can delete inquiries
+      allow delete: if isAdmin();
+    }
+
+    // Item images subcollection
+    match /marketplace_items/{itemId}/images/{imageId} {
+      allow read: if true; // Anyone can read images
+      allow create, update, delete: if isAuthenticated() &&
+                                       exists(/databases/$(database)/documents/marketplace_items/$(itemId)) &&
+                                       isItemOwner(get(/databases/$(database)/documents/marketplace_items/$(itemId)).data);
     }
 
     // Analytics and stats (admin only)
