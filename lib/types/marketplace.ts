@@ -154,16 +154,74 @@ export interface ItemsResponse {
   }
 }
 
-// 거래 문의 정보 (향후 확장용)
+// 거래 문의 스레드 상태
+export type InquiryStatus = 'active' | 'completed' | 'cancelled' | 'reported'
+
+// 문의 메시지 타입
+export type InquiryMessageType = 'text' | 'image' | 'price_proposal' | 'system'
+
+// 개별 문의 메시지
+export interface InquiryMessage {
+  id: string
+  inquiryId: string
+  senderId: string
+  senderName: string
+  senderType: 'buyer' | 'seller'
+  type: InquiryMessageType
+  content: string
+  imageUrl?: string
+  priceProposal?: {
+    proposedPrice: number
+    originalPrice: number
+    message?: string
+  }
+  isRead: boolean
+  createdAt: Timestamp
+  updatedAt: Timestamp
+  editHistory?: {
+    editedAt: Timestamp
+    previousContent: string
+  }[]
+}
+
+// 거래 문의 스레드 (기존 ItemInquiry 확장)
 export interface ItemInquiry {
   id: string
   itemId: string
+  itemTitle: string      // 상품 제목 (비정규화)
+  itemImage?: string     // 상품 대표 이미지
   buyerId: string
+  buyerName: string      // 구매자 닉네임 (비정규화)
   sellerId: string
-  message: string
-  status: 'pending' | 'replied' | 'closed'
+  sellerName: string     // 판매자 닉네임 (비정규화)
+
+  // 문의 상태
+  status: InquiryStatus
+
+  // 마지막 메시지 정보 (비정규화 - 목록 표시용)
+  lastMessage: string
+  lastMessageAt: Timestamp
+  lastSenderId: string
+
+  // 읽음 상태
+  buyerLastReadAt?: Timestamp
+  sellerLastReadAt?: Timestamp
+  unreadCount: {
+    buyer: number
+    seller: number
+  }
+
+  // 통계
+  messageCount: number
+
+  // 메타데이터
   createdAt: Timestamp
-  repliedAt?: Timestamp
+  updatedAt: Timestamp
+
+  // 신고 관련
+  reportedBy?: string
+  reportReason?: string
+  reportedAt?: Timestamp
 }
 
 // 에러 타입
@@ -214,3 +272,101 @@ export const ITEM_SORT_OPTIONS = {
   price_high: '높은가격순',
   popular: '인기순'
 } as const
+
+// 문의 관련 상수
+export const INQUIRY_STATUS = {
+  active: '진행중',
+  completed: '완료',
+  cancelled: '취소',
+  reported: '신고됨'
+} as const
+
+export const INQUIRY_MESSAGE_TYPE = {
+  text: '텍스트',
+  image: '이미지',
+  price_proposal: '가격제안',
+  system: '시스템'
+} as const
+
+// 문의 생성용 인터페이스
+export interface CreateInquiryData {
+  itemId: string
+  message: string
+  messageType?: InquiryMessageType
+  priceProposal?: {
+    proposedPrice: number
+    message?: string
+  }
+}
+
+// 문의 메시지 생성용 인터페이스
+export interface CreateInquiryMessageData {
+  inquiryId: string
+  type: InquiryMessageType
+  content: string
+  imageUrl?: string
+  priceProposal?: {
+    proposedPrice: number
+    originalPrice: number
+    message?: string
+  }
+}
+
+// 문의 업데이트용 인터페이스
+export interface UpdateInquiryData {
+  status?: InquiryStatus
+  reportReason?: string
+}
+
+// 문의 메시지 업데이트용 인터페이스
+export interface UpdateInquiryMessageData {
+  content?: string
+  isRead?: boolean
+}
+
+// 문의 목록 응답
+export interface InquiriesResponse {
+  data: ItemInquiry[]
+  pagination: {
+    page: number
+    limit: number
+    total: number
+    hasNext: boolean
+    hasPrev: boolean
+  }
+}
+
+// 문의 메시지 목록 응답
+export interface InquiryMessagesResponse {
+  data: InquiryMessage[]
+  pagination: {
+    page: number
+    limit: number
+    total: number
+    hasNext: boolean
+    hasPrev: boolean
+  }
+}
+
+// 문의 검색 필터
+export interface InquirySearchFilters {
+  status?: InquiryStatus[]
+  itemId?: string
+  buyerId?: string
+  sellerId?: string
+  dateRange?: {
+    from: Date
+    to: Date
+  }
+  hasUnread?: boolean
+  keyword?: string
+  sortBy?: 'latest' | 'oldest' | 'unread_first'
+}
+
+// 스팸 방지 설정
+export interface InquiryRateLimit {
+  maxMessagesPerMinute: number
+  maxMessagesPerHour: number
+  newAccountLimitHours: number
+  duplicateContentThreshold: number
+}

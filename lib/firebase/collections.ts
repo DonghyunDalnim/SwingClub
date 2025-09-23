@@ -43,7 +43,7 @@ import type {
   NotificationDocument
 } from '../types/community'
 import type { Studio } from '@/lib/types/studio'
-import type { MarketplaceItem, ItemInquiry } from '@/lib/types/marketplace'
+import type { MarketplaceItem, ItemInquiry, InquiryMessage } from '@/lib/types/marketplace'
 
 // ================================
 // 컬렉션 레퍼런스들
@@ -64,7 +64,8 @@ export const collections = {
 
   // Marketplace 컬렉션들
   marketplaceItems: collection(db, 'marketplace_items') as CollectionReference<MarketplaceItem>,
-  itemInquiries: collection(db, 'item_inquiries') as CollectionReference<ItemInquiry>
+  itemInquiries: collection(db, 'item_inquiries') as CollectionReference<ItemInquiry>,
+  inquiryMessages: collection(db, 'inquiry_messages') as CollectionReference<InquiryMessage>
 }
 
 // 호환성을 위한 기존 export들
@@ -72,6 +73,7 @@ export const usersCollection = collections.users
 export const studiosCollection = collections.studios
 export const marketplaceItemsCollection = collections.marketplaceItems
 export const itemInquiriesCollection = collections.itemInquiries
+export const inquiryMessagesCollection = collections.inquiryMessages
 
 // 헬퍼 함수들
 export const getStudioDoc = (studioId: string): DocumentReference<Studio> =>
@@ -82,6 +84,9 @@ export const getMarketplaceItemDoc = (itemId: string): DocumentReference<Marketp
 
 export const getItemInquiryDoc = (inquiryId: string): DocumentReference<ItemInquiry> =>
   doc(itemInquiriesCollection, inquiryId)
+
+export const getInquiryMessageDoc = (messageId: string): DocumentReference<InquiryMessage> =>
+  doc(inquiryMessagesCollection, messageId)
 
 // 서브컬렉션 참조 함수들
 export const getStudioReviewsCollection = (studioId: string) =>
@@ -102,6 +107,7 @@ export const COLLECTION_NAMES = {
   STUDIOS: 'studios',
   MARKETPLACE_ITEMS: 'marketplace_items',
   ITEM_INQUIRIES: 'item_inquiries',
+  INQUIRY_MESSAGES: 'inquiry_messages',
   POSTS: 'posts',
   COMMENTS: 'comments',
   LIKES: 'likes',
