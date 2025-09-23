@@ -1,5 +1,6 @@
 /**
  * Firestore 컬렉션 구조 및 헬퍼 함수들
+ * 통합된 컬렉션 참조 관리: Community + Marketplace + Studios
  */
 
 import {
@@ -41,20 +42,75 @@ import type {
   ReportDocument,
   NotificationDocument
 } from '../types/community'
+import type { Studio } from '@/lib/types/studio'
+import type { MarketplaceItem, ItemInquiry } from '@/lib/types/marketplace'
 
 // ================================
 // 컬렉션 레퍼런스들
 // ================================
 
 export const collections = {
+  // Community 컬렉션들
   posts: collection(db, 'posts') as CollectionReference<PostDocument>,
   comments: collection(db, 'comments') as CollectionReference<CommentDocument>,
   likes: collection(db, 'likes') as CollectionReference<LikeDocument>,
   reports: collection(db, 'reports') as CollectionReference<ReportDocument>,
   notifications: collection(db, 'notifications') as CollectionReference<NotificationDocument>,
-  users: collection(db, 'users'), // 기존 사용자 컬렉션
-  communityStats: collection(db, 'communityStats')
+  communityStats: collection(db, 'communityStats'),
+
+  // 기존 컬렉션들
+  users: collection(db, 'users'),
+  studios: collection(db, 'studios') as CollectionReference<Studio>,
+
+  // Marketplace 컬렉션들
+  marketplaceItems: collection(db, 'marketplace_items') as CollectionReference<MarketplaceItem>,
+  itemInquiries: collection(db, 'item_inquiries') as CollectionReference<ItemInquiry>
 }
+
+// 호환성을 위한 기존 export들
+export const usersCollection = collections.users
+export const studiosCollection = collections.studios
+export const marketplaceItemsCollection = collections.marketplaceItems
+export const itemInquiriesCollection = collections.itemInquiries
+
+// 헬퍼 함수들
+export const getStudioDoc = (studioId: string): DocumentReference<Studio> =>
+  doc(studiosCollection, studioId)
+
+export const getMarketplaceItemDoc = (itemId: string): DocumentReference<MarketplaceItem> =>
+  doc(marketplaceItemsCollection, itemId)
+
+export const getItemInquiryDoc = (inquiryId: string): DocumentReference<ItemInquiry> =>
+  doc(itemInquiriesCollection, inquiryId)
+
+// 서브컬렉션 참조 함수들
+export const getStudioReviewsCollection = (studioId: string) =>
+  collection(db, 'studios', studioId, 'reviews')
+
+export const getStudioImagesCollection = (studioId: string) =>
+  collection(db, 'studios', studioId, 'images')
+
+export const getUserFavoritesCollection = (userId: string) =>
+  collection(db, 'users', userId, 'favorites')
+
+export const getItemImagesCollection = (itemId: string) =>
+  collection(db, 'marketplace_items', itemId, 'images')
+
+// 컬렉션 이름 상수 (Server Actions에서 사용)
+export const COLLECTION_NAMES = {
+  USERS: 'users',
+  STUDIOS: 'studios',
+  MARKETPLACE_ITEMS: 'marketplace_items',
+  ITEM_INQUIRIES: 'item_inquiries',
+  POSTS: 'posts',
+  COMMENTS: 'comments',
+  LIKES: 'likes',
+  REPORTS: 'reports',
+  NOTIFICATIONS: 'notifications',
+  COMMUNITY_STATS: 'communityStats',
+  ANALYTICS: 'analytics',
+  CONFIG: 'config'
+} as const
 
 // ================================
 // 게시글 관련 함수들

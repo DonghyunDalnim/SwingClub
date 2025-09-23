@@ -96,12 +96,12 @@ export function PostCard({ post, currentUserId, showActions = false, isPinned = 
                   </Badge>
 
                   {/* 새 게시글 표시 */}
-                  {new Date().getTime() - post.metadata.createdAt.getTime() < 24 * 60 * 60 * 1000 && (
+                  {new Date().getTime() - post.metadata.createdAt.toDate().getTime() < 24 * 60 * 60 * 1000 && (
                     <Badge variant="destructive" className="text-xs">NEW</Badge>
                   )}
 
                   <span className="text-xs text-gray-500">
-                    {formatTime(post.metadata.createdAt)}
+                    {formatTime(post.metadata.createdAt.toDate())}
                   </span>
                 </div>
               </div>

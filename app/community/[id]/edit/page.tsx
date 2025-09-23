@@ -4,21 +4,22 @@ import { getPostAction } from '@/lib/actions/posts'
 import { getCurrentUser } from '@/lib/auth/server'
 
 interface EditPostPageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export default async function EditPostPage({ params }: EditPostPageProps) {
+  const { id } = await params
   // 인증 확인
   const user = await getCurrentUser()
 
   if (!user) {
-    redirect('/login?redirectTo=/community/' + params.id + '/edit')
+    redirect('/login?redirectTo=/community/' + id + '/edit')
   }
 
   // 게시글 데이터 로드
-  const postResult = await getPostAction(params.id)
+  const postResult = await getPostAction(id)
 
   if (!postResult.success || !postResult.data) {
     notFound()
@@ -28,7 +29,7 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
 
   // 작성자 권한 확인
   if (post.metadata.authorId !== user.uid) {
-    redirect('/community/' + params.id)
+    redirect('/community/' + id)
   }
 
   return (

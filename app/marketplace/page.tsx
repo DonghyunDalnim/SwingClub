@@ -1,9 +1,141 @@
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Search, Edit, Star, Clock } from 'lucide-react'
+'use client'
 
-export default function MarketplacePage() {
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { Button } from '@/components/core'
+import { Edit } from 'lucide-react'
+import { FilterPanel } from '@/components/marketplace/FilterPanel'
+import { ProductGrid } from '@/components/marketplace/ProductGrid'
+import type { ItemSearchFilters, ItemSortOption } from '@/lib/types/marketplace'
+
+function MarketplaceContent() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // URL에서 초기 상태 복원
+  const [filters, setFilters] = useState<ItemSearchFilters>(() => {
+    const initialFilters: ItemSearchFilters = {}
+
+    try {
+      // URL 파라미터에서 필터 복원
+      const category = searchParams.get('category')
+      if (category) {
+        initialFilters.category = category.split(',') as any
+      }
+
+      const condition = searchParams.get('condition')
+      if (condition) {
+        initialFilters.condition = condition.split(',') as any
+      }
+
+      const tradeMethod = searchParams.get('tradeMethod')
+      if (tradeMethod) {
+        initialFilters.tradeMethod = tradeMethod.split(',') as any
+      }
+
+      const searchTerm = searchParams.get('search')
+      if (searchTerm) {
+        initialFilters.searchTerm = searchTerm
+      }
+
+      const priceMin = searchParams.get('priceMin')
+      const priceMax = searchParams.get('priceMax')
+      if (priceMin || priceMax) {
+        initialFilters.priceRange = {
+          min: priceMin ? parseInt(priceMin) : undefined,
+          max: priceMax ? parseInt(priceMax) : undefined
+        }
+      }
+
+      const negotiable = searchParams.get('negotiable')
+      if (negotiable === 'true') {
+        initialFilters.negotiable = true
+      }
+
+      const deliveryAvailable = searchParams.get('deliveryAvailable')
+      if (deliveryAvailable === 'true') {
+        initialFilters.deliveryAvailable = true
+      }
+    } catch (error) {
+      console.error('URL 파라미터 파싱 오류:', error)
+    }
+
+    return initialFilters
+  })
+
+  const [sortBy, setSortBy] = useState<ItemSortOption>(() => {
+    try {
+      return (searchParams.get('sort') as ItemSortOption) || 'latest'
+    } catch (error) {
+      console.error('정렬 파라미터 파싱 오류:', error)
+      return 'latest'
+    }
+  })
+
+  // URL 상태 업데이트
+  const updateURL = (newFilters: ItemSearchFilters, newSort: ItemSortOption) => {
+    try {
+      const params = new URLSearchParams()
+
+      if (newFilters.category?.length) {
+        params.set('category', newFilters.category.join(','))
+      }
+
+      if (newFilters.condition?.length) {
+        params.set('condition', newFilters.condition.join(','))
+      }
+
+      if (newFilters.tradeMethod?.length) {
+        params.set('tradeMethod', newFilters.tradeMethod.join(','))
+      }
+
+      if (newFilters.searchTerm) {
+        params.set('search', newFilters.searchTerm)
+      }
+
+      if (newFilters.priceRange?.min) {
+        params.set('priceMin', newFilters.priceRange.min.toString())
+      }
+
+      if (newFilters.priceRange?.max) {
+        params.set('priceMax', newFilters.priceRange.max.toString())
+      }
+
+      if (newFilters.negotiable) {
+        params.set('negotiable', 'true')
+      }
+
+      if (newFilters.deliveryAvailable) {
+        params.set('deliveryAvailable', 'true')
+      }
+
+      if (newSort !== 'latest') {
+        params.set('sort', newSort)
+      }
+
+      const queryString = params.toString()
+      const newUrl = queryString ? `/marketplace?${queryString}` : '/marketplace'
+
+      // URL 업데이트 (페이지 리로드 없이)
+      router.replace(newUrl, { scroll: false })
+    } catch (error) {
+      console.error('URL 업데이트 오류:', error)
+    }
+  }
+
+  // 필터 변경 핸들러
+  const handleFiltersChange = (newFilters: ItemSearchFilters) => {
+    setFilters(newFilters)
+    updateURL(newFilters, sortBy)
+  }
+
+  // 정렬 변경 핸들러
+  const handleSortChange = (newSort: ItemSortOption) => {
+    setSortBy(newSort)
+    updateURL(filters, newSort)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -11,134 +143,56 @@ export default function MarketplacePage() {
         <div className="flex items-center justify-between px-4 py-3">
           <span className="font-semibold text-lg">중고거래</span>
           <div className="flex items-center space-x-3">
-            <Search className="h-6 w-6" />
-            <Edit className="h-6 w-6" />
+            <Link href="/marketplace/create">
+              <Button size="sm" variant="ghost">
+                <Edit className="h-5 w-5" />
+              </Button>
+            </Link>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-6 space-y-6">
-        {/* Category Filter */}
-        <div className="flex items-center space-x-2 overflow-x-auto pb-2">
-          <Badge variant="default" className="whitespace-nowrap">👠신발</Badge>
-          <Badge variant="outline" className="whitespace-nowrap">👗의상</Badge>
-          <Badge variant="outline" className="whitespace-nowrap">💍액세서리</Badge>
-          <Badge variant="outline" className="whitespace-nowrap">📱기타</Badge>
-        </div>
+      {/* Filter Panel */}
+      <FilterPanel
+        filters={filters}
+        onFiltersChange={handleFiltersChange}
+        sortBy={sortBy}
+        onSortChange={handleSortChange}
+      />
 
-        {/* Featured Items */}
-        <div className="grid gap-4">
-          <Card className="hover:shadow-md transition-shadow">
-            <CardContent className="p-4">
-              <div className="flex space-x-4">
-                <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center">
-                  <span className="text-2xl">👠</span>
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-semibold text-sm">린디합 전용 댄스화 - 거의 새제품!</h3>
-                    <Badge className="text-xs bg-red-500">🔥 인기</Badge>
-                  </div>
-                  <div className="flex items-center space-x-2 mb-2">
-                    <span className="text-sm font-medium">댄스러버</span>
-                    <div className="flex items-center">
-                      <Star className="h-3 w-3 text-yellow-400" />
-                      <span className="text-xs">4.8</span>
-                    </div>
-                    <Badge variant="outline" className="text-xs">강남구</Badge>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-2">
-                    "한 번만 신고 보관만 했어요. 정가 15만원 → 8만원"
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-bold text-blue-600">80,000원</span>
-                    <div className="flex items-center text-xs text-gray-500">
-                      <Clock className="h-3 w-3 mr-1" />
-                      2시간전
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+      {/* Product Grid */}
+      <div className="container mx-auto px-4 py-6">
+        <ProductGrid
+          filters={filters}
+          sortBy={sortBy}
+          currentUserId="current-user-id" // TODO: Get from auth context
+        />
+      </div>
 
-          <Card className="hover:shadow-md transition-shadow">
-            <CardContent className="p-4">
-              <div className="flex space-x-4">
-                <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center">
-                  <span className="text-2xl">👗</span>
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-semibold text-sm">빈티지 스윙 드레스 판매합니다</h3>
-                    <Badge variant="outline" className="text-xs">새상품</Badge>
-                  </div>
-                  <div className="flex items-center space-x-2 mb-2">
-                    <span className="text-sm font-medium">스윙걸23</span>
-                    <div className="flex items-center">
-                      <Star className="h-3 w-3 text-yellow-400" />
-                      <span className="text-xs">4.6</span>
-                    </div>
-                    <Badge variant="outline" className="text-xs">홍대</Badge>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-2">
-                    "공연용으로 한번 착용. 사이즈 55"
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-bold text-blue-600">45,000원</span>
-                    <div className="flex items-center text-xs text-gray-500">
-                      <Clock className="h-3 w-3 mr-1" />
-                      1일전
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-md transition-shadow">
-            <CardContent className="p-4">
-              <div className="flex space-x-4">
-                <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center">
-                  <span className="text-2xl">💍</span>
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-semibold text-sm">스윙댄스 액세서리 세트</h3>
-                    <Badge variant="secondary" className="text-xs">세트</Badge>
-                  </div>
-                  <div className="flex items-center space-x-2 mb-2">
-                    <span className="text-sm font-medium">액세사랑</span>
-                    <div className="flex items-center">
-                      <Star className="h-3 w-3 text-yellow-400" />
-                      <span className="text-xs">4.9</span>
-                    </div>
-                    <Badge variant="outline" className="text-xs">신촌</Badge>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-2">
-                    "모자, 넷타이, 헤어핀 세트로 판매"
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-bold text-blue-600">25,000원</span>
-                    <div className="flex items-center text-xs text-gray-500">
-                      <Clock className="h-3 w-3 mr-1" />
-                      3일전
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="fixed bottom-20 right-4">
+      {/* Quick Actions - Create Listing */}
+      <div className="fixed bottom-20 right-4">
+        <Link href="/marketplace/create">
           <Button size="lg" className="rounded-full shadow-lg">
             <Edit className="h-5 w-5 mr-2" />
             등록
           </Button>
-        </div>
+        </Link>
       </div>
     </div>
+  )
+}
+
+export default function MarketplacePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">로딩 중...</p>
+        </div>
+      </div>
+    }>
+      <MarketplaceContent />
+    </Suspense>
   )
 }

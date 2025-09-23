@@ -3,7 +3,7 @@ import { createBadgeStyle } from '@/lib/design-tokens';
 import { cn } from '@/lib/utils';
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: 'rating' | 'category' | 'status' | 'outline';
+  variant?: 'rating' | 'category' | 'status' | 'outline' | 'default' | 'destructive' | 'secondary';
   children: React.ReactNode;
   color?: 'primary' | 'secondary' | 'success' | 'warning' | 'error';
 }
@@ -20,32 +20,44 @@ const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
 
       const variantClasses = {
         status: 'rounded-full',
-        outline: 'border'
+        outline: 'border',
+        default: '',
+        destructive: '',
+        secondary: ''
       };
 
-      const colorClasses = {
-        primary: variant === 'outline'
-          ? 'border-[#693BF2] text-[#693BF2] bg-transparent'
-          : 'bg-[#693BF2] text-white',
-        secondary: variant === 'outline'
-          ? 'border-[#6A7685] text-[#6A7685] bg-transparent'
-          : 'bg-[#F1EEFF] text-[#693BF2]',
-        success: variant === 'outline'
-          ? 'border-green-600 text-green-600 bg-transparent'
-          : 'bg-green-100 text-green-800',
-        warning: variant === 'outline'
-          ? 'border-yellow-600 text-yellow-600 bg-transparent'
-          : 'bg-yellow-100 text-yellow-800',
-        error: variant === 'outline'
-          ? 'border-red-600 text-red-600 bg-transparent'
-          : 'bg-red-100 text-red-800'
-      };
+      // Handle variant-based styling
+      if (variant === 'default') {
+        badgeClasses = cn(base, 'bg-[#693BF2] text-white');
+      } else if (variant === 'destructive') {
+        badgeClasses = cn(base, 'bg-red-600 text-white');
+      } else if (variant === 'secondary') {
+        badgeClasses = cn(base, 'bg-[#F1EEFF] text-[#693BF2]');
+      } else {
+        const colorClasses = {
+          primary: variant === 'outline'
+            ? 'border-[#693BF2] text-[#693BF2] bg-transparent'
+            : 'bg-[#693BF2] text-white',
+          secondary: variant === 'outline'
+            ? 'border-[#6A7685] text-[#6A7685] bg-transparent'
+            : 'bg-[#F1EEFF] text-[#693BF2]',
+          success: variant === 'outline'
+            ? 'border-green-600 text-green-600 bg-transparent'
+            : 'bg-green-100 text-green-800',
+          warning: variant === 'outline'
+            ? 'border-yellow-600 text-yellow-600 bg-transparent'
+            : 'bg-yellow-100 text-yellow-800',
+          error: variant === 'outline'
+            ? 'border-red-600 text-red-600 bg-transparent'
+            : 'bg-red-100 text-red-800'
+        };
 
-      badgeClasses = cn(
-        base,
-        variantClasses[variant],
-        colorClasses[color]
-      );
+        badgeClasses = cn(
+          base,
+          variantClasses[variant as keyof typeof variantClasses],
+          colorClasses[color]
+        );
+      }
     }
 
     return (
