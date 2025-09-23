@@ -4,14 +4,15 @@ import { getPostAction } from '@/lib/actions/posts'
 import { getCurrentUser } from '@/lib/auth/server'
 
 interface PostPageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export default async function PostPage({ params }: PostPageProps) {
+  const { id } = await params
   // 게시글 데이터 로드
-  const postResult = await getPostAction(params.id)
+  const postResult = await getPostAction(id)
 
   if (!postResult.success || !postResult.data) {
     notFound()
@@ -32,7 +33,8 @@ export default async function PostPage({ params }: PostPageProps) {
 
 // 메타데이터 생성
 export async function generateMetadata({ params }: PostPageProps) {
-  const postResult = await getPostAction(params.id)
+  const { id } = await params
+  const postResult = await getPostAction(id)
 
   if (!postResult.success || !postResult.data) {
     return {
@@ -48,7 +50,7 @@ export async function generateMetadata({ params }: PostPageProps) {
     openGraph: {
       title: post.title,
       description: post.content.slice(0, 160) + '...',
-      images: post.attachments?.length > 0 ? [post.attachments[0].fileUrl] : []
+      images: post.attachments && post.attachments.length > 0 ? [post.attachments[0].fileUrl] : []
     }
   }
 }

@@ -35,12 +35,12 @@ export function CommentItem({
   const [showOptions, setShowOptions] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [liked, setLiked] = useState(false) // TODO: Get actual like status
-  const [likeCount, setLikeCount] = useState(comment.stats?.likes || 0)
+  const [likeCount, setLikeCount] = useState(comment.likes || 0)
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
   // 작성자인지 확인
-  const isAuthor = currentUserId === comment.metadata.authorId
+  const isAuthor = currentUserId === comment.authorId
 
   // 들여쓰기 계산 (최대 3레벨)
   const indentLevel = Math.min(comment.level, 3)
@@ -152,15 +152,15 @@ export function CommentItem({
           <div className="flex items-center gap-2">
             {/* 프로필 이미지 */}
             <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-              {comment.metadata.authorProfileUrl ? (
+              {comment.authorProfileUrl ? (
                 <img
-                  src={comment.metadata.authorProfileUrl}
-                  alt={comment.metadata.authorName}
+                  src={comment.authorProfileUrl}
+                  alt={comment.authorName}
                   className="w-8 h-8 rounded-full object-cover"
                 />
               ) : (
                 <span className="text-purple-600 text-sm font-medium">
-                  {comment.metadata.authorName.charAt(0)}
+                  {comment.authorName.charAt(0)}
                 </span>
               )}
             </div>
@@ -169,12 +169,12 @@ export function CommentItem({
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-gray-900">
-                  {comment.metadata.authorName}
+                  {comment.authorName}
                 </span>
                 <span className="text-xs text-gray-500">
-                  {formatDateTime(comment.metadata.createdAt)}
+                  {formatDateTime(comment.createdAt)}
                 </span>
-                {comment.metadata.updatedAt && comment.metadata.updatedAt !== comment.metadata.createdAt && (
+                {comment.updatedAt && comment.updatedAt.toDate() !== comment.createdAt.toDate() && (
                   <span className="text-xs text-gray-400">(수정됨)</span>
                 )}
               </div>

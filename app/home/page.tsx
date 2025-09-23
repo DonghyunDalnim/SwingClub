@@ -84,7 +84,7 @@ export default function HomePage() {
                 <CardTitle>
                   <Flex align="center" gap="sm">
                     <MapPin className="h-5 w-5" style={{ color: theme.colors.accent.blue }} />
-                    <Typography variant="h4">내 주변 댄스 정보</Typography>
+                    <span>내 주변 댄스 정보</span>
                   </Flex>
                 </CardTitle>
               </CardHeader>
@@ -107,7 +107,7 @@ export default function HomePage() {
                 <CardTitle>
                   <Flex align="center" gap="sm">
                     <Users className="h-5 w-5" style={{ color: theme.colors.primary.main }} />
-                    <Typography variant="h4">커뮤니티</Typography>
+                    <span>커뮤니티</span>
                   </Flex>
                 </CardTitle>
               </CardHeader>
@@ -134,9 +134,7 @@ export default function HomePage() {
           {/* Hot Topics */}
           <Card>
             <CardHeader>
-              <CardTitle>
-                <Typography variant="h4">🔥 HOT TOPICS</Typography>
-              </CardTitle>
+              <CardTitle>🔥 HOT TOPICS</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
