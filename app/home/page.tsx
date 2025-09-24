@@ -40,8 +40,8 @@ export default function HomePage() {
         </Container>
       </header>
 
-      <Container>
-        <Section spacing="md">
+      <Container className="soomgo-responsive-container">
+        <Section spacing="md" className="soomgo-responsive-section">
           {/* Today's Swing */}
           <Card
             className="text-white text-center"
@@ -78,7 +78,7 @@ export default function HomePage() {
           </Card>
 
           {/* Quick Access */}
-          <Grid cols={2} gap="md">
+          <div className="soomgo-responsive-grid">
             <Card>
               <CardHeader>
                 <CardTitle>
@@ -129,7 +129,7 @@ export default function HomePage() {
                 </div>
               </CardContent>
             </Card>
-          </Grid>
+          </div>
 
           {/* Hot Topics */}
           <Card>
@@ -206,7 +206,7 @@ export default function HomePage() {
           </Card>
 
           {/* Quick Actions */}
-          <Grid cols={2} gap="sm">
+          <div className="grid grid-cols-2 gap-4">
             <Button variant="secondary" size="lg" className="h-12">
               <Flex align="center" gap="sm">
                 <Users className="h-4 w-4" />
@@ -219,7 +219,7 @@ export default function HomePage() {
                 <span>중고거래</span>
               </Flex>
             </Button>
-          </Grid>
+          </div>
         </Section>
       </Container>
     </div>

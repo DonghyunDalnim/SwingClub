@@ -57,21 +57,20 @@ export default function BottomNav() {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex flex-col items-center justify-center space-y-1 px-3 py-2 rounded-lg transition-all duration-200',
+                'flex flex-col items-center justify-center space-y-1 rounded-lg transition-all duration-200 soomgo-touch-target soomgo-touch-area',
                 isActive
                   ? 'text-[#693BF2]'
                   : 'text-[#6A7685] hover:text-[#293341] hover:bg-[#F6F7F9]'
               )}
               style={{
-                backgroundColor: isActive ? theme.colors.secondary.light : 'transparent'
+                backgroundColor: isActive ? theme.colors.secondary.light : 'transparent',
+                minHeight: theme.responsive.touchOptimization.minTouchTarget,
+                minWidth: theme.responsive.touchOptimization.minTouchTarget
               }}
             >
               <Icon className="h-5 w-5" />
               <span
-                className="text-xs font-medium"
-                style={{
-                  fontSize: theme.typography.small.fontSize
-                }}
+                className="text-xs font-medium soomgo-responsive-text"
               >
                 {item.label}
               </span>

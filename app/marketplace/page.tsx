@@ -7,8 +7,8 @@ export default function MarketplacePage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="flex items-center justify-between px-4 py-3">
-          <span className="font-semibold text-lg">중고거래</span>
+        <div className="flex items-center justify-between soomgo-responsive-padding">
+          <span className="font-semibold soomgo-responsive-text">중고거래</span>
           <div className="flex items-center space-x-3">
             <Search className="h-6 w-6" />
             <Edit className="h-6 w-6" />
@@ -16,7 +16,7 @@ export default function MarketplacePage() {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-6 space-y-6">
+      <div className="container mx-auto soomgo-responsive-container soomgo-responsive-section space-y-6">
         {/* Category Filter */}
         <div className="flex items-center space-x-2 overflow-x-auto pb-2">
           <Badge variant="default" className="whitespace-nowrap">👠신발</Badge>
@@ -26,7 +26,7 @@ export default function MarketplacePage() {
         </div>
 
         {/* Featured Items */}
-        <div className="grid gap-4">
+        <div className="soomgo-responsive-grid">
           <Card className="hover:shadow-md transition-shadow">
             <CardContent className="p-4">
               <div className="flex space-x-4">
