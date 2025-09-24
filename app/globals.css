@@ -117,4 +117,62 @@
     font-size: 14px;
     color: var(--color-neutral-medium);
   }
+
+  /* Soomgo Interaction Styles */
+
+  /* Link Styles */
+  .soomgo-link {
+    color: var(--color-neutral-medium);
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .soomgo-link:hover {
+    color: var(--color-primary);
+    transform: scale(1.01);
+  }
+
+  .soomgo-link:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  .soomgo-link:active {
+    transform: scale(0.99);
+  }
+
+  /* Interactive Element Base Styles */
+  .soomgo-interactive {
+    transition: all 0.2s ease;
+  }
+
+  .soomgo-interactive:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Reduce Motion for Accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    .soomgo-link,
+    .soomgo-interactive,
+    button,
+    [role="button"] {
+      transition: none !important;
+      animation: none !important;
+      transform: none !important;
+    }
+  }
+
+  /* Enhanced Focus Styles for Accessibility */
+  button:focus-visible,
+  [role="button"]:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
 }

@@ -85,31 +85,81 @@ export const tokens = {
     normal: '1.5',
     relaxed: '1.625',
     loose: '2',
+  },
+
+  // 인터랙션 토큰
+  interactions: {
+    // 트랜지션
+    transition: {
+      default: 'all 0.2s ease',
+      fast: 'all 0.15s ease',
+      slow: 'all 0.3s ease',
+    },
+    // 변형 효과
+    transform: {
+      hover: {
+        card: 'translateY(-2px)',
+        button: 'scale(1.02)',
+        link: 'scale(1.01)',
+      },
+      active: {
+        button: 'scale(0.98)',
+        card: 'scale(0.99)',
+      },
+      focus: {
+        outline: '2px solid var(--color-primary)',
+        offset: '2px',
+      }
+    },
+    // 그림자 효과
+    elevation: {
+      hover: {
+        card: '0 4px 16px rgba(0, 0, 0, 0.12)',
+        button: '0 2px 8px rgba(105, 59, 242, 0.3)',
+      },
+      active: {
+        card: '0 2px 8px rgba(0, 0, 0, 0.08)',
+      }
+    }
   }
 };
 
 // 공통 스타일 조합 함수들
 export const createButtonStyle = (variant: 'primary' | 'secondary' | 'ghost' | 'outline' | 'default' = 'primary') => {
-  const base = 'inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none';
+  const base = `inline-flex items-center justify-center rounded-md font-medium
+    transition-all duration-200 ease-in-out
+    focus:outline-none focus:ring-2 focus:ring-[#693BF2] focus:ring-offset-2
+    hover:scale-[1.02] active:scale-[0.98]
+    disabled:opacity-50 disabled:pointer-events-none disabled:hover:scale-100 disabled:active:scale-100`;
 
   const variants = {
-    primary: 'bg-[#693BF2] text-white hover:bg-[#5A2FD9] focus:ring-[#693BF2]',
-    secondary: 'bg-transparent text-[#293341] border border-[#E0E5EB] hover:bg-[#F6F7F9] focus:ring-[#693BF2]',
-    ghost: 'bg-transparent text-[#693BF2] hover:bg-[#F1EEFF] focus:ring-[#693BF2]',
-    outline: 'bg-transparent text-[#693BF2] border border-[#693BF2] hover:bg-[#F1EEFF] focus:ring-[#693BF2]',
-    default: 'bg-[#693BF2] text-white hover:bg-[#5A2FD9] focus:ring-[#693BF2]'
+    primary: `bg-[#693BF2] text-white
+      hover:bg-[#5A2FD9] hover:shadow-[0_2px_8px_rgba(105,59,242,0.3)]`,
+    secondary: `bg-transparent text-[#293341] border border-[#E0E5EB]
+      hover:bg-[#F6F7F9] hover:border-[#693BF2]`,
+    ghost: `bg-transparent text-[#693BF2]
+      hover:bg-[#F1EEFF]`,
+    outline: `bg-transparent text-[#693BF2] border border-[#693BF2]
+      hover:bg-[#F1EEFF]`,
+    default: `bg-[#693BF2] text-white
+      hover:bg-[#5A2FD9] hover:shadow-[0_2px_8px_rgba(105,59,242,0.3)]`
   };
 
   return `${base} ${variants[variant]}`;
 };
 
 export const createCardStyle = (variant: 'default' | 'service' | 'portfolio' = 'default') => {
-  const base = 'bg-white border border-[#EFF1F5] transition-all duration-200';
+  const base = `bg-white border border-[#EFF1F5]
+    transition-all duration-200 ease-in-out`;
 
   const variants = {
-    default: 'rounded-xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.12)] hover:-translate-y-0.5',
-    service: 'rounded-lg p-3 text-center',
-    portfolio: 'rounded-xl overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.08)]'
+    default: `rounded-xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.06)]
+      hover:shadow-[0_4px_16px_rgba(0,0,0,0.12)] hover:-translate-y-0.5
+      active:scale-[0.99] active:shadow-[0_2px_8px_rgba(0,0,0,0.08)]`,
+    service: `rounded-lg p-3 text-center
+      hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:-translate-y-0.5`,
+    portfolio: `rounded-xl overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.08)]
+      hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)] hover:-translate-y-0.5`
   };
 
   return `${base} ${variants[variant]}`;
