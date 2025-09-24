@@ -117,4 +117,26 @@
     font-size: 14px;
     color: var(--color-neutral-medium);
   }
+
+  /* Scrollbar hide utility for carousel */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari, and Opera */
+  }
+
+  /* Responsive design utilities */
+  @media (max-width: 640px) {
+    .hero-responsive {
+      padding: 40px 16px !important;
+    }
+  }
+
+  @media (min-width: 641px) and (max-width: 1024px) {
+    .hero-responsive {
+      padding: 50px 24px !important;
+    }
+  }
 }

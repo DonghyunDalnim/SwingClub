@@ -42,10 +42,11 @@ export interface SectionProps extends React.HTMLAttributes<HTMLElement> {
   children: React.ReactNode;
   spacing?: 'none' | 'sm' | 'md' | 'lg';
   background?: 'white' | 'gray' | 'transparent';
+  variant?: 'default' | 'hero';
 }
 
 export const Section = React.forwardRef<HTMLElement, SectionProps>(
-  ({ className, children, spacing = 'md', background = 'transparent', ...props }, ref) => {
+  ({ className, children, spacing = 'md', background = 'transparent', variant = 'default', ...props }, ref) => {
     const spacingClasses = {
       none: '',
       sm: 'py-8',
@@ -59,12 +60,16 @@ export const Section = React.forwardRef<HTMLElement, SectionProps>(
       transparent: 'bg-transparent'
     };
 
+    const variantClasses = {
+      default: '',
+      hero: 'bg-white py-[60px] flex items-center justify-center text-center hero-responsive'
+    };
+
     return (
       <section
         ref={ref}
         className={cn(
-          spacingClasses[spacing],
-          backgroundClasses[background],
+          variant === 'hero' ? variantClasses.hero : `${spacingClasses[spacing]} ${backgroundClasses[background]}`,
           className
         )}
         {...props}
@@ -76,6 +81,52 @@ export const Section = React.forwardRef<HTMLElement, SectionProps>(
 );
 
 Section.displayName = 'Section';
+
+// 섹션 헤더 컴포넌트
+export interface SectionHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+  title: React.ReactNode;
+  subtitle?: React.ReactNode;
+  action?: React.ReactNode;
+}
+
+export const SectionHeader = React.forwardRef<HTMLDivElement, SectionHeaderProps>(
+  ({ className, title, subtitle, action, ...props }, ref) => {
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          'flex items-center justify-between mb-6',
+          className
+        )}
+        {...props}
+      >
+        <div className="flex-1">
+          {typeof title === 'string' ? (
+            <h2 className="text-h2 text-neutral-darkest">{title}</h2>
+          ) : (
+            title
+          )}
+          {subtitle && (
+            <div className="mt-1">
+              {typeof subtitle === 'string' ? (
+                <p className="text-small text-neutral-medium">{subtitle}</p>
+              ) : (
+                subtitle
+              )}
+            </div>
+          )}
+        </div>
+        {action && (
+          <div className="flex-shrink-0 ml-4">
+            {action}
+          </div>
+        )}
+      </div>
+    );
+  }
+);
+
+SectionHeader.displayName = 'SectionHeader';
 
 // 플렉스 레이아웃 컴포넌트
 export interface FlexProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -149,6 +200,47 @@ export const Flex = React.forwardRef<HTMLDivElement, FlexProps>(
 
 Flex.displayName = 'Flex';
 
+// 캐러셀 컴포넌트
+export interface CarouselProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
+  gap?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
+  scrollable?: boolean;
+}
+
+export const Carousel = React.forwardRef<HTMLDivElement, CarouselProps>(
+  ({ className, children, gap = 'md', scrollable = true, ...props }, ref) => {
+    const gapClasses = {
+      none: 'gap-0',
+      sm: 'gap-2',
+      md: 'gap-4',
+      lg: 'gap-6',
+      xl: 'gap-8'
+    };
+
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          'flex',
+          gapClasses[gap],
+          scrollable && 'overflow-x-auto scrollbar-hide',
+          scrollable && 'snap-x snap-mandatory',
+          className
+        )}
+        {...props}
+      >
+        {React.Children.map(children, (child) => (
+          <div className={cn('flex-shrink-0', scrollable && 'snap-start')}>
+            {child}
+          </div>
+        ))}
+      </div>
+    );
+  }
+);
+
+Carousel.displayName = 'Carousel';
+
 // 그리드 레이아웃 컴포넌트
 export interface GridProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
@@ -204,5 +296,46 @@ export const Grid = React.forwardRef<HTMLDivElement, GridProps>(
 );
 
 Grid.displayName = 'Grid';
+
+// 카테고리 그리드 컴포넌트
+export interface CategoryGridProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
+  minItemWidth?: number;
+  gap?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
+  responsive?: boolean;
+}
+
+export const CategoryGrid = React.forwardRef<HTMLDivElement, CategoryGridProps>(
+  ({ className, children, minItemWidth = 80, gap = 'sm', responsive = true, ...props }, ref) => {
+    const gapClasses = {
+      none: 'gap-0',
+      sm: 'gap-3',
+      md: 'gap-4',
+      lg: 'gap-6',
+      xl: 'gap-8'
+    };
+
+    const gridTemplate = responsive
+      ? `grid-cols-[repeat(auto-fit,minmax(${minItemWidth}px,1fr))]`
+      : `grid-cols-[repeat(auto-fill,minmax(${minItemWidth}px,1fr))]`;
+
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          'grid',
+          gridTemplate,
+          gapClasses[gap],
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </div>
+    );
+  }
+);
+
+CategoryGrid.displayName = 'CategoryGrid';
 
 export default Container;

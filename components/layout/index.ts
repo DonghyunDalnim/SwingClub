@@ -2,12 +2,18 @@
 export {
   default as Container,
   Section,
+  SectionHeader,
   Flex,
-  Grid
+  Carousel,
+  Grid,
+  CategoryGrid
 } from './Container';
 export type {
   ContainerProps,
   SectionProps,
+  SectionHeaderProps,
   FlexProps,
-  GridProps
+  CarouselProps,
+  GridProps,
+  CategoryGridProps
 } from './Container';
