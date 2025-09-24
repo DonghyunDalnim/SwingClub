@@ -202,6 +202,37 @@ export const theme = {
       maxWidth: "1200px"
     }
   },
+  responsive: {
+    mobile: {
+      fontSize: "14px",
+      padding: "12px",
+      gridColumns: "repeat(2, 1fr)",
+      touchTarget: "44px",
+      containerPadding: "12px",
+      sectionPadding: "20px"
+    },
+    tablet: {
+      fontSize: "16px",
+      padding: "16px",
+      gridColumns: "repeat(3, 1fr)",
+      touchTarget: "44px",
+      containerPadding: "16px",
+      sectionPadding: "32px"
+    },
+    desktop: {
+      fontSize: "16px",
+      padding: "20px",
+      gridColumns: "repeat(6, 1fr)",
+      touchTarget: "44px",
+      containerPadding: "20px",
+      sectionPadding: "40px"
+    },
+    touchOptimization: {
+      minTouchTarget: "44px",
+      tapHighlight: "transparent",
+      userSelect: "none"
+    }
+  },
   interactions: {
     hover: {
       cards: {

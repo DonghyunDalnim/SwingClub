@@ -117,4 +117,125 @@
     font-size: 14px;
     color: var(--color-neutral-medium);
   }
+
+  /* 반응형 Soomgo 표준 스타일 */
+  /* Mobile-first 반응형 텍스트 크기 */
+  .soomgo-responsive-text {
+    font-size: 14px; /* Mobile */
+  }
+
+  .soomgo-responsive-padding {
+    padding: 12px; /* Mobile */
+  }
+
+  .soomgo-responsive-container {
+    padding-left: 12px;
+    padding-right: 12px; /* Mobile */
+  }
+
+  .soomgo-responsive-section {
+    padding-top: 20px;
+    padding-bottom: 20px; /* Mobile */
+  }
+
+  .soomgo-responsive-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Mobile */
+    gap: 16px;
+  }
+
+  /* 터치 최적화 클래스 */
+  .soomgo-touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+  .soomgo-touch-area {
+    padding: 12px;
+    border-radius: 8px;
+    position: relative;
+  }
+
+  /* Tablet (768px+) */
+  @media (min-width: 768px) {
+    .soomgo-responsive-text {
+      font-size: 16px;
+    }
+
+    .soomgo-responsive-padding {
+      padding: 16px;
+    }
+
+    .soomgo-responsive-container {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+
+    .soomgo-responsive-section {
+      padding-top: 32px;
+      padding-bottom: 32px;
+    }
+
+    .soomgo-responsive-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  /* Desktop (1200px+) */
+  @media (min-width: 1200px) {
+    .soomgo-responsive-text {
+      font-size: 16px;
+    }
+
+    .soomgo-responsive-padding {
+      padding: 20px;
+    }
+
+    .soomgo-responsive-container {
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+
+    .soomgo-responsive-section {
+      padding-top: 40px;
+      padding-bottom: 40px;
+    }
+
+    .soomgo-responsive-grid {
+      grid-template-columns: repeat(6, 1fr);
+    }
+  }
+
+  /* 터치 디바이스에서 hover 효과 제거 */
+  @media (hover: none) {
+    .soomgo-link:hover,
+    .card:hover,
+    button:hover {
+      transform: none !important;
+      box-shadow: inherit !important;
+    }
+  }
+
+  /* 움직임 줄이기 설정을 고려한 애니메이션 */
+  @media (prefers-reduced-motion: reduce) {
+    .soomgo-link,
+    .card,
+    button {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+
+  /* 고해상도 디스플레이 최적화 */
+  @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .soomgo-responsive-text {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+  }
 }
