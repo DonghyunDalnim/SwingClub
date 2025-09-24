@@ -20,11 +20,9 @@ export type PostStatus = 'active' | 'hidden' | 'deleted' | 'reported'
 // 중고거래 상태
 export type MarketplaceStatus = 'selling' | 'reserved' | 'sold' | 'hidden'
 
-// 이벤트 상태
-export type EventStatus = 'upcoming' | 'ongoing' | 'completed' | 'cancelled'
-
 // 게시글 공개 범위
 export type PostVisibility = 'public' | 'members_only' | 'region_only'
+
 
 // 첨부파일 타입
 export interface Attachment {
@@ -353,9 +351,6 @@ export const REPORT_REASON_LABELS = {
   other: '기타'
 } as const
 
-// 검증 함수 타입
-export type ValidatePostData = (data: CreatePostData) => string[]
-export type ValidateCommentData = (data: CreateCommentData) => string[]
 
 // Firestore 컨버터용 타입
 export interface PostDocument extends Omit<Post, 'id'> {}

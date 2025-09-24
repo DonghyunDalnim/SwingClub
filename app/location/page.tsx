@@ -2,9 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Button, Card, CardContent, Badge } from '@/components/core';
 import { ArrowLeft, Search, Settings, MapPin, Users, Star, Filter } from 'lucide-react';
 import { Studio } from '@/lib/types/studio';
 import { searchStudiosByLocation } from '@/lib/actions/studios';

@@ -1,6 +1,5 @@
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Button, Card, CardContent, CardHeader, CardTitle } from '@/components/core'
+import { Badge } from '@/components/core'
 import { Search, Edit, Star, Clock } from 'lucide-react'
 
 export default function MarketplacePage() {
