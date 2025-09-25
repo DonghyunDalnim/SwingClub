@@ -127,7 +127,7 @@ export const tokens = {
 // 공통 스타일 조합 함수들
 export const createButtonStyle = (variant: 'primary' | 'secondary' | 'ghost' | 'outline' | 'default' = 'primary') => {
   const base = `inline-flex items-center justify-center rounded-md font-medium
-    transition-all duration-200 ease-in-out
+    transition-all duration-200 ease
     focus:outline-none focus:ring-2 focus:ring-[#693BF2] focus:ring-offset-2
     hover:scale-[1.02] active:scale-[0.98]
     disabled:opacity-50 disabled:pointer-events-none disabled:hover:scale-100 disabled:active:scale-100`;
@@ -150,7 +150,7 @@ export const createButtonStyle = (variant: 'primary' | 'secondary' | 'ghost' | '
 
 export const createCardStyle = (variant: 'default' | 'service' | 'portfolio' = 'default') => {
   const base = `bg-white border border-[#EFF1F5]
-    transition-all duration-200 ease-in-out`;
+    transition-all duration-200 ease`;
 
   const variants = {
     default: `rounded-xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.06)]

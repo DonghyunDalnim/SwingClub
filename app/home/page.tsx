@@ -52,13 +52,13 @@ export default function HomePage() {
           >
             <CardHeader>
               <Typography variant="h4" className="text-white font-bold">
-                🎵 TODAY'S SWING 🎵
+                🎵 TODAY&apos;S SWING 🎵
               </Typography>
               <Typography variant="small" className="text-blue-100 mt-2">
                 서울 강남구 | 오늘 19:00
               </Typography>
               <Typography variant="h4" className="text-white font-semibold mt-4">
-                "초보자 린디합 기초반 모집중!"
+                &ldquo;초보자 린디합 기초반 모집중!&rdquo;
               </Typography>
             </CardHeader>
             <CardContent>

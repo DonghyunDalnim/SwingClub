@@ -59,7 +59,7 @@ describe('Button Interaction Tests', () => {
       await user.hover(button);
 
       // Check that hover classes are present
-      expect(button).toHaveClass('transition-all', 'duration-200', 'ease-in-out');
+      expect(button).toHaveClass('transition-all', 'duration-200', 'ease');
 
       // Unhover to test state restoration
       await user.unhover(button);
@@ -604,7 +604,7 @@ describe('Button Interaction Tests', () => {
       render(<Button data-testid="transition-button">Transition</Button>);
       const button = screen.getByTestId('transition-button');
 
-      expect(button).toHaveClass('transition-all', 'duration-200', 'ease-in-out');
+      expect(button).toHaveClass('transition-all', 'duration-200', 'ease');
     });
 
     test('button with complex content maintains interactions', async () => {
@@ -740,7 +740,7 @@ describe('Button Interaction Tests', () => {
         'font-medium',
         'transition-all',
         'duration-200',
-        'ease-in-out',
+        'ease',
         'focus:outline-none',
         'focus:ring-2',
         'focus:ring-[#693BF2]',
