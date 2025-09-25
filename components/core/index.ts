@@ -31,3 +31,9 @@ export type { TypographyProps } from './Typography';
 
 export { default as Map } from './Map';
 export type { KakaoMapProps } from '@/lib/types/kakao-map';
+
+export {
+  default as Carousel,
+  CarouselItem
+} from './Carousel';
+export type { CarouselProps, CarouselItemProps } from './Carousel';

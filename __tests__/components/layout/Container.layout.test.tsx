@@ -5,13 +5,15 @@ import {
   Container,
   Section,
   SectionHeader,
-  Carousel,
   CategoryGrid,
   type SectionProps,
   type SectionHeaderProps,
-  type CarouselProps,
   type CategoryGridProps
 } from '@/components/layout';
+import {
+  Carousel,
+  type CarouselProps
+} from '@/components/core';
 
 // Mock cn function
 jest.mock('@/lib/utils', () => ({

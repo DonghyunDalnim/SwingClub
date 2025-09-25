@@ -1,19 +1,27 @@
 // Layout Components Export
 export {
   default as Container,
-  Section,
-  SectionHeader,
-  Flex,
-  Carousel,
-  Grid,
-  CategoryGrid
+  Flex
 } from './Container';
 export type {
   ContainerProps,
+  FlexProps
+} from './Container';
+
+export {
+  Section,
+  SectionHeader
+} from './Section';
+export type {
   SectionProps,
-  SectionHeaderProps,
-  FlexProps,
-  CarouselProps,
+  SectionHeaderProps
+} from './Section';
+
+export {
+  Grid,
+  CategoryGrid
+} from './Grid';
+export type {
   GridProps,
   CategoryGridProps
-} from './Container';
+} from './Grid';

@@ -1,5 +1,5 @@
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Badge, Typography } from '@/components/core'
-import { Container, Section, Flex, Grid } from '@/components/layout'
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Badge, Typography, Carousel, CarouselItem } from '@/components/core'
+import { Container, Section, SectionHeader, Flex, Grid, CategoryGrid } from '@/components/layout'
 import { theme } from '@/lib/theme'
 import { Bell, Menu, User, Heart, MessageCircle, Eye, MapPin, Users, MessageSquare, HelpCircle, Calendar, ShoppingBag } from 'lucide-react'
 
@@ -40,8 +40,42 @@ export default function HomePage() {
         </Container>
       </header>
 
+      {/* Hero Section - 숨고 표준 패턴 (흰색 배경, 60px 패딩, 중앙 정렬) */}
+      <Section variant="hero">
+        <Container>
+          <div className="max-w-4xl mx-auto text-center">
+            <Typography variant="h1" className="mb-6">
+              SWING CONNECT에 오신 것을 환영합니다
+            </Typography>
+            <Typography variant="body" className="mb-8 text-lg" style={{ color: theme.colors.neutral.medium }}>
+              모든 스윙댄스 정보를 한 곳에서 만나보세요.<br />
+              커뮤니티, 파트너 매칭, 중고거래까지 - 스윙댄스 라이프의 모든 것
+            </Typography>
+            <Flex justify="center" gap="md">
+              <Button variant="primary" size="lg">
+                시작하기
+              </Button>
+              <Button variant="outline" size="lg">
+                더 알아보기
+              </Button>
+            </Flex>
+          </div>
+        </Container>
+      </Section>
+
       <Container>
         <Section spacing="md">
+          {/* SectionHeader 패턴 시연 - space-between 레이아웃, 24px 하단 마진 */}
+          <SectionHeader
+            title={<Typography variant="h2">오늘의 스윙댄스</Typography>}
+            subtitle="오늘 진행되는 스윙댄스 모임과 이벤트"
+            action={
+              <Button variant="ghost" size="sm">
+                전체보기
+              </Button>
+            }
+          />
+
           {/* Today's Swing */}
           <Card
             className="text-white text-center"
@@ -52,13 +86,13 @@ export default function HomePage() {
           >
             <CardHeader>
               <Typography variant="h4" className="text-white font-bold">
-                🎵 TODAY'S SWING 🎵
+                🎵 TODAY&apos;S SWING 🎵
               </Typography>
               <Typography variant="small" className="text-blue-100 mt-2">
                 서울 강남구 | 오늘 19:00
               </Typography>
               <Typography variant="h4" className="text-white font-semibold mt-4">
-                "초보자 린디합 기초반 모집중!"
+                &ldquo;초보자 린디합 기초반 모집중!&rdquo;
               </Typography>
             </CardHeader>
             <CardContent>
@@ -77,7 +111,46 @@ export default function HomePage() {
             </CardContent>
           </Card>
 
-          {/* Quick Access */}
+          {/* SectionHeader + CategoryGrid 패턴 시연 */}
+          <SectionHeader
+            title={<Typography variant="h3">빠른 액세스</Typography>}
+            subtitle="자주 사용하는 기능들에 빠르게 접근하세요"
+            action={
+              <Button variant="ghost" size="sm">
+                설정
+              </Button>
+            }
+          />
+
+          {/* CategoryGrid 패턴 시연 - auto-fit, 최소 80px, 12px 간격 */}
+          <CategoryGrid minItemWidth={120} gap="sm" className="mb-6">
+            <Card className="text-center p-4">
+              <MapPin className="h-8 w-8 mx-auto mb-2" style={{ color: theme.colors.primary.main }} />
+              <Typography variant="small" className="font-medium">내 주변</Typography>
+            </Card>
+            <Card className="text-center p-4">
+              <Users className="h-8 w-8 mx-auto mb-2" style={{ color: theme.colors.primary.main }} />
+              <Typography variant="small" className="font-medium">파트너 찾기</Typography>
+            </Card>
+            <Card className="text-center p-4">
+              <MessageCircle className="h-8 w-8 mx-auto mb-2" style={{ color: theme.colors.primary.main }} />
+              <Typography variant="small" className="font-medium">커뮤니티</Typography>
+            </Card>
+            <Card className="text-center p-4">
+              <ShoppingBag className="h-8 w-8 mx-auto mb-2" style={{ color: theme.colors.primary.main }} />
+              <Typography variant="small" className="font-medium">중고거래</Typography>
+            </Card>
+            <Card className="text-center p-4">
+              <Calendar className="h-8 w-8 mx-auto mb-2" style={{ color: theme.colors.primary.main }} />
+              <Typography variant="small" className="font-medium">이벤트</Typography>
+            </Card>
+            <Card className="text-center p-4">
+              <HelpCircle className="h-8 w-8 mx-auto mb-2" style={{ color: theme.colors.primary.main }} />
+              <Typography variant="small" className="font-medium">도움말</Typography>
+            </Card>
+          </CategoryGrid>
+
+          {/* Quick Access - 기존 Grid 패턴 */}
           <Grid cols={2} gap="md">
             <Card>
               <CardHeader>
@@ -131,10 +204,110 @@ export default function HomePage() {
             </Card>
           </Grid>
 
-          {/* Hot Topics */}
+          {/* Carousel 패턴 시연 - Flex 레이아웃, 16px 간격 */}
+          <SectionHeader
+            title={<Typography variant="h3">🔥 HOT TOPICS</Typography>}
+            subtitle="인기 있는 게시물들을 확인해보세요"
+            action={
+              <Button variant="ghost" size="sm">
+                더보기
+              </Button>
+            }
+          />
+
+          <Carousel gap="md" className="mb-6">
+            <CarouselItem width="300px">
+              <Card className="h-full">
+                <CardHeader>
+                  <Badge variant="category" className="w-fit">NEW</Badge>
+                  <CardTitle>신촌 정기모임</CardTitle>
+                  <CardDescription>매주 토 14:00 | 참여자 12명</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Typography variant="small" className="mb-4">
+                    💃 초보자 환영! 기초부터 차근차근
+                  </Typography>
+                  <Flex align="center" gap="sm" className="text-xs">
+                    <Flex align="center" gap="sm">
+                      <Heart className="h-3 w-3" />
+                      <span>15</span>
+                    </Flex>
+                    <Flex align="center" gap="sm">
+                      <MessageCircle className="h-3 w-3" />
+                      <span>8</span>
+                    </Flex>
+                    <Flex align="center" gap="sm">
+                      <Eye className="h-3 w-3" />
+                      <span>127</span>
+                    </Flex>
+                  </Flex>
+                </CardContent>
+              </Card>
+            </CarouselItem>
+
+            <CarouselItem width="300px">
+              <Card className="h-full">
+                <CardHeader>
+                  <Badge variant="category" className="w-fit">🎪</Badge>
+                  <CardTitle>강남 스윙댄스 파티</CardTitle>
+                  <CardDescription>3/15(토) 19:00</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Typography variant="small" className="mb-4">
+                    🎵 라이브 밴드와 함께하는 소셜댄스
+                  </Typography>
+                  <Flex align="center" gap="sm" className="text-xs">
+                    <Flex align="center" gap="sm">
+                      <Heart className="h-3 w-3" />
+                      <span>23</span>
+                    </Flex>
+                    <Flex align="center" gap="sm">
+                      <MessageCircle className="h-3 w-3" />
+                      <span>15</span>
+                    </Flex>
+                    <Flex align="center" gap="sm">
+                      <Eye className="h-3 w-3" />
+                      <span>201</span>
+                    </Flex>
+                  </Flex>
+                </CardContent>
+              </Card>
+            </CarouselItem>
+
+            <CarouselItem width="300px">
+              <Card className="h-full">
+                <CardHeader>
+                  <Badge variant="category" className="w-fit">HOT</Badge>
+                  <CardTitle>초보자 린디합 클래스</CardTitle>
+                  <CardDescription>매주 일 10:00 | 홍대</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Typography variant="small" className="mb-4">
+                    🌟 린디합 기초부터 차근차근
+                  </Typography>
+                  <Flex align="center" gap="sm" className="text-xs">
+                    <Flex align="center" gap="sm">
+                      <Heart className="h-3 w-3" />
+                      <span>31</span>
+                    </Flex>
+                    <Flex align="center" gap="sm">
+                      <MessageCircle className="h-3 w-3" />
+                      <span>22</span>
+                    </Flex>
+                    <Flex align="center" gap="sm">
+                      <Eye className="h-3 w-3" />
+                      <span>156</span>
+                    </Flex>
+                  </Flex>
+                </CardContent>
+              </Card>
+            </CarouselItem>
+          </Carousel>
+
+          {/* Hot Topics - 기존 형태 유지 */}
           <Card>
             <CardHeader>
-              <CardTitle>🔥 HOT TOPICS</CardTitle>
+              <CardTitle>📰 최신 소식</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
