@@ -1,6 +1,7 @@
 import React from 'react';
 import { createButtonStyle } from '@/lib/design-tokens';
 import { cn } from '@/lib/utils';
+import { reduceMotion } from '@/lib/utils/animations';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'ghost' | 'outline' | 'default';
@@ -23,6 +24,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       sizeClasses[size],
       fullWidth && 'w-full',
       loading && 'cursor-not-allowed opacity-70',
+      !reduceMotion() && 'hover:scale-[1.02] active:scale-[0.98]',
       className
     );
 

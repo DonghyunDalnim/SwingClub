@@ -2,12 +2,13 @@
 
 import Link from 'next/link'
 import { Card, CardContent, Badge, Button } from '@/components/core'
-import { Heart, MessageCircle, Eye, Pin, Edit, Trash2 } from 'lucide-react'
+import { MessageCircle, Eye, Pin, Edit, Trash2 } from 'lucide-react'
 import { deletePostAction } from '@/lib/actions/posts'
 import { POST_CATEGORIES, POST_STATUS_LABELS } from '@/lib/types/community'
 import type { Post } from '@/lib/types/community'
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { LikeButton } from './LikeButton'
 
 interface PostCardProps {
   post: Post
@@ -69,6 +70,17 @@ export function PostCard({ post, currentUserId, showActions = false, isPinned = 
 
   // 작성자인지 확인
   const isAuthor = currentUserId === post.metadata.authorId
+
+  // 좋아요 토글 핸들러
+  const handleToggleLike = async (postId: string, isLiked: boolean) => {
+    // 실제 서버 액션 호출 (현재는 시뮬레이션)
+    await new Promise(resolve => setTimeout(resolve, 500))
+
+    return {
+      success: true,
+      newCount: isLiked ? post.stats.likes + 1 : Math.max(0, post.stats.likes - 1)
+    }
+  }
 
   return (
     <Card className={`hover:shadow-md transition-shadow ${isPinned ? 'border-blue-200 bg-blue-50' : ''}`}>
@@ -134,7 +146,7 @@ export function PostCard({ post, currentUserId, showActions = false, isPinned = 
                 <>
                   {' | '}
                   <span className="line-clamp-1">
-                    "{post.content.slice(0, 50)}{post.content.length > 50 ? '...' : ''}"
+                    &ldquo;{post.content.slice(0, 50)}{post.content.length > 50 ? '...' : ''}&rdquo;
                   </span>
                 </>
               )}
@@ -143,10 +155,13 @@ export function PostCard({ post, currentUserId, showActions = false, isPinned = 
             {/* 통계 및 첨부파일 */}
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4 text-xs text-gray-500">
-                <span className="flex items-center">
-                  <Heart className="h-3 w-3 mr-1" />
-                  {post.stats.likes}
-                </span>
+                <LikeButton
+                  postId={post.id}
+                  isLiked={false}
+                  likeCount={post.stats.likes}
+                  onToggleLike={handleToggleLike}
+                  size="sm"
+                />
                 <span className="flex items-center">
                   <MessageCircle className="h-3 w-3 mr-1" />
                   {post.stats.comments}
