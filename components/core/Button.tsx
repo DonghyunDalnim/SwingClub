@@ -1,6 +1,9 @@
-import React from 'react';
+'use client'
+
+import React, { useRef, useEffect } from 'react';
 import { createButtonStyle } from '@/lib/design-tokens';
 import { cn } from '@/lib/utils';
+import { createColorTransition, reduceMotion } from '@/lib/utils/animations';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'ghost' | 'outline' | 'default';
@@ -12,6 +15,9 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', children, loading, fullWidth, disabled, ...props }, ref) => {
+    const buttonRef = useRef<HTMLButtonElement>(null);
+    const internalRef = (ref as React.RefObject<HTMLButtonElement>) || buttonRef;
+
     const sizeClasses = {
       sm: 'h-8 px-3 text-sm',
       md: 'h-10 px-4 text-base',
@@ -23,15 +29,35 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       sizeClasses[size],
       fullWidth && 'w-full',
       loading && 'cursor-not-allowed opacity-70',
-      'motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.98]',
+      'motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.98] transition-all duration-200',
       className
     );
+
+    const handleMouseEnter = () => {
+      if (!disabled && !loading && !reduceMotion() && internalRef.current) {
+        const button = internalRef.current;
+        if (variant === 'secondary' || variant === 'ghost') {
+          createColorTransition(button, button.style.color || '#293341', '#693BF2', 150);
+        }
+      }
+    };
+
+    const handleMouseLeave = () => {
+      if (!disabled && !loading && !reduceMotion() && internalRef.current) {
+        const button = internalRef.current;
+        if (variant === 'secondary' || variant === 'ghost') {
+          createColorTransition(button, button.style.color || '#693BF2', '#293341', 150);
+        }
+      }
+    };
 
     return (
       <button
         className={buttonClasses}
-        ref={ref}
+        ref={internalRef}
         disabled={disabled || loading}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         {...props}
       >
         {loading && (
