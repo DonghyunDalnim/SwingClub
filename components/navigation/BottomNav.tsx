@@ -40,6 +40,8 @@ export default function BottomNav() {
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-50"
+      role="navigation"
+      aria-label="메인 네비게이션"
       style={{
         height: theme.components.navigation.height,
         backgroundColor: theme.components.navigation.backgroundColor,
@@ -57,7 +59,7 @@ export default function BottomNav() {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex flex-col items-center justify-center space-y-1 px-3 py-2 rounded-lg transition-all duration-200',
+                'flex flex-col items-center justify-center space-y-1 px-3 py-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#693BF2]',
                 isActive
                   ? 'text-[#693BF2]'
                   : 'text-[#6A7685] hover:text-[#293341] hover:bg-[#F6F7F9]'
@@ -65,8 +67,11 @@ export default function BottomNav() {
               style={{
                 backgroundColor: isActive ? theme.colors.secondary.light : 'transparent'
               }}
+              role="tab"
+              aria-selected={isActive}
+              aria-label={`${item.label} 페이지로 이동`}
             >
-              <Icon className="h-5 w-5" />
+              <Icon className="h-5 w-5" aria-hidden="true" />
               <span
                 className="text-xs font-medium"
                 style={{
