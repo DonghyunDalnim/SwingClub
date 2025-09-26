@@ -1,5 +1,7 @@
 import { Button, Card, CardContent, Badge, Typography } from '@/components/core'
 import { Container } from '@/components/layout'
+import { OptimizedImage } from '@/components/ui/OptimizedImage'
+import { Avatar } from '@/components/ui/Avatar'
 import { MessageCircle, Eye, Search, Star, ChevronRight, ChevronLeft } from 'lucide-react'
 
 export default function HomePage() {
@@ -200,22 +202,33 @@ export default function HomePage() {
                   title: '환갑도 늦지 않았어요, 나다운 삶으로 나아가는 원동력',
                   excerpt: '오랫동안 마음속에 그려온 그림은 마침내 빛을 찾아 세상 앞에 서게 되었습니다. 송미정님은 엄마이자 아내, 며느리로서 긴 시간 가족을 1순위로...',
                   views: '2,230',
-                  comments: '7'
+                  comments: '7',
+                  author: '송미정',
+                  hasImage: true
                 },
                 {
                   category: '스윙댄스 이야기',
                   title: '32살, 인생 2막의 변화를 선택한 이유',
                   excerpt: '5년 동안 출판사 번역가로 일하다 이제 막 퇴사한 지 5개월이 된, 32살 청년이 있습니다. 더 이상 퇴사가 낯설지 않은 시대지만...',
                   views: '3,234',
-                  comments: '5'
+                  comments: '5',
+                  author: '김민수',
+                  hasImage: false
                 }
               ].map((post, index) => (
                 <Card key={index} className="group hover:shadow-2xl hover:shadow-purple-100/40 transition-all duration-500 cursor-pointer hover:-translate-y-2 bg-gradient-to-br from-white/95 via-white/90 to-purple-50/30 backdrop-blur-md border border-white/80 hover:border-purple-200/60 shadow-inner hover:shadow-lg">
                   <div className="flex">
                     <div className="flex-1 p-6">
-                      <Badge variant="outline" className="mb-2 text-purple-600 border-purple-200">
-                        {post.category}
-                      </Badge>
+                      <div className="flex items-center space-x-2 mb-2">
+                        <Avatar
+                          alt={post.author}
+                          size="xs"
+                          fallback={post.author.charAt(0)}
+                        />
+                        <Badge variant="outline" className="text-purple-600 border-purple-200">
+                          {post.category}
+                        </Badge>
+                      </div>
                       <Typography variant="body" className="font-bold text-lg text-gray-800 mb-3 leading-relaxed">
                         {post.title}
                       </Typography>
@@ -233,8 +246,18 @@ export default function HomePage() {
                         </div>
                       </div>
                     </div>
-                    <div className="w-24 h-24 bg-gradient-to-br from-purple-100 via-purple-150 to-purple-200 rounded-lg m-4 flex items-center justify-center shadow-lg shadow-purple-200/40">
-                      <span className="text-2xl filter drop-shadow-sm">💃</span>
+                    <div className="w-24 m-4">
+                      {post.hasImage ? (
+                        <OptimizedImage
+                          alt={`${post.title} 이미지`}
+                          ratio="card"
+                          className="w-full h-24 rounded-lg shadow-lg shadow-purple-200/40"
+                        />
+                      ) : (
+                        <div className="w-24 h-24 bg-gradient-to-br from-purple-100 via-purple-150 to-purple-200 rounded-lg flex items-center justify-center shadow-lg shadow-purple-200/40">
+                          <span className="text-2xl filter drop-shadow-sm">💃</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </Card>
@@ -260,9 +283,16 @@ export default function HomePage() {
                       <span className="text-xl filter drop-shadow-sm">{index === 0 ? '📚' : '👥'}</span>
                     </div>
                     <div className="flex-1">
-                      <Badge variant="outline" className="mb-1 text-blue-600 border-blue-200">
-                        {post.category}
-                      </Badge>
+                      <div className="flex items-center space-x-2 mb-1">
+                        <Avatar
+                          alt={post.author}
+                          size="xs"
+                          fallback={post.author.charAt(0)}
+                        />
+                        <Badge variant="outline" className="text-blue-600 border-blue-200">
+                          {post.category}
+                        </Badge>
+                      </div>
                       <Typography variant="small" className="font-semibold mb-1">
                         {post.title}
                       </Typography>

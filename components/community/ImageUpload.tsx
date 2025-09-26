@@ -4,6 +4,7 @@ import { useState, useRef } from 'react'
 import { Button } from '@/components/core/Button'
 import { Card } from '@/components/core/Card'
 import { X, Upload, Image as ImageIcon } from 'lucide-react'
+import { OptimizedImage } from '@/components/ui/OptimizedImage'
 import { uploadImage, validateImageFile, resizeImage } from '@/lib/utils/imageUpload'
 
 interface ImageUploadProps {
@@ -131,21 +132,20 @@ export function ImageUpload({ onUpload, maxImages = 5, userId, existingImages = 
       {images.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {images.map((url, index) => (
-            <Card key={index} className="relative group">
-              <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                <img
-                  src={url}
-                  alt={`업로드된 이미지 ${index + 1}`}
-                  className="w-full h-full object-cover"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeImage(index)}
-                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </div>
+            <Card key={index} className="relative group overflow-hidden">
+              <OptimizedImage
+                src={url}
+                alt={`업로드된 이미지 ${index + 1}`}
+                ratio="avatar"
+                className="w-full"
+              />
+              <button
+                type="button"
+                onClick={() => removeImage(index)}
+                className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+              >
+                <X className="h-3 w-3" />
+              </button>
             </Card>
           ))}
         </div>

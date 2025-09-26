@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { Card, CardContent, Badge, Button } from '@/components/core'
 import { Heart, MessageCircle, Eye, Pin, Edit, Trash2 } from 'lucide-react'
+import { OptimizedImage } from '@/components/ui/OptimizedImage'
+import { Avatar } from '@/components/ui/Avatar'
 import { deletePostAction } from '@/lib/actions/posts'
 import { POST_CATEGORIES, POST_STATUS_LABELS } from '@/lib/types/community'
 import type { Post } from '@/lib/types/community'
@@ -134,11 +136,50 @@ export function PostCard({ post, currentUserId, showActions = false, isPinned = 
                 <>
                   {' | '}
                   <span className="line-clamp-1">
-                    "{post.content.slice(0, 50)}{post.content.length > 50 ? '...' : ''}"
+                    &ldquo;{post.content.slice(0, 50)}{post.content.length > 50 ? '...' : ''}&rdquo;
                   </span>
                 </>
               )}
             </p>
+
+            {/* 첨부된 이미지들 */}
+            {post.attachments && post.attachments.length > 0 && (
+              <div className="mb-3">
+                {post.attachments.length === 1 ? (
+                  <OptimizedImage
+                    src={post.attachments[0].fileUrl}
+                    alt={post.attachments[0].fileName || `${post.title} 이미지`}
+                    ratio="card"
+                    className="w-full max-w-md"
+                  />
+                ) : (
+                  <div className="grid grid-cols-2 gap-2 max-w-md">
+                    {post.attachments.slice(0, 4).map((attachment, index) => (
+                      <OptimizedImage
+                        key={attachment.id || index}
+                        src={attachment.fileUrl}
+                        alt={attachment.fileName || `${post.title} 이미지 ${index + 1}`}
+                        ratio="card"
+                        className="w-full"
+                      />
+                    ))}
+                    {post.attachments.length > 4 && (
+                      <div className="relative">
+                        <OptimizedImage
+                          src={post.attachments[3].fileUrl}
+                          alt={`${post.title} 이미지 4`}
+                          ratio="card"
+                          className="w-full"
+                        />
+                        <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center text-white font-semibold">
+                          +{post.attachments.length - 3}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* 통계 및 첨부파일 */}
             <div className="flex items-center justify-between">
@@ -157,14 +198,8 @@ export function PostCard({ post, currentUserId, showActions = false, isPinned = 
                 </span>
               </div>
 
-              {/* 첨부파일 표시 */}
+              {/* 태그 표시 */}
               <div className="flex gap-1">
-                {post.attachments && post.attachments.length > 0 && (
-                  <Badge variant="outline" className="text-xs">
-                    이미지 {post.attachments.length}장
-                  </Badge>
-                )}
-
                 {post.tags && post.tags.length > 0 && (
                   <Badge variant="outline" className="text-xs">
                     #{post.tags[0]}{post.tags.length > 1 ? ` +${post.tags.length - 1}` : ''}
