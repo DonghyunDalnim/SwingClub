@@ -7,6 +7,9 @@ import { Search, Filter } from 'lucide-react'
 import { getPostsAction } from '@/lib/actions/posts'
 import { POST_CATEGORIES } from '@/lib/types/community'
 import type { Post, PostCategory, PostSearchFilters } from '@/lib/types/community'
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+import { SkeletonCard } from '@/components/ui/SkeletonCard'
+import { EmptyState, EmptyPostsIllustration } from '@/components/ui/EmptyState'
 
 interface PostListProps {
   initialPosts: Post[]
@@ -163,9 +166,16 @@ export function PostList({ initialPosts, currentUserId, showActions = false }: P
 
       {/* 로딩 상태 */}
       {loading && (
-        <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-2" />
-          <p className="text-gray-500">게시글을 불러오는 중...</p>
+        <div className="space-y-4">
+          <div className="flex items-center justify-center py-6">
+            <LoadingSpinner size="lg" />
+            <p className="text-[#6A7685] ml-3">게시글을 불러오는 중...</p>
+          </div>
+
+          {/* 스켈레톤 카드들 */}
+          {Array.from({ length: 4 }, (_, i) => (
+            <SkeletonCard key={i} type="post" />
+          ))}
         </div>
       )}
 
@@ -203,18 +213,18 @@ export function PostList({ initialPosts, currentUserId, showActions = false }: P
             ))
           ) : (
             !loading && (
-              <div className="text-center py-12 bg-gray-50 rounded-lg">
-                <p className="text-gray-500 mb-4">
-                  {searchQuery || filters.category
-                    ? '검색 결과가 없습니다.'
-                    : '아직 게시글이 없습니다.'}
-                </p>
-                {(!searchQuery && !filters.category) && (
-                  <Button onClick={() => window.location.href = '/community/write'}>
-                    첫 번째 게시글 작성하기
-                  </Button>
-                )}
-              </div>
+              <EmptyState
+                icon={<EmptyPostsIllustration />}
+                title={searchQuery || filters.category ? '검색 결과가 없습니다' : '아직 게시글이 없습니다'}
+                description={
+                  searchQuery || filters.category
+                    ? '다른 검색어나 카테고리를 시도해보세요.'
+                    : '첫 번째 게시글을 작성해서 커뮤니티를 시작해보세요.'
+                }
+                actionLabel={(!searchQuery && !filters.category) ? '첫 번째 게시글 작성하기' : undefined}
+                onAction={(!searchQuery && !filters.category) ? () => window.location.href = '/community/write' : undefined}
+                className="bg-[#F6F7F9] rounded-xl"
+              />
             )
           )}
         </div>
