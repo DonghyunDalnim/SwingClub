@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { Button } from '@/components/core/Button'
 import { Card, CardContent } from '@/components/core/Card'
 import { Send, X } from 'lucide-react'
+import { Avatar } from '@/components/ui/Avatar'
 import { createCommentAction } from '@/lib/actions/comments'
 import type { CreateCommentData } from '@/lib/types/community'
 
@@ -88,19 +89,12 @@ export function CommentForm({
         <form onSubmit={handleSubmit} className="space-y-3">
           {/* 작성자 정보 */}
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
-              {authorProfileUrl ? (
-                <img
-                  src={authorProfileUrl}
-                  alt={authorName}
-                  className="w-8 h-8 rounded-full object-cover"
-                />
-              ) : (
-                <span className="text-purple-600 text-sm font-medium">
-                  {authorName.charAt(0)}
-                </span>
-              )}
-            </div>
+            <Avatar
+              src={authorProfileUrl}
+              alt={authorName}
+              size="sm"
+              fallback={authorName.charAt(0).toUpperCase()}
+            />
             <div>
               <p className="text-sm font-medium text-gray-900">{authorName}</p>
               {isReply && (

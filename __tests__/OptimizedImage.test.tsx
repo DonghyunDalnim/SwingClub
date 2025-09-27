@@ -6,7 +6,7 @@ import { OptimizedImage } from '@/components/ui/OptimizedImage'
 // Mock Next.js Image component
 jest.mock('next/image', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return ({ src, alt, onLoad, onError, width, height, fill, className, ...props }: any) => {
+  return ({ src, alt, onLoad, onError, width, height, fill, className, priority, ...props }: any) => {
     const handleLoad = () => {
       if (onLoad) onLoad()
     }
@@ -26,6 +26,7 @@ jest.mock('next/image', () => {
         onError={handleError}
         data-testid="next-image"
         data-fill={fill}
+        data-priority={priority}
         {...props}
       />
     )
@@ -179,7 +180,7 @@ describe('OptimizedImage', () => {
     render(<OptimizedImage {...defaultProps} priority />)
 
     const image = screen.getByTestId('next-image')
-    expect(image).toHaveAttribute('priority')
+    expect(image).toHaveAttribute('data-priority', 'true')
   })
 
   it('uses Soomgo placeholder colors', () => {

@@ -6,7 +6,7 @@ import { Avatar } from '@/components/ui/Avatar'
 // Mock Next.js Image component
 jest.mock('next/image', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return ({ src, alt, onLoad, onError, width, height, className, ...props }: any) => {
+  return ({ src, alt, onLoad, onError, width, height, className, priority, ...props }: any) => {
     const handleLoad = () => {
       if (onLoad) onLoad()
     }
@@ -25,6 +25,7 @@ jest.mock('next/image', () => {
         onLoad={handleLoad}
         onError={handleError}
         data-testid="next-image"
+        data-priority={priority}
         {...props}
       />
     )
@@ -90,10 +91,11 @@ describe('Avatar', () => {
     const expectedSizes = [24, 32, 48, 64, 96]
 
     sizes.forEach((size, index) => {
-      render(<Avatar {...defaultProps} size={size} />)
+      const { unmount } = render(<Avatar {...defaultProps} size={size} />)
       const image = screen.getByTestId('next-image')
       expect(image).toHaveAttribute('width', expectedSizes[index].toString())
       expect(image).toHaveAttribute('height', expectedSizes[index].toString())
+      unmount()
     })
   })
 
@@ -160,7 +162,7 @@ describe('Avatar', () => {
     render(<Avatar {...defaultProps} priority />)
 
     const image = screen.getByTestId('next-image')
-    expect(image).toHaveAttribute('priority')
+    expect(image).toHaveAttribute('data-priority', 'true')
   })
 
   it('uses Soomgo placeholder colors', () => {
@@ -183,9 +185,10 @@ describe('Avatar', () => {
     ]
 
     testCases.forEach(({ size, expectedClass }) => {
-      render(<Avatar alt="John Doe" size={size} />)
+      const { unmount } = render(<Avatar alt="John Doe" size={size} />)
       const placeholderDiv = screen.getByText('J')
       expect(placeholderDiv).toHaveClass(expectedClass)
+      unmount()
     })
   })
 

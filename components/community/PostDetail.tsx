@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader } from '@/components/core/Card'
 import { Badge } from '@/components/core/Badge'
 import { Button } from '@/components/core/Button'
+import { OptimizedImage } from '@/components/ui/OptimizedImage'
 import { CommentSection } from './CommentSection'
 import { ArrowLeft, Heart, MessageCircle, Eye, Edit, Trash2, Share2 } from 'lucide-react'
 import { deletePostAction } from '@/lib/actions/posts'
@@ -181,10 +182,11 @@ export function PostDetail({ post, currentUserId, currentUserName, currentUserPr
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {post.attachments.map((attachment, index) => (
                   <div key={attachment.id} className="relative">
-                    <img
+                    <OptimizedImage
                       src={attachment.fileUrl}
-                      alt={`첨부 이미지 ${index + 1}`}
-                      className="w-full h-auto rounded-lg shadow-sm"
+                      alt={attachment.fileName || `첨부 이미지 ${index + 1}`}
+                      ratio="card"
+                      className="w-full shadow-sm"
                     />
                   </div>
                 ))}
