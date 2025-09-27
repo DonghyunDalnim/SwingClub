@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { Timestamp } from 'firebase/firestore'
 import { Button } from '@/components/core/Button'
+import { Avatar } from '@/components/ui/Avatar'
 import { CommentForm, InlineCommentForm } from './CommentForm'
 import { Heart, MessageCircle, MoreHorizontal, Edit, Trash2, Flag } from 'lucide-react'
 import {
@@ -151,19 +152,12 @@ export function CommentItem({
         <div className="flex items-start justify-between mb-2">
           <div className="flex items-center gap-2">
             {/* 프로필 이미지 */}
-            <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-              {comment.authorProfileUrl ? (
-                <img
-                  src={comment.authorProfileUrl}
-                  alt={comment.authorName}
-                  className="w-8 h-8 rounded-full object-cover"
-                />
-              ) : (
-                <span className="text-purple-600 text-sm font-medium">
-                  {comment.authorName.charAt(0)}
-                </span>
-              )}
-            </div>
+            <Avatar
+              src={comment.authorProfileUrl}
+              alt={comment.authorName}
+              size="sm"
+              fallback={comment.authorName.charAt(0).toUpperCase()}
+            />
 
             {/* 작성자 정보 */}
             <div>

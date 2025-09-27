@@ -47,7 +47,7 @@ export default function MarketplacePage() {
                     <Badge variant="outline" className="text-xs">강남구</Badge>
                   </div>
                   <p className="text-sm text-gray-600 mb-2">
-                    "한 번만 신고 보관만 했어요. 정가 15만원 → 8만원"
+                    &ldquo;한 번만 신고 보관만 했어요. 정가 15만원 → 8만원&rdquo;
                   </p>
                   <div className="flex items-center justify-between">
                     <span className="text-lg font-bold text-blue-600">80,000원</span>
@@ -81,7 +81,7 @@ export default function MarketplacePage() {
                     <Badge variant="outline" className="text-xs">홍대</Badge>
                   </div>
                   <p className="text-sm text-gray-600 mb-2">
-                    "공연용으로 한번 착용. 사이즈 55"
+                    &ldquo;공연용으로 한번 착용. 사이즈 55&rdquo;
                   </p>
                   <div className="flex items-center justify-between">
                     <span className="text-lg font-bold text-blue-600">45,000원</span>
@@ -115,7 +115,7 @@ export default function MarketplacePage() {
                     <Badge variant="outline" className="text-xs">신촌</Badge>
                   </div>
                   <p className="text-sm text-gray-600 mb-2">
-                    "모자, 넷타이, 헤어핀 세트로 판매"
+                    &ldquo;모자, 넷타이, 헤어핀 세트로 판매&rdquo;
                   </p>
                   <div className="flex items-center justify-between">
                     <span className="text-lg font-bold text-blue-600">25,000원</span>
