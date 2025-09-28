@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { Timestamp } from 'firebase/firestore'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useFocusTrap } from '@/lib/hooks/useFocusTrap'
 import { Card, CardContent, CardHeader } from '@/components/core/Card'
 import { Badge } from '@/components/core/Badge'
 import { Button } from '@/components/core/Button'
@@ -26,6 +27,14 @@ export function PostDetail({ post, currentUserId, currentUserName, currentUserPr
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [liked, setLiked] = useState(false) // TODO: 실제 좋아요 상태 연동
   const [likeCount, setLikeCount] = useState(post.stats.likes)
+
+  // 삭제 확인 모달을 위한 포커스 트랩
+  const { containerRef: modalRef } = useFocusTrap({
+    enabled: showDeleteConfirm,
+    autoFocus: true,
+    onEscape: () => setShowDeleteConfirm(false),
+    restoreFocusOnCleanup: true
+  })
 
   // 작성자인지 확인
   const isAuthor = currentUserId === post.metadata.authorId
@@ -253,13 +262,24 @@ export function PostDetail({ post, currentUserId, currentUserName, currentUserPr
 
       {/* 삭제 확인 모달 */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-md mx-4">
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          aria-labelledby="delete-modal-title"
+          aria-describedby="delete-modal-description"
+        >
+          <Card
+            ref={modalRef as any}
+            role="dialog"
+            aria-modal="true"
+            className="w-full max-w-md mx-4"
+          >
             <CardHeader>
-              <h3 className="text-lg font-semibold">게시글 삭제</h3>
+              <h3 id="delete-modal-title" className="text-lg font-semibold">
+                게시글 삭제
+              </h3>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600 mb-4">
+              <p id="delete-modal-description" className="text-gray-600 mb-4">
                 정말로 이 게시글을 삭제하시겠습니까?<br />
                 삭제된 게시글은 복구할 수 없습니다.
               </p>
@@ -268,13 +288,15 @@ export function PostDetail({ post, currentUserId, currentUserName, currentUserPr
                   variant="secondary"
                   onClick={() => setShowDeleteConfirm(false)}
                   disabled={isPending}
+                  aria-label="삭제 취소"
                 >
                   취소
                 </Button>
                 <Button
                   onClick={handleDelete}
                   disabled={isPending}
-                  className="bg-red-600 hover:bg-red-700 text-white"
+                  className="bg-red-600 hover:bg-red-700 text-white focus:outline-none focus:outline-2 focus:outline-red-600 focus:outline-offset-2"
+                  aria-label={isPending ? '게시글 삭제 중' : '게시글 삭제 확인'}
                 >
                   {isPending ? '삭제 중...' : '삭제'}
                 </Button>
