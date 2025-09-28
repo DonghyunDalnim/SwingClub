@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/core'
+import { SkipLink } from '@/components/core/SkipLink'
 import { PostList } from '@/components/community/PostList'
 import { ArrowLeft, Search, Edit } from 'lucide-react'
 import { getPostsAction } from '@/lib/actions/posts'
@@ -16,45 +17,74 @@ export default async function CommunityPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* 스킵 링크 */}
+      <SkipLink targetId="community-content">게시글 목록으로 바로가기</SkipLink>
+
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
+      <header
+        className="bg-white border-b border-gray-200 sticky top-0 z-40"
+        role="banner"
+      >
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center space-x-3">
-            <Link href="/">
-              <ArrowLeft className="h-6 w-6" />
+            <Link
+              href="/"
+              aria-label="홈페이지로 돌아가기"
+              className="focus:outline-none focus:outline-2 focus:outline-[#693BF2] focus:outline-offset-2 rounded"
+            >
+              <ArrowLeft className="h-6 w-6" aria-hidden="true" />
             </Link>
-            <span className="font-semibold text-lg">커뮤니티</span>
+            <h1 className="font-semibold text-lg">커뮤니티</h1>
           </div>
-          <div className="flex items-center space-x-3">
-            <Search className="h-6 w-6" />
-            <Link href="/community/write">
-              <Edit className="h-6 w-6" />
+          <nav
+            className="flex items-center space-x-3"
+            role="navigation"
+            aria-label="커뮤니티 액션"
+          >
+            <button
+              aria-label="게시글 검색"
+              className="focus:outline-none focus:outline-2 focus:outline-[#693BF2] focus:outline-offset-2 rounded p-1"
+            >
+              <Search className="h-6 w-6" aria-hidden="true" />
+            </button>
+            <Link
+              href="/community/write"
+              aria-label="새 게시글 작성"
+              className="focus:outline-none focus:outline-2 focus:outline-[#693BF2] focus:outline-offset-2 rounded p-1"
+            >
+              <Edit className="h-6 w-6" aria-hidden="true" />
             </Link>
-          </div>
+          </nav>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-6 max-w-4xl">
+      <main
+        id="community-content"
+        className="container mx-auto px-4 py-6 max-w-4xl"
+        role="main"
+      >
         {/* 작성 버튼 (모바일용) */}
         <div className="mb-6 flex justify-between items-center">
-          <h1 className="text-xl font-bold">스윙댄스 커뮤니티</h1>
+          <h2 className="text-xl font-bold">스윙댄스 커뮤니티</h2>
           <Link href="/community/write">
-            <Button>
-              <Edit className="h-4 w-4 mr-2" />
+            <Button aria-label="새 게시글 작성하기">
+              <Edit className="h-4 w-4 mr-2" aria-hidden="true" />
               글쓰기
             </Button>
           </Link>
         </div>
 
         {/* 게시글 목록 */}
-        <Suspense fallback={<PostListSkeleton />}>
-          <PostList
-            initialPosts={initialPosts}
-            currentUserId={currentUser?.uid}
-            showActions={!!currentUser}
-          />
-        </Suspense>
-      </div>
+        <section aria-label="게시글 목록">
+          <Suspense fallback={<PostListSkeleton />}>
+            <PostList
+              initialPosts={initialPosts}
+              currentUserId={currentUser?.uid}
+              showActions={!!currentUser}
+            />
+          </Suspense>
+        </section>
+      </main>
     </div>
   )
 }

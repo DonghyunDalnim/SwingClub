@@ -90,14 +90,15 @@ export const tokens = {
 
 // 공통 스타일 조합 함수들
 export const createButtonStyle = (variant: 'primary' | 'secondary' | 'ghost' | 'outline' | 'default' = 'primary') => {
-  const base = 'inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none';
+  // 강화된 포커스 스타일: #693BF2 색상 2px 아웃라인 보장
+  const base = 'inline-flex items-center justify-center rounded-md font-medium transition-all duration-200 focus:outline-none focus:outline-2 focus:outline-[#693BF2] focus:outline-offset-2 disabled:opacity-50 disabled:pointer-events-none';
 
   const variants = {
-    primary: 'bg-[#693BF2] text-white hover:bg-[#5A2FD9] focus:ring-[#693BF2]',
-    secondary: 'bg-transparent text-[#293341] border border-[#E0E5EB] hover:bg-[#F6F7F9] focus:ring-[#693BF2]',
-    ghost: 'bg-transparent text-[#693BF2] hover:bg-[#F1EEFF] focus:ring-[#693BF2]',
-    outline: 'bg-transparent text-[#693BF2] border border-[#693BF2] hover:bg-[#F1EEFF] focus:ring-[#693BF2]',
-    default: 'bg-[#693BF2] text-white hover:bg-[#5A2FD9] focus:ring-[#693BF2]'
+    primary: 'bg-[#693BF2] text-white hover:bg-[#5A2FD9] active:bg-[#4A1FCC]',
+    secondary: 'bg-transparent text-[#293341] border border-[#E0E5EB] hover:bg-[#F6F7F9] active:bg-[#EFF1F5]',
+    ghost: 'bg-transparent text-[#693BF2] hover:bg-[#F1EEFF] active:bg-[#E3DEFF]',
+    outline: 'bg-transparent text-[#693BF2] border border-[#693BF2] hover:bg-[#F1EEFF] active:bg-[#E3DEFF]',
+    default: 'bg-[#693BF2] text-white hover:bg-[#5A2FD9] active:bg-[#4A1FCC]'
   };
 
   return `${base} ${variants[variant]}`;
