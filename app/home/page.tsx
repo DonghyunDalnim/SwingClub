@@ -6,7 +6,11 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50/30">
       {/* Header - Enhanced with shadow and gradient */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-lg shadow-gray-900/5">
+      <header
+        className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-lg shadow-gray-900/5"
+        role="banner"
+        aria-label="사이트 헤더"
+      >
         <Container>
           <div className="flex items-center justify-between h-16">
             {/* Left Navigation */}
@@ -16,28 +20,32 @@ export default function HomePage() {
                   Swing Connect
                 </Typography>
               </div>
-              <nav className="hidden md:flex items-center space-x-6">
-                <Button variant="ghost" className="text-gray-700 hover:text-gray-900">
+              <nav
+                className="hidden md:flex items-center space-x-6"
+                role="navigation"
+                aria-label="주요 네비게이션"
+              >
+                <Button variant="ghost" className="text-gray-700 hover:text-gray-900" aria-label="견적요청 페이지로 이동">
                   견적요청
                 </Button>
-                <Button variant="ghost" className="text-gray-700 hover:text-gray-900">
+                <Button variant="ghost" className="text-gray-700 hover:text-gray-900" aria-label="고수찾기 페이지로 이동">
                   고수찾기
                 </Button>
-                <Button variant="ghost" className="text-gray-700 hover:text-gray-900">
+                <Button variant="ghost" className="text-gray-700 hover:text-gray-900" aria-label="마켓 페이지로 이동">
                   마켓
                 </Button>
-                <Button variant="ghost" className="text-gray-700 hover:text-gray-900">
+                <Button variant="ghost" className="text-gray-700 hover:text-gray-900" aria-label="커뮤니티 페이지로 이동">
                   커뮤니티
                 </Button>
               </nav>
             </div>
 
             {/* Right Actions */}
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" className="text-gray-700">
+            <div className="flex items-center space-x-4" role="group" aria-label="사용자 계정 액션">
+              <Button variant="ghost" className="text-gray-700" aria-label="로그인 또는 회원가입">
                 로그인 / 회원가입
               </Button>
-              <Button variant="primary" size="sm">
+              <Button variant="primary" size="sm" aria-label="고수로 가입하기">
                 고수가입
               </Button>
             </div>
@@ -46,7 +54,12 @@ export default function HomePage() {
       </header>
 
       {/* Hero Section - Enhanced with multi-layer gradients and patterns */}
-      <section className="relative py-20 overflow-hidden">
+      <section
+        className="relative py-20 overflow-hidden"
+        role="banner"
+        aria-labelledby="hero-title"
+        aria-describedby="hero-subtitle"
+      >
         <div className="absolute inset-0 bg-gradient-to-br from-purple-50 via-indigo-50/50 to-white"></div>
         <div className="absolute inset-0 bg-gradient-to-t from-white/80 via-transparent to-transparent"></div>
         <div className="absolute inset-0 opacity-5" style={{
@@ -57,26 +70,36 @@ export default function HomePage() {
         <Container>
           <div className="max-w-4xl mx-auto text-center">
             <div className="mb-8">
-              <Typography variant="h1" className="text-5xl font-bold mb-4">
+              <h1 id="hero-title" className="text-5xl font-bold mb-4">
                 <span className="bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-600 bg-clip-text text-transparent">
                   숨은고수
                 </span>
-              </Typography>
-              <Typography variant="h2" className="text-2xl text-gray-600 mb-8 font-medium">
+              </h1>
+              <p id="hero-subtitle" className="text-2xl text-gray-600 mb-8 font-medium">
                 더 나은 스윙댄스를 위한 변화
-              </Typography>
+              </p>
             </div>
 
             {/* Search Bar - Soomgo Style */}
             <div className="relative mb-8 max-w-2xl mx-auto">
-              <div className="relative flex items-center">
-                <Search className="absolute left-4 h-5 w-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="어떤 스윙댄스 서비스가 필요하세요?"
-                  className="w-full pl-12 pr-4 py-4 text-lg border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none shadow-lg shadow-gray-200/50 hover:shadow-xl hover:shadow-gray-300/30 transition-all duration-300 focus:shadow-purple-200/50"
-                />
-              </div>
+              <form role="search" aria-label="서비스 검색">
+                <label htmlFor="service-search" className="sr-only">
+                  스윙댄스 서비스 검색
+                </label>
+                <div className="relative flex items-center">
+                  <Search className="absolute left-4 h-5 w-5 text-gray-400" aria-hidden="true" />
+                  <input
+                    id="service-search"
+                    type="text"
+                    placeholder="어떤 스윙댄스 서비스가 필요하세요?"
+                    className="w-full pl-12 pr-4 py-4 text-lg border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none shadow-lg shadow-gray-200/50 hover:shadow-xl hover:shadow-gray-300/30 transition-all duration-300 focus:shadow-purple-200/50"
+                    aria-describedby="search-help"
+                  />
+                </div>
+                <div id="search-help" className="sr-only">
+                  원하는 스윙댄스 서비스를 입력하세요. 예: 레슨, 파트너 매칭, 이벤트
+                </div>
+              </form>
             </div>
 
             {/* Category Icons - Soomgo Style */}

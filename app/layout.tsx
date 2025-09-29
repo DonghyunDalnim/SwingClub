@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import BottomNav from '../components/navigation/BottomNav'
 import { AuthProvider } from '../lib/auth/context'
+import { SkipLink } from '../components/core/SkipLink'
 
 export const metadata: Metadata = {
   title: 'Swing Connect - 스윙댄스 커뮤니티',
@@ -27,7 +28,18 @@ export default function RootLayout({
       </head>
       <body className="font-sans">
         <AuthProvider>
-          <main className="pb-16">
+          <SkipLink targetId="main-content">
+            메인 콘텐츠로 바로가기
+          </SkipLink>
+          <SkipLink targetId="main-navigation">
+            메인 네비게이션으로 바로가기
+          </SkipLink>
+          <main
+            id="main-content"
+            className="pb-16"
+            role="main"
+            aria-label="메인 콘텐츠"
+          >
             {children}
           </main>
           <BottomNav />
