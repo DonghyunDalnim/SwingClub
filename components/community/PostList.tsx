@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { PostCard } from './PostCard'
+import { CategoryTabs } from './CategoryTabs'
 import { Button, Badge } from '@/components/core'
 import { Search, Filter } from 'lucide-react'
 import { getPostsAction } from '@/lib/actions/posts'
@@ -103,33 +104,16 @@ export function PostList({ initialPosts, currentUserId, showActions = false }: P
           </Button>
         </div>
 
+        {/* 카테고리 탭 */}
+        <CategoryTabs
+          selectedCategory={Array.isArray(filters.category) ? filters.category[0] : filters.category}
+          onCategoryChange={handleCategoryFilter}
+          className="mb-4"
+        />
+
         {/* 필터 옵션 */}
         {showFilters && (
           <div className="bg-gray-50 p-4 rounded-lg space-y-4">
-            {/* 카테고리 필터 */}
-            <div>
-              <label className="block text-sm font-medium mb-2">카테고리</label>
-              <div className="flex flex-wrap gap-2">
-                <Badge
-                  variant={filters.category === undefined ? 'default' : 'outline'}
-                  className="cursor-pointer"
-                  onClick={() => handleCategoryFilter(undefined)}
-                >
-                  전체
-                </Badge>
-                {Object.entries(POST_CATEGORIES).map(([key, label]) => (
-                  <Badge
-                    key={key}
-                    variant={filters.category === key ? 'default' : 'outline'}
-                    className="cursor-pointer"
-                    onClick={() => handleCategoryFilter(key as PostCategory)}
-                  >
-                    {label}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-
             {/* 정렬 옵션 */}
             <div>
               <label className="block text-sm font-medium mb-2">정렬</label>
