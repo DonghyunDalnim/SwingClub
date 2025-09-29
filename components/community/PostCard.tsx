@@ -8,6 +8,7 @@ import { POST_CATEGORIES, POST_STATUS_LABELS } from '@/lib/types/community'
 import type { Post } from '@/lib/types/community'
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { theme } from '@/lib/theme'
 
 interface PostCardProps {
   post: Post
@@ -71,8 +72,11 @@ export function PostCard({ post, currentUserId, showActions = false, isPinned = 
   const isAuthor = currentUserId === post.metadata.authorId
 
   return (
-    <Card className={`hover:shadow-md transition-shadow ${isPinned ? 'border-blue-200 bg-blue-50' : ''}`}>
-      <CardContent className="p-4">
+    <Card
+      className={`transition-all duration-200 hover:shadow-lg hover:-translate-y-1 ${isPinned ? 'border-blue-200 bg-blue-50' : ''}`}
+      style={theme.components.cards.default}
+    >
+      <CardContent style={{ padding: theme.components.cards.default.padding }}>
         <div className="flex items-start space-x-3">
           {/* 카테고리 아이콘 */}
           <div className="text-2xl flex-shrink-0">
@@ -128,13 +132,15 @@ export function PostCard({ post, currentUserId, showActions = false, isPinned = 
             </div>
 
             {/* 작성자와 미리보기 */}
-            <p className="text-sm text-gray-600 mb-2">
-              <span className="font-medium">{post.metadata.authorName}</span>
+            <p className="mb-2" style={{ fontSize: '14px', color: theme.colors.neutral.medium }}>
+              <span className="font-medium" style={{ color: theme.colors.neutral.darkest }}>
+                {post.metadata.authorName}
+              </span>
               {post.content && (
                 <>
                   {' | '}
                   <span className="line-clamp-1">
-                    "{post.content.slice(0, 50)}{post.content.length > 50 ? '...' : ''}"
+                    &ldquo;{post.content.slice(0, 50)}{post.content.length > 50 ? '...' : ''}&rdquo;
                   </span>
                 </>
               )}
@@ -142,17 +148,26 @@ export function PostCard({ post, currentUserId, showActions = false, isPinned = 
 
             {/* 통계 및 첨부파일 */}
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4 text-xs text-gray-500">
+              <div className="flex items-center space-x-4 text-xs" style={{ color: theme.colors.neutral.medium }}>
                 <span className="flex items-center">
-                  <Heart className="h-3 w-3 mr-1" />
+                  <Heart
+                    className="h-3 w-3 mr-1"
+                    style={{ color: theme.colors.primary.main }}
+                  />
                   {post.stats.likes}
                 </span>
                 <span className="flex items-center">
-                  <MessageCircle className="h-3 w-3 mr-1" />
+                  <MessageCircle
+                    className="h-3 w-3 mr-1"
+                    style={{ color: theme.colors.primary.main }}
+                  />
                   {post.stats.comments}
                 </span>
                 <span className="flex items-center">
-                  <Eye className="h-3 w-3 mr-1" />
+                  <Eye
+                    className="h-3 w-3 mr-1"
+                    style={{ color: theme.colors.primary.main }}
+                  />
                   {post.stats.views}
                 </span>
               </div>
