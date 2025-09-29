@@ -37,3 +37,13 @@ export {
   CarouselItem
 } from './Carousel';
 export type { CarouselProps, CarouselItemProps } from './Carousel';
+
+// Accessibility Components
+export { SkipLink } from './SkipLink';
+export type { SkipLinkProps } from './SkipLink';
+
+export { OptimizedImage } from './OptimizedImage';
+export type { OptimizedImageProps } from './OptimizedImage';
+
+export { LiveRegion, useLiveRegion } from './LiveRegion';
+export type { LiveRegionProps } from './LiveRegion';

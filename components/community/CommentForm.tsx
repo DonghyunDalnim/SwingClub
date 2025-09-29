@@ -92,7 +92,7 @@ export function CommentForm({
               {authorProfileUrl ? (
                 <img
                   src={authorProfileUrl}
-                  alt={authorName}
+                  alt={`${authorName}의 프로필 사진`}
                   className="w-8 h-8 rounded-full object-cover"
                 />
               ) : (
@@ -111,7 +111,11 @@ export function CommentForm({
 
           {/* 텍스트 에리어 */}
           <div className="relative">
+            <label htmlFor={`comment-input-${postId}${isReply ? `-reply-${parentId}` : ''}`} className="sr-only">
+              {isReply ? '답글 내용' : '댓글 내용'}
+            </label>
             <textarea
+              id={`comment-input-${postId}${isReply ? `-reply-${parentId}` : ''}`}
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder={placeholder}
@@ -119,6 +123,9 @@ export function CommentForm({
               rows={isReply ? 3 : 4}
               maxLength={maxLength}
               disabled={isPending}
+              required
+              aria-describedby={`char-count-${postId}${isReply ? `-reply-${parentId}` : ''} ${error ? `error-${postId}${isReply ? `-reply-${parentId}` : ''}` : ''}`}
+              aria-invalid={error ? 'true' : 'false'}
               className={`
                 w-full px-3 py-3 border rounded-lg resize-none
                 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
@@ -128,7 +135,11 @@ export function CommentForm({
             />
 
             {/* 글자 수 표시 */}
-            <div className="absolute bottom-2 right-2 text-xs text-gray-400">
+            <div
+              id={`char-count-${postId}${isReply ? `-reply-${parentId}` : ''}`}
+              className="absolute bottom-2 right-2 text-xs text-gray-400"
+              aria-live="polite"
+            >
               <span className={remainingChars < 50 ? 'text-orange-500' : ''}>
                 {content.length}
               </span>
@@ -138,7 +149,12 @@ export function CommentForm({
 
           {/* 에러 메시지 */}
           {error && (
-            <p className="text-sm text-red-600 bg-red-50 p-2 rounded">
+            <p
+              id={`error-${postId}${isReply ? `-reply-${parentId}` : ''}`}
+              className="text-sm text-red-600 bg-red-50 p-2 rounded"
+              role="alert"
+              aria-live="assertive"
+            >
               {error}
             </p>
           )}

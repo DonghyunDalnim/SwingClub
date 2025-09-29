@@ -135,13 +135,15 @@ export function ImageUpload({ onUpload, maxImages = 5, userId, existingImages = 
               <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
                 <img
                   src={url}
-                  alt={`업로드된 이미지 ${index + 1}`}
+                  alt={`업로드된 이미지 ${index + 1}번째`}
                   className="w-full h-full object-cover"
+                  loading="lazy"
                 />
                 <button
                   type="button"
                   onClick={() => removeImage(index)}
                   className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  aria-label={`${index + 1}번째 이미지 삭제`}
                 >
                   <X className="h-3 w-3" />
                 </button>

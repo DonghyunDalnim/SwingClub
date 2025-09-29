@@ -155,7 +155,7 @@ export function CommentItem({
               {comment.authorProfileUrl ? (
                 <img
                   src={comment.authorProfileUrl}
-                  alt={comment.authorName}
+                  alt={`${comment.authorName}의 프로필 사진`}
                   className="w-8 h-8 rounded-full object-cover"
                 />
               ) : (

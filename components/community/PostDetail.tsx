@@ -183,8 +183,9 @@ export function PostDetail({ post, currentUserId, currentUserName, currentUserPr
                   <div key={attachment.id} className="relative">
                     <img
                       src={attachment.fileUrl}
-                      alt={`첨부 이미지 ${index + 1}`}
+                      alt={`게시글 첨부 이미지 ${index + 1}번째: ${attachment.fileName || '이미지'}`}
                       className="w-full h-auto rounded-lg shadow-sm"
+                      loading="lazy"
                     />
                   </div>
                 ))}
