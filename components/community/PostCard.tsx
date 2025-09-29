@@ -134,7 +134,7 @@ export function PostCard({ post, currentUserId, showActions = false, isPinned = 
                 <>
                   {' | '}
                   <span className="line-clamp-1">
-                    "{post.content.slice(0, 50)}{post.content.length > 50 ? '...' : ''}"
+                    &quot;{post.content.slice(0, 50)}{post.content.length > 50 ? '...' : ''}&quot;
                   </span>
                 </>
               )}
