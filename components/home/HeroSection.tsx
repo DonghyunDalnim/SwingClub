@@ -4,7 +4,7 @@ import { Search } from 'lucide-react'
 
 export function HeroSection() {
   return (
-    <section className="relative py-20 overflow-hidden">
+    <section className="relative py-24 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-purple-50 via-indigo-50/50 to-white"></div>
       <div className="absolute inset-0 bg-gradient-to-t from-white/80 via-transparent to-transparent"></div>
       <div className="absolute inset-0 opacity-5" style={{
@@ -14,13 +14,13 @@ export function HeroSection() {
       <div className="relative">
         <Container>
           <div className="max-w-4xl mx-auto text-center">
-            <div className="mb-8">
-              <Typography variant="h1" className="text-5xl font-bold mb-4">
-                <span className="bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-600 bg-clip-text text-transparent">
+            <div className="mb-8 animate-fadeIn">
+              <Typography variant="h1" className="text-6xl md:text-7xl font-extrabold mb-6 leading-tight">
+                <span className="bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-600 bg-clip-text text-transparent drop-shadow-2xl">
                   숨은고수
                 </span>
               </Typography>
-              <Typography variant="h2" className="text-2xl text-gray-600 mb-8 font-medium">
+              <Typography variant="h2" className="text-3xl md:text-4xl text-gray-700 mb-8 font-bold animate-fadeIn animation-delay-200">
                 더 나은 스윙댄스를 위한 변화
               </Typography>
             </div>
@@ -37,23 +37,26 @@ export function HeroSection() {
               </div>
             </div>
 
-            {/* Category Icons - Soomgo Style */}
-            <div className="grid grid-cols-4 md:grid-cols-8 gap-4 max-w-4xl mx-auto">
+            {/* Category Icons - Enhanced Design */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-6 max-w-5xl mx-auto">
               {[
-                { icon: '🏠', label: '전체보기' },
-                { icon: '💃', label: '레슨/클래스' },
-                { icon: '🎵', label: '이벤트/파티' },
-                { icon: '👥', label: '파트너매칭' },
-                { icon: '🛍️', label: '중고거래' },
-                { icon: '📍', label: '스튜디오/홀' },
-                { icon: '🎯', label: '대회준비' },
-                { icon: '❓', label: '기타' },
+                { icon: '🏠', label: '전체보기', color: 'from-purple-500 to-indigo-500' },
+                { icon: '💃', label: '레슨/클래스', color: 'from-pink-500 to-rose-500' },
+                { icon: '🎵', label: '이벤트/파티', color: 'from-orange-500 to-amber-500' },
+                { icon: '👥', label: '파트너매칭', color: 'from-cyan-500 to-blue-500' },
+                { icon: '🛍️', label: '중고거래', color: 'from-green-500 to-emerald-500' },
+                { icon: '📍', label: '스튜디오/홀', color: 'from-violet-500 to-purple-500' },
+                { icon: '🎯', label: '대회준비', color: 'from-red-500 to-pink-500' },
+                { icon: '❓', label: '기타', color: 'from-gray-500 to-slate-500' },
               ].map((category, index) => (
-                <div key={index} className="flex flex-col items-center p-3 hover:bg-white/80 rounded-lg cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-purple-100/50 hover:-translate-y-1">
-                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-md shadow-gray-200/60 mb-2 text-xl hover:shadow-lg hover:shadow-purple-200/50 transition-all duration-300">
+                <div
+                  key={index}
+                  className="group flex flex-col items-center p-5 bg-white rounded-2xl cursor-pointer transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 shadow-lg shadow-gray-200/50 hover:shadow-purple-300/30"
+                >
+                  <div className={`w-16 h-16 bg-gradient-to-br ${category.color} rounded-2xl flex items-center justify-center shadow-lg mb-3 text-2xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}>
                     {category.icon}
                   </div>
-                  <Typography variant="small" className="text-gray-600 text-center">
+                  <Typography variant="small" className="text-gray-700 text-center font-medium group-hover:text-gray-900">
                     {category.label}
                   </Typography>
                 </div>
