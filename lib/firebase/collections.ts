@@ -374,6 +374,31 @@ export async function createComment(
     'stats.lastActivity': serverTimestamp()
   })
 
+  // 알림 생성 (게시글 작성자에게)
+  try {
+    const postSnap = await getDoc(postRef)
+    if (postSnap.exists()) {
+      const postData = postSnap.data() as PostDocument
+      // 자기 자신의 게시글에 댓글을 단 경우가 아니라면 알림 생성
+      if (postData.metadata.authorId !== authorId) {
+        const { createNotificationForComment } = await import('@/lib/actions/notifications')
+        await createNotificationForComment({
+          postId: data.postId,
+          postTitle: postData.title,
+          postAuthorId: postData.metadata.authorId,
+          commentId: docRef.id,
+          commentAuthorId: authorId,
+          commentAuthorName: authorName,
+          commentContent: data.content,
+          isReply: !!data.parentId
+        })
+      }
+    }
+  } catch (error) {
+    console.error('Failed to create comment notification:', error)
+    // 알림 생성 실패는 댓글 생성에 영향을 주지 않음
+  }
+
   return docRef.id
 }
 
@@ -534,11 +559,64 @@ export async function toggleLike(
         'stats.likes': increment(1),
         'stats.lastActivity': serverTimestamp()
       })
+
+      // 알림 생성 (게시글 작성자에게)
+      try {
+        const postSnap = await getDoc(postRef)
+        if (postSnap.exists()) {
+          const postData = postSnap.data() as PostDocument
+          // 자기 자신의 게시글에 좋아요를 누른 경우가 아니라면 알림 생성
+          if (postData.metadata.authorId !== userId) {
+            const { createNotificationForLike } = await import('@/lib/actions/notifications')
+            const userSnap = await getDoc(doc(collections.users, userId))
+            const userName = userSnap.exists() ? userSnap.data().displayName || '익명' : '익명'
+
+            await createNotificationForLike({
+              targetType: 'post',
+              targetId,
+              targetTitle: postData.title,
+              targetAuthorId: postData.metadata.authorId,
+              likeUserId: userId,
+              likeUserName: userName
+            })
+          }
+        }
+      } catch (error) {
+        console.error('Failed to create like notification:', error)
+        // 알림 생성 실패는 좋아요에 영향을 주지 않음
+      }
     } else {
       const commentRef = doc(collections.comments, targetId)
       await updateDoc(commentRef, {
         likes: increment(1)
       })
+
+      // 알림 생성 (댓글 작성자에게)
+      try {
+        const commentSnap = await getDoc(commentRef)
+        if (commentSnap.exists()) {
+          const commentData = commentSnap.data() as CommentDocument
+          // 자기 자신의 댓글에 좋아요를 누른 경우가 아니라면 알림 생성
+          if (commentData.authorId !== userId) {
+            const { createNotificationForLike } = await import('@/lib/actions/notifications')
+            const userSnap = await getDoc(doc(collections.users, userId))
+            const userName = userSnap.exists() ? userSnap.data().displayName || '익명' : '익명'
+
+            await createNotificationForLike({
+              targetType: 'comment',
+              targetId,
+              targetTitle: commentData.content.substring(0, 30) + '...',
+              targetAuthorId: commentData.authorId,
+              likeUserId: userId,
+              likeUserName: userName,
+              relatedPostId: commentData.postId
+            })
+          }
+        }
+      } catch (error) {
+        console.error('Failed to create like notification:', error)
+        // 알림 생성 실패는 좋아요에 영향을 주지 않음
+      }
     }
 
     return true

@@ -200,8 +200,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     try {
       unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
-        if (firebaseUser) {
-          try {
+        try {
+          if (firebaseUser) {
             // Convert Firebase user and fetch profile
             const user: User = {
               id: firebaseUser.uid,
@@ -213,23 +213,70 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               lastLoginAt: new Date(firebaseUser.metadata.lastSignInTime || Date.now())
             }
 
-            const profile = await getUserProfile(user.id)
+            // Safely fetch user profile with error handling
+            let profile: UserProfile | null = null
+            try {
+              profile = await getUserProfile(user.id)
+            } catch (profileError) {
+              console.warn('Failed to fetch user profile:', profileError)
+              // Continue with null profile - user can update later
+            }
+
             const userWithProfile = { ...user, profile: profile || undefined }
 
-            // Store authentication state in cookies for server-side access
-            document.cookie = `auth-token=${firebaseUser.uid}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
-            document.cookie = `user-data=${encodeURIComponent(JSON.stringify(userWithProfile))}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
+            // Store authentication state in cookies for server-side access (client-side only)
+            if (typeof window !== 'undefined') {
+              try {
+                // Get Firebase ID token for middleware validation with retry
+                let idToken: string | null = null
+                let retries = 3
+
+                while (retries > 0 && !idToken) {
+                  try {
+                    idToken = await firebaseUser.getIdToken(true) // Force refresh
+                    break
+                  } catch (tokenError: any) {
+                    retries--
+                    if (retries > 0) {
+                      console.warn(`Token fetch failed, retrying... (${retries} left)`)
+                      await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 second
+                    } else {
+                      throw tokenError
+                    }
+                  }
+                }
+
+                if (idToken) {
+                  const isSecure = location.protocol === 'https:'
+                  document.cookie = `firebase-token=${idToken}; path=/; max-age=${60 * 60}; SameSite=Lax${isSecure ? '; Secure' : ''}`
+                  document.cookie = `user-data=${encodeURIComponent(JSON.stringify(userWithProfile))}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax${isSecure ? '; Secure' : ''}`
+                }
+              } catch (tokenError: any) {
+                console.warn('Failed to get Firebase ID token after retries:', tokenError)
+                // Continue without token - user might need to re-authenticate
+                // Still set basic auth state
+                if (typeof window !== 'undefined') {
+                  document.cookie = `firebase-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC`
+                }
+              }
+            }
 
             dispatch({ type: 'AUTH_SUCCESS', payload: userWithProfile })
-          } catch (error) {
-            dispatch({ type: 'AUTH_ERROR', payload: '사용자 정보를 불러오는데 실패했습니다' })
-          }
-        } else {
-          // Clear cookies on logout
-          document.cookie = 'auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC'
-          document.cookie = 'user-data=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC'
+          } else {
+            // Clear cookies on logout (client-side only)
+            if (typeof window !== 'undefined') {
+              document.cookie = 'firebase-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC'
+              document.cookie = 'user-data=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC'
+            }
 
-          dispatch({ type: 'AUTH_SIGNOUT' })
+            dispatch({ type: 'AUTH_SIGNOUT' })
+          }
+        } catch (authError: any) {
+          console.error('Auth state change error:', authError)
+          dispatch({
+            type: 'AUTH_ERROR',
+            payload: `인증 상태 처리 중 오류가 발생했습니다: ${authError.message || '알 수 없는 오류'}`
+          })
         }
       })
     } catch (error: any) {

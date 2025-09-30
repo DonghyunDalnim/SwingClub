@@ -1,8 +1,5 @@
 import { Suspense } from 'react'
-import Link from 'next/link'
-import { Button } from '@/components/core'
-import { PostList } from '@/components/community/PostList'
-import { ArrowLeft, Search, Edit } from 'lucide-react'
+import { CommunityContainer } from '@/components/community/CommunityContainer'
 import { getPostsAction } from '@/lib/actions/posts'
 import { getCurrentUser } from '@/lib/auth/server'
 
@@ -15,66 +12,63 @@ export default async function CommunityPage() {
   const currentUser = await getCurrentUser()
 
   return (
+    <Suspense fallback={<CommunityPageSkeleton />}>
+      <CommunityContainer
+        initialPosts={initialPosts}
+        currentUserId={currentUser?.uid}
+      />
+    </Suspense>
+  )
+}
+
+// 전체 페이지 스켈레톤 컴포넌트
+function CommunityPageSkeleton() {
+  return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+      {/* Header skeleton */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center space-x-3">
-            <Link href="/">
-              <ArrowLeft className="h-6 w-6" />
-            </Link>
-            <span className="font-semibold text-lg">커뮤니티</span>
+            <div className="w-6 h-6 bg-gray-200 rounded animate-pulse" />
+            <div className="w-20 h-5 bg-gray-200 rounded animate-pulse" />
           </div>
           <div className="flex items-center space-x-3">
-            <Search className="h-6 w-6" />
-            <Link href="/community/write">
-              <Edit className="h-6 w-6" />
-            </Link>
+            <div className="w-6 h-6 bg-gray-200 rounded animate-pulse" />
+            <div className="w-6 h-6 bg-gray-200 rounded animate-pulse" />
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-6 max-w-4xl">
-        {/* 작성 버튼 (모바일용) */}
+      {/* Content skeleton */}
+      <main className="container mx-auto px-4 py-6 max-w-4xl">
         <div className="mb-6 flex justify-between items-center">
-          <h1 className="text-xl font-bold">스윙댄스 커뮤니티</h1>
-          <Link href="/community/write">
-            <Button>
-              <Edit className="h-4 w-4 mr-2" />
-              글쓰기
-            </Button>
-          </Link>
+          <div className="w-32 h-6 bg-gray-200 rounded animate-pulse" />
+          <div className="w-20 h-10 bg-gray-200 rounded animate-pulse" />
         </div>
 
-        {/* 게시글 목록 */}
-        <Suspense fallback={<PostListSkeleton />}>
-          <PostList
-            initialPosts={initialPosts}
-            currentUserId={currentUser?.uid}
-            showActions={!!currentUser}
-          />
-        </Suspense>
-      </div>
-    </div>
-  )
-}
+        {/* Category tabs skeleton */}
+        <div className="mb-6 flex space-x-2">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="w-20 h-10 bg-gray-200 rounded-lg animate-pulse" />
+          ))}
+        </div>
 
-// 스켈레톤 컴포넌트
-function PostListSkeleton() {
-  return (
-    <div className="space-y-4">
-      {[...Array(5)].map((_, i) => (
-        <div key={i} className="bg-white p-4 rounded-lg shadow-sm animate-pulse">
-          <div className="flex items-start space-x-3">
-            <div className="w-8 h-8 bg-gray-200 rounded-full" />
-            <div className="flex-1 space-y-2">
-              <div className="h-4 bg-gray-200 rounded w-3/4" />
-              <div className="h-3 bg-gray-200 rounded w-1/2" />
-              <div className="h-3 bg-gray-200 rounded w-2/3" />
+        {/* Posts skeleton */}
+        <div className="space-y-4">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="bg-white p-4 rounded-lg shadow-sm animate-pulse">
+              <div className="flex items-start space-x-3">
+                <div className="w-8 h-8 bg-gray-200 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-gray-200 rounded w-3/4" />
+                  <div className="h-3 bg-gray-200 rounded w-1/2" />
+                  <div className="h-3 bg-gray-200 rounded w-2/3" />
+                </div>
+              </div>
             </div>
-          </div>
+          ))}
         </div>
-      ))}
+      </main>
     </div>
   )
 }

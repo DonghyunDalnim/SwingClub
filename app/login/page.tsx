@@ -18,7 +18,7 @@ function LoginContent() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      const redirectTo = searchParams.get('redirectTo')
+      const redirectTo = searchParams?.get('redirectTo')
       const targetPath = redirectTo || '/home'
       router.push(targetPath)
     }
@@ -33,7 +33,7 @@ function LoginContent() {
         case 'google':
           await signInWithGoogle()
           // Redirect to intended page or home on success
-          const redirectTo = searchParams.get('redirectTo')
+          const redirectTo = searchParams?.get('redirectTo')
           const targetPath = redirectTo || '/home'
           router.push(targetPath)
           break

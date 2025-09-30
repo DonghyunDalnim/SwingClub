@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { Card, Badge } from '@/components/core'
+import { Card, Badge, OptimizedImage } from '@/components/core'
 import { Star, Clock, Heart } from 'lucide-react'
 import { theme } from '@/lib/theme'
 import type { MarketplaceItem } from '@/lib/types/marketplace'
@@ -68,13 +68,17 @@ export function ProductCard({
       style={theme.components.cards.portfolio}
     >
       <Link href={`/marketplace/${item.id}`}>
-        {/* 상품 이미지 */}
-        <div className="relative aspect-[4/3] overflow-hidden">
-          <img
+        {/* 상품 이미지 - Soomgo 표준 4:3 비율, 8px borderRadius */}
+        <div className="relative overflow-hidden">
+          <OptimizedImage
             src={item.images[0] || '/placeholder-product.jpg'}
-            alt={item.title}
-            className="w-full h-full object-cover transition-transform duration-200 hover:scale-105"
-            style={{ borderRadius: '8px 8px 0 0' }}
+            alt={`${item.title} - ${PRODUCT_CATEGORIES[item.category]} 상품 이미지`}
+            aspectRatio="card"
+            borderRadius={8}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="hover:scale-105 transition-transform duration-200"
+            priority={false}
           />
 
           {/* 상태 배지 */}

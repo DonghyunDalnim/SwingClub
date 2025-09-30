@@ -5,10 +5,13 @@ export interface ContainerProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
   padding?: boolean;
+  as?: React.ElementType;
+  'aria-label'?: string;
+  'aria-labelledby'?: string;
 }
 
-const Container = React.forwardRef<HTMLDivElement, ContainerProps>(
-  ({ className, children, size = 'lg', padding = true, ...props }, ref) => {
+const Container = React.forwardRef<any, ContainerProps>(
+  ({ className, children, size = 'lg', padding = true, as: Component = 'div', ...props }, ref) => {
     const sizeClasses = {
       sm: 'max-w-screen-sm',
       md: 'max-w-screen-md',
@@ -18,7 +21,7 @@ const Container = React.forwardRef<HTMLDivElement, ContainerProps>(
     };
 
     return (
-      <div
+      <Component
         ref={ref}
         className={cn(
           'mx-auto',
@@ -29,7 +32,7 @@ const Container = React.forwardRef<HTMLDivElement, ContainerProps>(
         {...props}
       >
         {children}
-      </div>
+      </Component>
     );
   }
 );
@@ -44,9 +47,12 @@ export interface FlexProps extends React.HTMLAttributes<HTMLDivElement> {
   justify?: 'start' | 'center' | 'end' | 'between' | 'around' | 'evenly';
   gap?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
   wrap?: boolean;
+  as?: React.ElementType;
+  'aria-label'?: string;
+  'aria-labelledby'?: string;
 }
 
-export const Flex = React.forwardRef<HTMLDivElement, FlexProps>(
+export const Flex = React.forwardRef<any, FlexProps>(
   ({
     className,
     children,
@@ -55,6 +61,7 @@ export const Flex = React.forwardRef<HTMLDivElement, FlexProps>(
     justify = 'start',
     gap = 'md',
     wrap = false,
+    as: Component = 'div',
     ...props
   }, ref) => {
     const directionClasses = {
@@ -87,7 +94,7 @@ export const Flex = React.forwardRef<HTMLDivElement, FlexProps>(
     };
 
     return (
-      <div
+      <Component
         ref={ref}
         className={cn(
           'flex',
@@ -101,7 +108,7 @@ export const Flex = React.forwardRef<HTMLDivElement, FlexProps>(
         {...props}
       >
         {children}
-      </div>
+      </Component>
     );
   }
 );

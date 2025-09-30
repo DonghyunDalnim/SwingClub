@@ -127,9 +127,11 @@ describe('AuthProvider Context', () => {
 
   describe('Authentication State Changes', () => {
     it('should handle successful Firebase user authentication', async () => {
-      const authCallback = jest.fn()
+      let authCallback: ((user: any) => void) | null = null
       mockedOnAuthStateChanged.mockImplementation((auth, callback) => {
-        authCallback.mockImplementation(callback)
+        if (typeof callback === 'function') {
+          authCallback = callback
+        }
         return mockUnsubscribe
       })
 
@@ -145,7 +147,7 @@ describe('AuthProvider Context', () => {
 
       // Simulate Firebase user authentication
       await act(async () => {
-        authCallback(global.mockFirebaseUser)
+        authCallback?.((global as any).mockFirebaseUser)
       })
 
       await waitFor(() => {
@@ -158,9 +160,11 @@ describe('AuthProvider Context', () => {
     })
 
     it('should handle Firebase user sign out', async () => {
-      const authCallback = jest.fn()
+      let authCallback: ((user: any) => void) | null = null
       mockedOnAuthStateChanged.mockImplementation((auth, callback) => {
-        authCallback.mockImplementation(callback)
+        if (typeof callback === 'function') {
+          authCallback = callback
+        }
         return mockUnsubscribe
       })
 
@@ -168,7 +172,7 @@ describe('AuthProvider Context', () => {
 
       // Simulate sign out
       await act(async () => {
-        authCallback(null)
+        authCallback?.(null)
       })
 
       await waitFor(() => {
@@ -179,9 +183,11 @@ describe('AuthProvider Context', () => {
     })
 
     it('should handle profile fetch error during Firebase auth', async () => {
-      const authCallback = jest.fn()
+      let authCallback: ((user: any) => void) | null = null
       mockedOnAuthStateChanged.mockImplementation((auth, callback) => {
-        authCallback.mockImplementation(callback)
+        if (typeof callback === 'function') {
+          authCallback = callback
+        }
         return mockUnsubscribe
       })
 
@@ -190,7 +196,7 @@ describe('AuthProvider Context', () => {
       renderWithProvider(<TestComponent />)
 
       await act(async () => {
-        authCallback(global.mockFirebaseUser)
+        authCallback?.((global as any).mockFirebaseUser)
       })
 
       await waitFor(() => {
@@ -202,7 +208,7 @@ describe('AuthProvider Context', () => {
   describe('Authentication Actions', () => {
     describe('Google Sign In', () => {
       it('should handle successful Google sign in', async () => {
-        const mockUserWithProfile = { ...global.mockUser }
+        const mockUserWithProfile = { ...(global as any).mockUser }
         mockedSignInWithGoogle.mockResolvedValue(mockUserWithProfile)
         mockedGetUserProfile.mockResolvedValue(mockUserWithProfile.profile)
 
@@ -297,8 +303,8 @@ describe('AuthProvider Context', () => {
 
     describe('Email Sign In', () => {
       it('should handle successful email sign in', async () => {
-        mockedSignInWithEmail.mockResolvedValue(global.mockUser)
-        mockedGetUserProfile.mockResolvedValue(global.mockUser.profile)
+        mockedSignInWithEmail.mockResolvedValue((global as any).mockUser)
+        mockedGetUserProfile.mockResolvedValue((global as any).mockUser.profile)
 
         renderWithProvider(<TestComponent />)
 
@@ -329,8 +335,8 @@ describe('AuthProvider Context', () => {
 
     describe('Sign Up', () => {
       it('should handle successful sign up', async () => {
-        mockedSignUpWithEmail.mockResolvedValue(global.mockUser)
-        mockedGetUserProfile.mockResolvedValue(global.mockUser.profile)
+        mockedSignUpWithEmail.mockResolvedValue((global as any).mockUser)
+        mockedGetUserProfile.mockResolvedValue((global as any).mockUser.profile)
 
         renderWithProvider(<TestComponent />)
 
@@ -400,14 +406,14 @@ describe('AuthProvider Context', () => {
           return mockUnsubscribe
         })
 
-        mockedGetUserProfile.mockResolvedValue(global.mockUser.profile)
+        mockedGetUserProfile.mockResolvedValue((global as any).mockUser.profile)
         mockedUpdateUserProfile.mockResolvedValue()
 
         renderWithProvider(<TestComponent />)
 
         // Authenticate user first
         await act(async () => {
-          authCallback(global.mockFirebaseUser)
+          authCallback?.((global as any).mockFirebaseUser)
         })
 
         // Update profile
@@ -438,13 +444,13 @@ describe('AuthProvider Context', () => {
           return mockUnsubscribe
         })
 
-        mockedGetUserProfile.mockResolvedValue(global.mockUser.profile)
+        mockedGetUserProfile.mockResolvedValue((global as any).mockUser.profile)
         mockedUpdateUserProfile.mockRejectedValue(new Error('profile-update-failed'))
 
         renderWithProvider(<TestComponent />)
 
         await act(async () => {
-          authCallback(global.mockFirebaseUser)
+          authCallback?.((global as any).mockFirebaseUser)
         })
 
         await act(async () => {

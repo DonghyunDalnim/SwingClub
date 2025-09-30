@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { Button } from '@/components/core/Button'
 import { Card } from '@/components/core/Card'
+import { OptimizedImage } from '@/components/core/OptimizedImage'
 import { X, Upload, Image as ImageIcon } from 'lucide-react'
 import { uploadImage, validateImageFile, resizeImage } from '@/lib/utils/imageUpload'
 
@@ -133,10 +134,11 @@ export function ImageUpload({ onUpload, maxImages = 5, userId, existingImages = 
           {images.map((url, index) => (
             <Card key={index} className="relative group">
               <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                <img
+                <OptimizedImage
                   src={url}
                   alt={`업로드된 이미지 ${index + 1}`}
                   className="w-full h-full object-cover"
+                  priority={false}
                 />
                 <button
                   type="button"

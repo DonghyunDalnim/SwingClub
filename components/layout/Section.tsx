@@ -6,10 +6,14 @@ export interface SectionProps extends React.HTMLAttributes<HTMLElement> {
   spacing?: 'none' | 'sm' | 'md' | 'lg';
   background?: 'white' | 'gray' | 'transparent';
   variant?: 'default' | 'hero';
+  as?: 'section' | 'article' | 'aside' | 'div';
+  'aria-label'?: string;
+  'aria-labelledby'?: string;
+  'aria-describedby'?: string;
 }
 
-export const Section = React.forwardRef<HTMLElement, SectionProps>(
-  ({ className, children, spacing = 'md', background = 'transparent', variant = 'default', ...props }, ref) => {
+export const Section = React.forwardRef<any, SectionProps>(
+  ({ className, children, spacing = 'md', background = 'transparent', variant = 'default', as: Component = 'section', ...props }, ref) => {
     const spacingClasses = {
       none: '',
       sm: 'py-8',
@@ -29,7 +33,7 @@ export const Section = React.forwardRef<HTMLElement, SectionProps>(
     };
 
     return (
-      <section
+      <Component
         ref={ref}
         className={cn(
           variant === 'hero' ? variantClasses.hero : `${spacingClasses[spacing]} ${backgroundClasses[background]}`,
@@ -38,7 +42,7 @@ export const Section = React.forwardRef<HTMLElement, SectionProps>(
         {...props}
       >
         {children}
-      </section>
+      </Component>
     );
   }
 );
@@ -50,12 +54,18 @@ export interface SectionHeaderProps extends Omit<React.HTMLAttributes<HTMLDivEle
   title: React.ReactNode;
   subtitle?: React.ReactNode;
   action?: React.ReactNode;
+  level?: 1 | 2 | 3 | 4 | 5 | 6;
+  titleId?: string;
 }
 
 export const SectionHeader = React.forwardRef<HTMLDivElement, SectionHeaderProps>(
-  ({ className, title, subtitle, action, ...props }, ref) => {
+  ({ className, title, subtitle, action, level = 2, titleId, ...props }, ref) => {
+    const HeadingComponent = `h${level}` as React.ElementType;
+    const reactId = React.useId();
+    const generatedTitleId = titleId || reactId;
+
     return (
-      <div
+      <header
         ref={ref}
         className={cn(
           'flex items-center justify-between mb-6',
@@ -65,12 +75,17 @@ export const SectionHeader = React.forwardRef<HTMLDivElement, SectionHeaderProps
       >
         <div className="flex-1">
           {typeof title === 'string' ? (
-            <h2 className="text-h2 text-neutral-darkest">{title}</h2>
+            <HeadingComponent
+              id={generatedTitleId}
+              className="text-h2 text-neutral-darkest"
+            >
+              {title}
+            </HeadingComponent>
           ) : (
-            title
+            <div id={generatedTitleId}>{title}</div>
           )}
           {subtitle && (
-            <div className="mt-1">
+            <div className="mt-1" aria-describedby={generatedTitleId}>
               {typeof subtitle === 'string' ? (
                 <p className="text-small text-neutral-medium">{subtitle}</p>
               ) : (
@@ -80,11 +95,15 @@ export const SectionHeader = React.forwardRef<HTMLDivElement, SectionHeaderProps
           )}
         </div>
         {action && (
-          <div className="flex-shrink-0 ml-4">
+          <div
+            className="flex-shrink-0 ml-4"
+            role="group"
+            aria-label="섹션 액션"
+          >
             {action}
           </div>
         )}
-      </div>
+      </header>
     );
   }
 );

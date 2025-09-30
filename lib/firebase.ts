@@ -61,9 +61,14 @@ try {
   db = getFirestore(app)
   storage = getStorage(app)
 
-  // Initialize analytics only in browser environment
-  if (typeof window !== 'undefined' && firebaseConfig.measurementId) {
-    analytics = getAnalytics(app)
+  // Initialize analytics only in browser environment with valid measurementId
+  if (typeof window !== 'undefined' && firebaseConfig.measurementId && firebaseConfig.measurementId !== 'G-ABC123DEF4') {
+    try {
+      analytics = getAnalytics(app)
+    } catch (analyticsError) {
+      console.warn('Failed to initialize Firebase Analytics:', analyticsError)
+      analytics = null
+    }
   }
 } catch (error) {
   console.error('Failed to initialize Firebase:', error)

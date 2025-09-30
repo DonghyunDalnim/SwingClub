@@ -77,6 +77,31 @@ describe('Post Server Actions', () => {
     email: 'anon@example.com'
   }
 
+  const mockExistingPost: Post = {
+    id: 'existing_post_123',
+    title: '기존 게시글',
+    content: '기존 내용',
+    category: 'general',
+    status: 'active',
+    visibility: 'public',
+    metadata: {
+      authorId: 'swing_dancer_123',
+      authorName: '김린디',
+      createdAt: { seconds: 1640995200, nanoseconds: 0 } as any,
+      updatedAt: { seconds: 1640995200, nanoseconds: 0 } as any
+    },
+    stats: {
+      views: 10,
+      likes: 5,
+      comments: 3,
+      shares: 0,
+      reports: 0,
+      lastActivity: { seconds: 1640995200, nanoseconds: 0 } as any
+    },
+    isPinned: false,
+    isFeatured: false
+  }
+
   describe('createPostAction', () => {
 
     describe('🎵 Success Cases - Korean Swing Dance Community', () => {
@@ -392,31 +417,6 @@ describe('Post Server Actions', () => {
 
   describe('updatePostAction', () => {
 
-    const mockExistingPost: Post = {
-      id: 'existing_post_123',
-      title: '기존 게시글',
-      content: '기존 내용',
-      category: 'general',
-      status: 'active',
-      visibility: 'public',
-      metadata: {
-        authorId: 'swing_dancer_123',
-        authorName: '김린디',
-        createdAt: { seconds: 1640995200, nanoseconds: 0 } as any,
-        updatedAt: { seconds: 1640995200, nanoseconds: 0 } as any
-      },
-      stats: {
-        views: 10,
-        likes: 5,
-        comments: 3,
-        shares: 0,
-        reports: 0,
-        lastActivity: { seconds: 1640995200, nanoseconds: 0 } as any
-      },
-      isPinned: false,
-      isFeatured: false
-    }
-
     describe('✅ Success Cases', () => {
 
       it('should update swing dance event details successfully', async () => {
@@ -657,7 +657,7 @@ describe('Post Server Actions', () => {
         })
 
         const filters: PostSearchFilters = {
-          keywords: '린디합',
+          keyword: '린디합',
           tags: ['린디합', '기본기']
         }
 

@@ -8,10 +8,14 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   children: React.ReactNode;
   loading?: boolean;
   fullWidth?: boolean;
+  loadingText?: string;
+  'aria-describedby'?: string;
+  'aria-expanded'?: boolean;
+  'aria-haspopup'?: boolean | 'false' | 'true' | 'menu' | 'listbox' | 'tree' | 'grid' | 'dialog';
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'primary', size = 'md', children, loading, fullWidth, disabled, ...props }, ref) => {
+  ({ className, variant = 'primary', size = 'md', children, loading, loadingText = '로딩 중...', fullWidth, disabled, ...props }, ref) => {
     const sizeClasses = {
       sm: 'h-8 px-3 text-sm',
       md: 'h-10 px-4 text-base',
@@ -28,9 +32,23 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     return (
       <button
-        className={buttonClasses}
+        className={cn(
+          buttonClasses,
+          // WCAG AA 준수 포커스 스타일: #693BF2 색상, 2px 두께, 명확한 가시성
+          'focus:outline-none',
+          'focus-visible:ring-2 focus-visible:ring-[#693BF2] focus-visible:ring-offset-2',
+          // 숨고 마이크로 인터랙션: 호버/클릭 애니메이션
+          'transition-all duration-200 ease-out',
+          'hover:scale-[1.02]',
+          'active:scale-[0.98]',
+          'transform',
+          // reduce-motion 접근성 지원
+          'motion-reduce:transition-none motion-reduce:hover:transform-none'
+        )}
         ref={ref}
         disabled={disabled || loading}
+        aria-busy={loading}
+        aria-label={loading ? loadingText : props['aria-label']}
         {...props}
       >
         {loading && (
@@ -39,6 +57,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
+            aria-hidden="true"
+            role="presentation"
           >
             <circle
               className="opacity-25"
@@ -55,7 +75,14 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             />
           </svg>
         )}
-        {children}
+        <span className={loading ? 'sr-only' : undefined}>
+          {children}
+        </span>
+        {loading && (
+          <span aria-live="polite" className="sr-only">
+            {loadingText}
+          </span>
+        )}
       </button>
     );
   }

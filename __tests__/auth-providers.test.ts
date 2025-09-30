@@ -60,11 +60,21 @@ describe('Authentication Providers', () => {
     email: 'test@example.com',
     displayName: 'Test User',
     photoURL: 'https://example.com/photo.jpg',
+    emailVerified: true,
+    isAnonymous: false,
+    providerData: [],
+    refreshToken: 'mock-refresh-token',
+    tenantId: null,
+    delete: jest.fn(),
+    getIdToken: jest.fn().mockResolvedValue('mock-id-token'),
+    getIdTokenResult: jest.fn(),
+    reload: jest.fn(),
+    toJSON: jest.fn(),
     metadata: {
       creationTime: '2023-01-01T00:00:00.000Z',
       lastSignInTime: '2023-01-01T00:00:00.000Z'
     }
-  }
+  } as any
 
   const mockUserDocData = {
     profile: {

@@ -13,8 +13,15 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
   ({ className, variant = 'default', children, hoverable = true, clickable = false, ...props }, ref) => {
     const cardClasses = cn(
       createCardStyle(variant),
+      // 숨고 마이크로 인터랙션
+      'transition-all duration-200 ease-out',
+      hoverable && 'hover:-translate-y-0.5 hover:shadow-lg',
       !hoverable && 'hover:shadow-none hover:transform-none',
-      clickable && 'cursor-pointer',
+      clickable && 'cursor-pointer active:scale-[0.99]',
+      // reduce-motion 접근성 지원
+      'motion-reduce:transition-none motion-reduce:hover:transform-none',
+      // 키보드 접근성: 클릭 가능한 카드에 포커스 스타일 추가
+      clickable && 'focus:outline-none focus-visible:ring-2 focus-visible:ring-[#693BF2] focus-visible:ring-offset-2',
       className
     );
 
@@ -22,6 +29,15 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       <div
         className={cardClasses}
         ref={ref}
+        // 클릭 가능한 카드는 키보드로도 활성화 가능하도록
+        tabIndex={clickable ? 0 : undefined}
+        role={clickable ? 'button' : undefined}
+        onKeyDown={clickable ? (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            props.onClick?.(e as any)
+          }
+        } : undefined}
         {...props}
       >
         {children}

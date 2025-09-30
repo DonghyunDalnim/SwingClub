@@ -18,6 +18,13 @@ export type ProductCondition = 'new' | 'like_new' | 'good' | 'fair' | 'poor'
 // 거래 방식
 export type TradeMethod = 'direct' | 'delivery' | 'both'
 
+// 문의 상태
+export type InquiryStatus =
+  | 'active'      // 활성 상태 (진행중)
+  | 'completed'   // 거래 완료
+  | 'cancelled'   // 취소됨
+  | 'blocked'     // 차단됨
+
 // 가격 정보
 export interface ItemPricing {
   price: number           // 판매 가격
@@ -154,16 +161,62 @@ export interface ItemsResponse {
   }
 }
 
-// 거래 문의 정보 (향후 확장용)
+// 거래 문의 시스템
+
+// 문의 메시지 인터페이스 (채팅 형태)
+export interface InquiryMessage {
+  id: string
+  inquiryId: string
+  senderId: string      // 메시지 보낸 사람 ID
+  senderName: string    // 메시지 보낸 사람 이름 (비정규화)
+  senderType: 'buyer' | 'seller' // 구매자 또는 판매자
+  content: string       // 메시지 내용
+  messageType: 'text' | 'system' | 'offer' // 메시지 타입
+  offerPrice?: number   // 가격 제안 (offer 타입일 때)
+  createdAt: Timestamp
+  readAt?: Timestamp    // 읽음 시간
+  editedAt?: Timestamp  // 수정 시간
+  status: 'active' | 'deleted' | 'reported'
+}
+
+// 거래 문의 스레드 인터페이스
 export interface ItemInquiry {
   id: string
   itemId: string
-  buyerId: string
+  itemTitle: string     // 상품 제목 (비정규화)
+  itemPrice: number     // 상품 가격 (비정규화)
+  itemStatus: ItemStatus // 상품 상태 (비정규화)
   sellerId: string
-  message: string
-  status: 'pending' | 'replied' | 'closed'
+  sellerName: string    // 판매자 이름 (비정규화)
+  buyerId: string
+  buyerName: string     // 구매자 이름 (비정규화)
+
+  // 문의 상태
+  status: InquiryStatus
+
+  // 통계
+  messageCount: number
+  lastMessageAt: Timestamp
+  lastMessageContent: string // 마지막 메시지 미리보기
+  lastMessageSender: 'buyer' | 'seller'
+
+  // 메타데이터
   createdAt: Timestamp
-  repliedAt?: Timestamp
+  updatedAt: Timestamp
+
+  // 읽음 상태
+  buyerLastRead?: Timestamp
+  sellerLastRead?: Timestamp
+
+  // 거래 완료 정보
+  completedAt?: Timestamp
+  completedBy?: string   // 거래 완료 처리한 사람
+  finalPrice?: number    // 최종 거래 가격
+
+  // 신고 및 관리
+  reported: boolean
+  reportedBy?: string[]
+  blockedBy?: string[]   // 차단한 사용자 목록
 }
 
 // 에러 타입
@@ -214,3 +267,63 @@ export const ITEM_SORT_OPTIONS = {
   price_high: '높은가격순',
   popular: '인기순'
 } as const
+
+// 문의 상태 라벨
+export const INQUIRY_STATUS_LABELS = {
+  active: '진행중',
+  completed: '거래완료',
+  cancelled: '취소됨',
+  blocked: '차단됨'
+} as const
+
+// 문의 관련 액션 인터페이스
+
+// 문의 시작 데이터
+export interface CreateInquiryData {
+  itemId: string
+  initialMessage: string
+}
+
+// 메시지 생성 데이터
+export interface CreateMessageData {
+  inquiryId: string
+  content: string
+  messageType?: 'text' | 'offer'
+  offerPrice?: number
+}
+
+// 문의 업데이트 데이터
+export interface UpdateInquiryData {
+  status?: InquiryStatus
+  finalPrice?: number
+  completedBy?: string
+}
+
+// 문의 검색 필터
+export interface InquirySearchFilters {
+  status?: InquiryStatus[]
+  userId?: string        // 특정 사용자의 문의만
+  itemId?: string        // 특정 상품의 문의만
+  userType?: 'buyer' | 'seller' // 구매자 또는 판매자 관점
+  hasUnread?: boolean    // 읽지 않은 메시지가 있는 문의만
+  dateRange?: {
+    from: Date
+    to: Date
+  }
+}
+
+// 문의 목록 응답
+export interface InquiryListResponse {
+  inquiries: ItemInquiry[]
+  total: number
+  hasMore: boolean
+  filters: InquirySearchFilters
+}
+
+// 메시지 목록 응답
+export interface MessageListResponse {
+  messages: InquiryMessage[]
+  total: number
+  hasMore: boolean
+  inquiry: ItemInquiry
+}

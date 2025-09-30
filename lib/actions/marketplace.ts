@@ -40,7 +40,16 @@ import type {
   ItemsResponse,
   MarketplaceError,
   ProductCategory,
-  ItemSortOption
+  ItemSortOption,
+  ItemInquiry,
+  InquiryMessage,
+  CreateInquiryData,
+  CreateMessageData,
+  UpdateInquiryData,
+  InquirySearchFilters,
+  InquiryListResponse,
+  MessageListResponse,
+  InquiryStatus
 } from '@/lib/types/marketplace'
 import {
   validateMarketplaceItemData,
@@ -54,6 +63,7 @@ import {
   isValidCoordinates,
   findNearestRegion
 } from '@/lib/utils/geo'
+import { getCurrentUser } from '@/lib/auth/server'
 
 /**
  * 상품 생성
@@ -818,4 +828,408 @@ function applyFilters(items: MarketplaceItem[], filters?: ItemSearchFilters): Ma
   }
 
   return filtered
+}
+
+// ===== Inquiry Management Actions =====
+
+/**
+ * 거래 문의 시작
+ */
+export async function createInquiryAction(
+  data: CreateInquiryData
+): Promise<{ success: boolean; inquiryId?: string; error?: string }> {
+  try {
+    const user = await getCurrentUser()
+    if (!user) {
+      return { success: false, error: '로그인이 필요합니다.' }
+    }
+
+    // 데이터 검증
+    if (!data.initialMessage?.trim()) {
+      return { success: false, error: '문의 내용을 입력해주세요.' }
+    }
+
+    if (data.initialMessage.length > 1000) {
+      return { success: false, error: '문의 내용은 1000자를 초과할 수 없습니다.' }
+    }
+
+    // 상품 정보 조회
+    const item = await getMarketplaceItem(data.itemId, false)
+    if (!item) {
+      return { success: false, error: '상품을 찾을 수 없습니다.' }
+    }
+
+    // 자신의 상품에 문의하는 것을 방지
+    if (item.metadata.sellerId === user.uid) {
+      return { success: false, error: '자신의 상품에는 문의할 수 없습니다.' }
+    }
+
+    // 문의 데이터 준비
+    const inquiryDoc: Omit<ItemInquiry, 'id'> = {
+      itemId: data.itemId,
+      itemTitle: item.title,
+      itemPrice: item.pricing.price,
+      itemStatus: item.metadata.status,
+      sellerId: item.metadata.sellerId,
+      sellerName: 'Unknown', // TODO: 판매자 이름 조회 필요
+      buyerId: user.uid,
+      buyerName: user.displayName || '익명',
+      status: 'active',
+      messageCount: 1,
+      lastMessageAt: Timestamp.now(),
+      lastMessageContent: data.initialMessage,
+      lastMessageSender: 'buyer',
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
+      reported: false
+    }
+
+    // 문의 생성
+    const inquiryRef = await addDoc(collection(db, 'inquiries'), inquiryDoc)
+    const inquiryId = inquiryRef.id
+
+    // 초기 메시지 생성
+    const messageDoc: Omit<InquiryMessage, 'id'> = {
+      inquiryId,
+      senderId: user.uid,
+      senderName: user.displayName || '익명',
+      senderType: 'buyer',
+      content: data.initialMessage.trim(),
+      messageType: 'text',
+      createdAt: Timestamp.now(),
+      status: 'active'
+    }
+
+    await addDoc(collection(db, 'inquiry_messages'), messageDoc)
+
+    // 상품의 문의 수 증가
+    await updateDoc(getMarketplaceItemDoc(data.itemId), {
+      'stats.inquiries': item.stats.inquiries + 1,
+      'metadata.updatedAt': Timestamp.now()
+    })
+
+    return { success: true, inquiryId }
+
+  } catch (error) {
+    console.error('Error creating inquiry:', error)
+    return {
+      success: false,
+      error: '문의 생성 중 오류가 발생했습니다.'
+    }
+  }
+}
+
+/**
+ * 문의 메시지 전송
+ */
+export async function sendInquiryMessageAction(
+  data: CreateMessageData
+): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  try {
+    const user = await getCurrentUser()
+    if (!user) {
+      return { success: false, error: '로그인이 필요합니다.' }
+    }
+
+    // 데이터 검증
+    if (!data.content?.trim()) {
+      return { success: false, error: '메시지 내용을 입력해주세요.' }
+    }
+
+    if (data.content.length > 1000) {
+      return { success: false, error: '메시지는 1000자를 초과할 수 없습니다.' }
+    }
+
+    if (data.messageType === 'offer' && (!data.offerPrice || data.offerPrice <= 0)) {
+      return { success: false, error: '올바른 가격 제안을 입력해주세요.' }
+    }
+
+    // 문의 정보 조회
+    const inquiryDoc = await getDoc(doc(db, 'inquiries', data.inquiryId))
+    if (!inquiryDoc.exists()) {
+      return { success: false, error: '문의를 찾을 수 없습니다.' }
+    }
+
+    const inquiry = { ...inquiryDoc.data(), id: inquiryDoc.id } as ItemInquiry
+
+    // 권한 확인 (구매자 또는 판매자만 메시지 전송 가능)
+    if (inquiry.buyerId !== user.uid && inquiry.sellerId !== user.uid) {
+      return { success: false, error: '메시지 전송 권한이 없습니다.' }
+    }
+
+    // 문의 상태 확인
+    if (inquiry.status === 'blocked' || inquiry.status === 'cancelled') {
+      return { success: false, error: '종료된 문의에는 메시지를 보낼 수 없습니다.' }
+    }
+
+    // 발신자 타입 결정
+    const senderType = inquiry.buyerId === user.uid ? 'buyer' : 'seller'
+
+    // 메시지 생성
+    const messageDoc: Omit<InquiryMessage, 'id'> = {
+      inquiryId: data.inquiryId,
+      senderId: user.uid,
+      senderName: user.displayName || '익명',
+      senderType,
+      content: data.content.trim(),
+      messageType: data.messageType || 'text',
+      offerPrice: data.offerPrice,
+      createdAt: Timestamp.now(),
+      status: 'active'
+    }
+
+    const messageRef = await addDoc(collection(db, 'inquiry_messages'), messageDoc)
+
+    // 문의 정보 업데이트 (마지막 메시지 정보)
+    const inquiryUpdateData = {
+      messageCount: inquiry.messageCount + 1,
+      lastMessageAt: Timestamp.now(),
+      lastMessageContent: data.content.trim(),
+      lastMessageSender: senderType,
+      updatedAt: Timestamp.now()
+    }
+
+    await updateDoc(doc(db, 'inquiries', data.inquiryId), inquiryUpdateData)
+
+    return { success: true, messageId: messageRef.id }
+
+  } catch (error) {
+    console.error('Error sending inquiry message:', error)
+    return {
+      success: false,
+      error: '메시지 전송 중 오류가 발생했습니다.'
+    }
+  }
+}
+
+/**
+ * 사용자의 문의 목록 조회
+ */
+export async function getUserInquiriesAction(
+  filters?: InquirySearchFilters
+): Promise<{ success: boolean; data?: InquiryListResponse; error?: string }> {
+  try {
+    const user = await getCurrentUser()
+    if (!user) {
+      return { success: false, error: '로그인이 필요합니다.' }
+    }
+
+    // 기본 쿼리 (사용자가 참여한 문의)
+    let inquiriesQuery = query(
+      collection(db, 'inquiries'),
+      where('buyerId', '==', user.uid)
+    )
+
+    // 판매자 관점의 문의도 포함하려면 두 개의 쿼리가 필요 (Firestore 제한)
+    const buyerQuery = query(
+      collection(db, 'inquiries'),
+      where('buyerId', '==', user.uid),
+      orderBy('lastMessageAt', 'desc'),
+      limit(50)
+    )
+
+    const sellerQuery = query(
+      collection(db, 'inquiries'),
+      where('sellerId', '==', user.uid),
+      orderBy('lastMessageAt', 'desc'),
+      limit(50)
+    )
+
+    const [buyerSnapshot, sellerSnapshot] = await Promise.all([
+      getDocs(buyerQuery),
+      getDocs(sellerQuery)
+    ])
+
+    // 결과 합치기
+    const allInquiries = [
+      ...buyerSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as ItemInquiry)),
+      ...sellerSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as ItemInquiry))
+    ]
+
+    // 중복 제거 및 정렬
+    const uniqueInquiries = allInquiries
+      .filter((inquiry, index, arr) =>
+        index === arr.findIndex(i => i.id === inquiry.id)
+      )
+      .sort((a, b) => b.lastMessageAt.toMillis() - a.lastMessageAt.toMillis())
+
+    // 필터 적용
+    let filteredInquiries = uniqueInquiries
+
+    if (filters?.status && filters.status.length > 0) {
+      filteredInquiries = filteredInquiries.filter(inquiry =>
+        filters.status!.includes(inquiry.status)
+      )
+    }
+
+    if (filters?.itemId) {
+      filteredInquiries = filteredInquiries.filter(inquiry =>
+        inquiry.itemId === filters.itemId
+      )
+    }
+
+    if (filters?.userType) {
+      if (filters.userType === 'buyer') {
+        filteredInquiries = filteredInquiries.filter(inquiry =>
+          inquiry.buyerId === user.uid
+        )
+      } else {
+        filteredInquiries = filteredInquiries.filter(inquiry =>
+          inquiry.sellerId === user.uid
+        )
+      }
+    }
+
+    return {
+      success: true,
+      data: {
+        inquiries: filteredInquiries,
+        total: filteredInquiries.length,
+        hasMore: false,
+        filters: filters || {}
+      }
+    }
+
+  } catch (error) {
+    console.error('Error getting user inquiries:', error)
+    return {
+      success: false,
+      error: '문의 목록 조회 중 오류가 발생했습니다.'
+    }
+  }
+}
+
+/**
+ * 문의 메시지 목록 조회
+ */
+export async function getInquiryMessagesAction(
+  inquiryId: string
+): Promise<{ success: boolean; data?: MessageListResponse; error?: string }> {
+  try {
+    const user = await getCurrentUser()
+    if (!user) {
+      return { success: false, error: '로그인이 필요합니다.' }
+    }
+
+    // 문의 정보 조회
+    const inquiryDoc = await getDoc(doc(db, 'inquiries', inquiryId))
+    if (!inquiryDoc.exists()) {
+      return { success: false, error: '문의를 찾을 수 없습니다.' }
+    }
+
+    const inquiry = { ...inquiryDoc.data(), id: inquiryDoc.id } as ItemInquiry
+
+    // 권한 확인
+    if (inquiry.buyerId !== user.uid && inquiry.sellerId !== user.uid) {
+      return { success: false, error: '문의 조회 권한이 없습니다.' }
+    }
+
+    // 메시지 목록 조회
+    const messagesQuery = query(
+      collection(db, 'inquiry_messages'),
+      where('inquiryId', '==', inquiryId),
+      where('status', '==', 'active'),
+      orderBy('createdAt', 'asc')
+    )
+
+    const messagesSnapshot = await getDocs(messagesQuery)
+    const messages = messagesSnapshot.docs.map(doc => ({
+      ...doc.data(),
+      id: doc.id
+    })) as InquiryMessage[]
+
+    // 읽음 상태 업데이트
+    const userType = inquiry.buyerId === user.uid ? 'buyer' : 'seller'
+    const readFieldName = userType === 'buyer' ? 'buyerLastRead' : 'sellerLastRead'
+
+    await updateDoc(doc(db, 'inquiries', inquiryId), {
+      [readFieldName]: Timestamp.now(),
+      updatedAt: Timestamp.now()
+    })
+
+    return {
+      success: true,
+      data: {
+        messages,
+        total: messages.length,
+        hasMore: false,
+        inquiry
+      }
+    }
+
+  } catch (error) {
+    console.error('Error getting inquiry messages:', error)
+    return {
+      success: false,
+      error: '메시지 조회 중 오류가 발생했습니다.'
+    }
+  }
+}
+
+/**
+ * 문의 상태 업데이트
+ */
+export async function updateInquiryStatusAction(
+  inquiryId: string,
+  data: UpdateInquiryData
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const user = await getCurrentUser()
+    if (!user) {
+      return { success: false, error: '로그인이 필요합니다.' }
+    }
+
+    // 문의 정보 조회
+    const inquiryDoc = await getDoc(doc(db, 'inquiries', inquiryId))
+    if (!inquiryDoc.exists()) {
+      return { success: false, error: '문의를 찾을 수 없습니다.' }
+    }
+
+    const inquiry = { ...inquiryDoc.data(), id: inquiryDoc.id } as ItemInquiry
+
+    // 권한 확인 (구매자 또는 판매자만)
+    if (inquiry.buyerId !== user.uid && inquiry.sellerId !== user.uid) {
+      return { success: false, error: '문의 상태 변경 권한이 없습니다.' }
+    }
+
+    // 업데이트 데이터 준비
+    const updateData: Partial<ItemInquiry> = {
+      updatedAt: Timestamp.now()
+    }
+
+    if (data.status) {
+      updateData.status = data.status
+
+      if (data.status === 'completed') {
+        updateData.completedAt = Timestamp.now()
+        updateData.completedBy = user.uid
+        if (data.finalPrice) {
+          updateData.finalPrice = data.finalPrice
+        }
+      }
+    }
+
+    if (data.finalPrice && inquiry.status === 'completed') {
+      updateData.finalPrice = data.finalPrice
+    }
+
+    await updateDoc(doc(db, 'inquiries', inquiryId), updateData)
+
+    // 거래 완료 시 상품 상태도 업데이트
+    if (data.status === 'completed') {
+      await updateDoc(getMarketplaceItemDoc(inquiry.itemId), {
+        'metadata.status': 'sold',
+        'metadata.updatedAt': Timestamp.now()
+      })
+    }
+
+    return { success: true }
+
+  } catch (error) {
+    console.error('Error updating inquiry status:', error)
+    return {
+      success: false,
+      error: '문의 상태 업데이트 중 오류가 발생했습니다.'
+    }
+  }
 }

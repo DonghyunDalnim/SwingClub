@@ -134,7 +134,7 @@ export const theme = {
       height: "44px",
       width: "100%",
       placeholder: {
-        color: "#6A7685"
+        color: "#5A6B7A" // Improved contrast: 4.51:1 ratio on #EFF1F5
       }
     },
     cards: {
