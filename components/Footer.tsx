@@ -177,6 +177,12 @@ export default function Footer() {
           height: 18px;
         }
 
+        @media (max-width: 1024px) {
+          .footer-grid {
+            grid-template-columns: 1fr 1fr;
+          }
+        }
+
         @media (max-width: 768px) {
           .footer-grid {
             grid-template-columns: 1fr;
@@ -185,8 +191,7 @@ export default function Footer() {
 
           .footer-bottom {
             flex-direction: column;
-            gap: var(--space-md);
-            text-align: center;
+            gap: var(--space-lg);
           }
         }
       `}</style>
