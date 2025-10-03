@@ -918,7 +918,7 @@ export function ProductForm({ userId, userName, mode }: ProductFormProps) {
         .form-grid {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: var(--space-xl);
+          gap: var(--space-2xl);
         }
 
         /* Category Badges */
