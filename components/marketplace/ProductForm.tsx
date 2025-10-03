@@ -897,7 +897,6 @@ export function ProductForm({ userId, userName, mode }: ProductFormProps) {
           color: var(--gray-900);
           background: rgba(255, 255, 255, 0.8);
           transition: all 0.2s;
-          box-sizing: border-box;
         }
 
         .form-grid .form-input {
