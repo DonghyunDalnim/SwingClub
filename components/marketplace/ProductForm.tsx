@@ -888,7 +888,8 @@ export function ProductForm({ userId, userName, mode }: ProductFormProps) {
 
         .form-input,
         .form-textarea {
-          width: 100%;
+          width: 744px;
+          max-width: 100%;
           padding: 12px 16px;
           border: 1.5px solid rgba(200, 200, 200, 0.3);
           border-radius: 12px;
@@ -896,6 +897,10 @@ export function ProductForm({ userId, userName, mode }: ProductFormProps) {
           color: var(--gray-900);
           background: rgba(255, 255, 255, 0.8);
           transition: all 0.2s;
+        }
+
+        .form-grid .form-input {
+          width: 350px;
         }
 
         .form-input:focus,
