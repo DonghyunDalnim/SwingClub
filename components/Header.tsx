@@ -80,6 +80,7 @@ export default function Header() {
 
         .logo-icon {
           font-size: 32px;
+          text-decoration: none !important;
         }
 
         .logo-text {
