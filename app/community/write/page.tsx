@@ -18,18 +18,14 @@ const PostForm = dynamic(
 )
 
 export default async function WritePostPage() {
-  // 인증 확인
+  // 인증 확인 (선택적)
   const user = await getCurrentUser()
-
-  if (!user) {
-    redirect('/login?redirectTo=/community/write')
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <PostForm
-        userId={user.uid}
-        userName={user.displayName || '익명'}
+        userId={user?.uid || 'anonymous'}
+        userName={user?.displayName || '익명'}
         mode="create"
       />
     </div>

@@ -18,19 +18,14 @@ const ProductForm = dynamic(
 )
 
 export default async function WriteProductPage() {
-  // 인증 확인
+  // 인증 확인 (선택적)
   const user = await getCurrentUser()
-
-  if (!user) {
-    redirect('/login?redirectTo=/marketplace/write')
-    return null // This line won't be reached due to redirect, but helps TypeScript
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <ProductForm
-        userId={user.uid}
-        userName={user.displayName || '익명'}
+        userId={user?.uid || 'anonymous'}
+        userName={user?.displayName || '익명'}
         mode="create"
       />
     </div>
