@@ -43,8 +43,8 @@ function extractUserIdFromToken(token: string): string | null {
 // Routes that require authentication
 const protectedRoutes = [
   '/home',
-  '/community',
-  '/marketplace',
+  '/community/write',
+  '/marketplace/write',
   '/profile',
   '/location'
 ]
