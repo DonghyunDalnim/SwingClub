@@ -39,6 +39,14 @@ export default function Header() {
       </div>
 
       <style jsx>{`
+        :global(a.logo) {
+          text-decoration: none !important;
+        }
+
+        :global(a.logo *) {
+          text-decoration: none !important;
+        }
+
         .header {
           position: sticky;
           top: 0;
