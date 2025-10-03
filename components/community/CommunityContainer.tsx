@@ -179,6 +179,10 @@ export function CommunityContainer({ initialPosts, currentUserId }: CommunityCon
       <Footer />
 
       <style jsx>{`
+        :global(a) {
+          text-decoration: none !important;
+        }
+
         .page {
           min-height: 100vh;
           display: flex;
