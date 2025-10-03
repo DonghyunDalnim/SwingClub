@@ -465,6 +465,7 @@ export function PostForm({ userId, userName, mode, initialData }: PostFormProps)
           border-radius: 20px;
           padding: var(--space-2xl);
           box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+          max-width: 744px;
         }
 
         .error-message {
@@ -491,7 +492,8 @@ export function PostForm({ userId, userName, mode, initialData }: PostFormProps)
 
         .form-input,
         .form-textarea {
-          width: 100%;
+          width: 744px;
+          max-width: 100%;
           padding: 12px 16px;
           border: 1.5px solid rgba(200, 200, 200, 0.3);
           border-radius: 12px;
