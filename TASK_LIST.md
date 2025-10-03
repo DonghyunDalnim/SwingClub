@@ -42,43 +42,120 @@
 - [x] 중고거래 마켓플레이스 시스템 (CRUD, 검색, 필터링, 지리적 검색)
 - [x] 200+ 테스트 케이스로 검증된 품질 보증 (80% 이상 커버리지)
 
-### 🔥 우선순위 1: 사용자 관리 시스템
+### 🔥 우선순위 1: 사용자 인증 시스템 ✅ **80% 완료**
 
-#### 1.1 Firebase 프로젝트 설정
+#### 1.1 Firebase 프로젝트 설정 ✅ **100% 완료**
 - [x] Firebase 콘솔에서 프로젝트 생성
 - [x] Firestore Database 활성화 및 초기 설정
 - [x] Firebase Authentication 설정
 - [x] Firebase Storage 설정 (이미지 업로드용)
 - [x] Firebase Cloud Messaging 설정 (푸시 알림)
 - [x] 환경변수 설정 (.env.local)
-- [x] Firebase SDK 초기화 코드 작성
+- [x] Firebase SDK 초기화 코드 작성 (lib/firebase.ts)
 - [x] Firestore 보안 규칙 설정 (사용자 인증 기반 접근 제어)
 
-#### 1.2 소셜 로그인 시스템
-- [x] 카카오톡 로그인 API 연동
-  - [x] 카카오 개발자 콘솔에서 앱 등록 (플레이스홀더 구현)
-  - [x] OAuth 설정 및 리다이렉트 URL 구성 (플레이스홀더)
-  - [x] 로그인/로그아웃 플로우 구현 (플레이스홀더)
-- [x] 네이버 로그인 API 연동
-  - [x] 네이버 개발자 센터에서 앱 등록 (플레이스홀더 구현)
-  - [x] OAuth 설정 및 콜백 처리 (플레이스홀더)
-- [x] 구글 로그인 API 연동
-  - [x] Google Cloud Console에서 OAuth 설정
-  - [x] Firebase Auth와 연동
-- [x] 로그인 상태 관리 (Context API 또는 Zustand)
-- [x] 보호된 라우트 구현 (로그인 필요 페이지)
+#### 1.2 인증 인프라 구축 ✅ **100% 완료**
+- [x] **AuthContext & Provider** (lib/auth/context.tsx - 312줄 완전 구현)
+  - [x] React Context API로 전역 인증 상태 관리
+  - [x] useAuth hook 제공 (lib/auth/hooks.ts)
+  - [x] Firebase onAuthStateChanged 연동
+  - [x] Firestore users 컬렉션 동기화
+  - [x] 쿠키 기반 서버사이드 인증 (firebase-token, user-data)
+  - [x] 에러 핸들링 및 재시도 로직 (토큰 갱신 3회 재시도)
 
-#### 1.3 사용자 프로필 관리
-- [x] 사용자 데이터 스키마 설계 (Firestore)
+- [x] **Authentication Providers** (lib/auth/providers.ts - 169줄)
+  - [x] Google 로그인 (signInWithPopup 방식, 완전 작동)
+  - [x] 이메일/비밀번호 로그인 (signInWithEmail)
+  - [x] 이메일 회원가입 (signUpWithEmail)
+  - [x] 로그아웃 기능 (signOut)
+  - [x] Firestore 사용자 문서 자동 생성/업데이트
+  - [x] 프로필 관리 (updateUserProfile, getUserProfile)
+
+- [x] **소셜 로그인 플레이스홀더**
+  - [x] 카카오 로그인 (플레이스홀더 - "곧 지원 예정" 메시지)
+  - [x] 네이버 로그인 (플레이스홀더 - "곧 지원 예정" 메시지)
+  - [ ] 카카오 OAuth 실제 구현 (Phase 2)
+  - [ ] 네이버 OAuth 실제 구현 (Phase 2)
+
+#### 1.3 로그인 페이지 UI ✅ **100% 완료**
+- [x] **로그인 페이지** (app/login/page.tsx - 180줄 완전 구현)
+  - [x] Glassmorphism 스타일 카드 디자인
+  - [x] 3개 소셜 로그인 버튼 (구글, 카카오, 네이버)
+  - [x] 로딩 상태 표시 (애니메이션 스피너)
+  - [x] 에러 메시지 표시 (빨간색 알림 박스)
+  - [x] 리다이렉션 처리 (redirectTo 쿼리 파라미터)
+  - [x] 자동 로그인 리다이렉션 (이미 로그인된 경우 /home으로)
+  - [x] Suspense 경계 처리 (로딩 폴백)
+
+- [x] **인증 플로우 통합**
+  - [x] useSignIn, useAuthError, useAuthLoading hooks 활용
+  - [x] 프로바이더별 로딩 상태 분리
+  - [x] 에러 자동 초기화 (3초 후)
+  - [x] 로그인 성공 시 의도된 페이지로 리다이렉션
+
+#### 1.4 회원가입 시스템 ⚠️ **30% 완료** (우선 구현 필요)
+- [x] 이메일 회원가입 백엔드 로직 (signUpWithEmail)
+- [ ] **회원가입 페이지 UI** (app/signup/page.tsx - 미구현)
+  - [ ] 3단계 회원가입 마법사 (Wizard) 컴포넌트
+  - [ ] Step 1: 계정 정보 (이메일, 비밀번호, 소셜 로그인 선택)
+  - [ ] Step 2: 프로필 정보 (닉네임, 댄스 레벨, 지역, 선호 스타일)
+  - [ ] Step 3: 약관 동의 (서비스 이용약관, 개인정보처리방침, 마케팅)
+  - [ ] 진행 상태 바 (ProgressBar)
+  - [ ] 입력 검증 (이메일 형식, 비밀번호 강도)
+
+- [ ] **회원가입 폼 컴포넌트**
+  - [ ] SignupWizard 컴포넌트
+  - [ ] Step1AccountInfo 컴포넌트
+  - [ ] Step2ProfileInfo 컴포넌트
+  - [ ] Step3Terms 컴포넌트
+  - [ ] 댄스 레벨 선택기 (드롭다운)
+  - [ ] 지역 선택기 (시/도, 구/군 2단계)
+  - [ ] 선호 스타일 다중 선택 (체크박스)
+
+#### 1.5 사용자 프로필 관리 ✅ **70% 완료**
+- [x] **프로필 데이터 스키마** (lib/types/auth.ts)
   - [x] 기본 정보 (이름, 이메일, 프로필 사진)
-  - [x] 댄스 레벨 (입문자, 초급, 중급, 고급, 전문가)
+  - [x] 댄스 레벨 (beginner, intermediate, advanced, professional)
   - [x] 선호 스타일 (린디합, 찰스턴, 발보아, 이스트코스트 스윙)
-  - [x] 활동 지역 (시/도, 구/군)
-- [x] 프로필 생성/수정 폼 구현
-- [x] 프로필 이미지 업로드 기능
-- [x] 프로필 조회 페이지
-- [x] 개인정보 보호 설정
-- [x] 사용자 데이터 무결성 검증 (입력 검증 및 XSS 방지)
+  - [x] 활동 지역 (location 필드)
+  - [x] Firestore users 컬렉션 구조
+
+- [x] **프로필 조회 페이지** (app/profile/page.tsx - 205줄)
+  - [x] 프로필 헤더 (아바타, 이름, 댄스 레벨, 지역)
+  - [x] 선호 스타일 표시 (별점 시스템)
+  - [x] 활동 통계 (작성한 글, 댓글, 좋아요, 모임 참여)
+  - [x] 배지 시스템 (5개 배지 표시)
+  - [x] 자기소개 섹션
+  - [x] 설정 메뉴 (알림, 개인정보, 계정 연결, 로그아웃)
+
+- [ ] **프로필 편집 페이지** (app/profile/edit/page.tsx - 미구현)
+  - [ ] 프로필 이미지 업로드 (Firebase Storage)
+  - [ ] 닉네임, 지역, 댄스 레벨 수정 폼
+  - [ ] 선호 스타일 수정 (다중 선택)
+  - [ ] 자기소개 텍스트 에디터
+  - [ ] 저장 시 Firestore 업데이트 (updateUserProfile)
+
+- [x] **프로필 백엔드 로직**
+  - [x] updateUserProfile 함수 구현
+  - [x] getUserProfile 함수 구현
+  - [x] 프로필 완성도 계산 (lib/auth/utils.ts - getProfileCompletionPercentage)
+
+#### 1.6 인증 미들웨어 및 보안 ✅ **90% 완료**
+- [x] **Next.js Middleware** (middleware.ts)
+  - [x] 쿠키 기반 인증 검증 (firebase-token)
+  - [x] 보호된 라우트 리다이렉션 (/home, /profile, /location)
+  - [x] 공개 라우트 허용 (/community, /marketplace 목록 페이지)
+  - [x] 로그인 페이지 리다이렉션 (redirectTo 파라미터 전달)
+
+- [x] **보안 강화**
+  - [x] XSS 방지 (입력 검증 시스템)
+  - [x] 권한 검증 (사용자별 데이터 접근 제어)
+  - [x] Firestore 보안 규칙 (users 컬렉션 read/write 제한)
+
+- [ ] **추가 보안 기능** (Phase 2)
+  - [ ] Rate Limiting (로그인 시도 제한 5회/10분)
+  - [ ] IP 기반 회원가입 제한
+  - [ ] 2단계 인증 (2FA) 옵션
 
 <!--
 #### 1.4 레벨/뱃지 시스템
