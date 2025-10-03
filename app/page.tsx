@@ -69,11 +69,6 @@ export default function Home() {
                   <span className="category-count">567</span>
                 </button>
               </nav>
-
-              <button className="new-post-button">
-                <span className="button-icon">✏️</span>
-                <span>새 글 작성</span>
-              </button>
             </div>
           </aside>
 
@@ -170,7 +165,6 @@ export default function Home() {
           display: flex;
           flex-direction: column;
           gap: var(--space-xs);
-          margin-bottom: var(--space-lg);
         }
 
         .category-item {
@@ -212,33 +206,6 @@ export default function Home() {
 
         .category-item:not(.active) .category-count {
           color: var(--gray-500);
-        }
-
-        .new-post-button {
-          width: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: var(--space-sm);
-          padding: var(--space-md);
-          background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-          border: none;
-          border-radius: 12px;
-          color: white;
-          font-size: 14px;
-          font-weight: 700;
-          cursor: pointer;
-          transition: all 0.2s;
-          box-shadow: 0 4px 12px rgba(245, 87, 108, 0.3);
-        }
-
-        .new-post-button:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
-        }
-
-        .button-icon {
-          font-size: 16px;
         }
 
         /* Main Content */
