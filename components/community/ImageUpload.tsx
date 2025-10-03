@@ -1,8 +1,6 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Button } from '@/components/core/Button'
-import { Card } from '@/components/core/Card'
 import { OptimizedImage } from '@/components/core/OptimizedImage'
 import { X, Upload, Image as ImageIcon } from 'lucide-react'
 import { uploadImage, validateImageFile, resizeImage } from '@/lib/utils/imageUpload'
@@ -84,28 +82,27 @@ export function ImageUpload({ onUpload, maxImages = 5, userId, existingImages = 
   }
 
   return (
-    <div className="space-y-4">
+    <div className="upload-container">
       {/* 업로드 버튼 */}
       <div>
-        <Button
+        <button
           type="button"
-          variant="outline"
           onClick={handleUploadClick}
           disabled={uploading || images.length >= maxImages}
-          className="w-full"
+          className="upload-button"
         >
           {uploading ? (
             <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600 mr-2" />
+              <div className="spinner" />
               업로드 중...
             </>
           ) : (
             <>
-              <Upload className="h-4 w-4 mr-2" />
+              <Upload className="upload-icon" />
               이미지 업로드 ({images.length}/{maxImages})
             </>
           )}
-        </Button>
+        </button>
 
         <input
           ref={fileInputRef}
@@ -113,55 +110,218 @@ export function ImageUpload({ onUpload, maxImages = 5, userId, existingImages = 
           multiple
           accept="image/jpeg,image/jpg,image/png,image/webp"
           onChange={handleFileSelect}
-          className="hidden"
+          className="hidden-input"
         />
 
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="upload-hint">
           JPG, PNG, WebP 파일 (최대 5MB)
         </p>
       </div>
 
       {/* 에러 메시지 */}
       {error && (
-        <div className="text-red-600 text-sm bg-red-50 p-2 rounded">
+        <div className="error-message">
           {error}
         </div>
       )}
 
       {/* 업로드된 이미지 미리보기 */}
       {images.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="images-grid">
           {images.map((url, index) => (
-            <Card key={index} className="relative group">
-              <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+            <div key={index} className="image-card">
+              <div className="image-wrapper">
                 <OptimizedImage
                   src={url}
                   alt={`업로드된 이미지 ${index + 1}`}
-                  className="w-full h-full object-cover"
+                  className="image"
                   priority={false}
                 />
                 <button
                   type="button"
                   onClick={() => removeImage(index)}
-                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="remove-button"
                 >
-                  <X className="h-3 w-3" />
+                  <X className="remove-icon" />
                 </button>
               </div>
-            </Card>
+            </div>
           ))}
         </div>
       )}
 
       {/* 빈 상태 */}
       {images.length === 0 && !uploading && (
-        <Card className="border-dashed border-2 border-gray-300">
-          <div className="p-8 text-center">
-            <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500">이미지를 업로드해보세요</p>
+        <div className="empty-state">
+          <div className="empty-content">
+            <ImageIcon className="empty-icon" />
+            <p className="empty-text">이미지를 업로드해보세요</p>
           </div>
-        </Card>
+        </div>
       )}
+
+      <style jsx>{`
+        .upload-container {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+
+        .upload-button {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          width: 100%;
+          padding: 12px 16px;
+          background: rgba(102, 126, 234, 0.1);
+          border: 1.5px solid rgba(102, 126, 234, 0.3);
+          border-radius: 12px;
+          color: #667eea;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .upload-button:hover:not(:disabled) {
+          background: rgba(102, 126, 234, 0.2);
+          transform: translateY(-1px);
+        }
+
+        .upload-button:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: none;
+        }
+
+        .upload-icon {
+          width: 16px;
+          height: 16px;
+        }
+
+        .spinner {
+          width: 16px;
+          height: 16px;
+          border: 2px solid rgba(102, 126, 234, 0.3);
+          border-top-color: #667eea;
+          border-radius: 50%;
+          animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+
+        .hidden-input {
+          display: none;
+        }
+
+        .upload-hint {
+          margin-top: 8px;
+          font-size: 13px;
+          color: var(--gray-500);
+        }
+
+        .error-message {
+          padding: 12px 16px;
+          background: rgba(239, 68, 68, 0.1);
+          border: 1.5px solid rgba(239, 68, 68, 0.3);
+          border-radius: 12px;
+          color: #dc2626;
+          font-size: 14px;
+        }
+
+        .images-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+          gap: 12px;
+        }
+
+        .image-card {
+          position: relative;
+        }
+
+        .image-wrapper {
+          position: relative;
+          aspect-ratio: 1;
+          border-radius: 12px;
+          overflow: hidden;
+          background: rgba(200, 200, 200, 0.1);
+        }
+
+        .image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .remove-button {
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          width: 28px;
+          height: 28px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(239, 68, 68, 0.9);
+          border: none;
+          border-radius: 50%;
+          color: white;
+          cursor: pointer;
+          opacity: 0;
+          transition: all 0.2s;
+        }
+
+        .image-card:hover .remove-button {
+          opacity: 1;
+        }
+
+        .remove-button:hover {
+          background: #dc2626;
+          transform: scale(1.1);
+        }
+
+        .remove-icon {
+          width: 14px;
+          height: 14px;
+        }
+
+        .empty-state {
+          background: rgba(255, 255, 255, 0.9);
+          border: 1.5px dashed rgba(200, 200, 200, 0.4);
+          border-radius: 12px;
+          padding: 40px 20px;
+        }
+
+        .empty-content {
+          text-align: center;
+        }
+
+        .empty-icon {
+          width: 48px;
+          height: 48px;
+          color: var(--gray-400);
+          margin: 0 auto 16px;
+        }
+
+        .empty-text {
+          color: var(--gray-500);
+          font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+          .images-grid {
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 8px;
+          }
+
+          .empty-state {
+            padding: 32px 16px;
+          }
+        }
+      `}</style>
     </div>
   )
 }

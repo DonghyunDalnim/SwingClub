@@ -1,13 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
-import { Button } from '@/components/core'
+import { useRouter } from 'next/navigation'
 import { ProductCard } from '@/components/marketplace/ProductCard'
-import { FilterSection } from '@/components/marketplace/FilterSection'
-import { ArrowLeft, Edit } from 'lucide-react'
 import type { MarketplaceItem, ItemSearchFilters } from '@/lib/types/marketplace'
 import { Timestamp } from 'firebase/firestore'
+import Header from '@/components/Header'
+import Footer from '@/components/Footer'
 
 // 더미 데이터 (실제로는 서버에서 가져올 데이터)
 const mockProducts: MarketplaceItem[] = [
@@ -126,138 +125,374 @@ const mockProducts: MarketplaceItem[] = [
 ]
 
 export default function MarketplacePage() {
-  const [filters, setFilters] = useState<ItemSearchFilters>({})
-  const [filteredProducts, setFilteredProducts] = useState<MarketplaceItem[]>(mockProducts)
+  const router = useRouter()
+  const [filteredProducts] = useState<MarketplaceItem[]>(mockProducts)
+  const [activeCategory, setActiveCategory] = useState<string>('all')
 
-  // 필터 변경 핸들러
-  const handleFiltersChange = (newFilters: ItemSearchFilters) => {
-    setFilters(newFilters)
-
-    // 필터 적용 로직
-    let filtered = [...mockProducts]
-
-    // 검색어 필터
-    if (newFilters.searchTerm) {
-      const searchTerm = newFilters.searchTerm.toLowerCase()
-      filtered = filtered.filter(product =>
-        product.title.toLowerCase().includes(searchTerm) ||
-        product.description.toLowerCase().includes(searchTerm) ||
-        product.specs.brand?.toLowerCase().includes(searchTerm)
-      )
+  const handleCategoryClick = (category: string) => {
+    switch (category) {
+      case '전체':
+        router.push('/');
+        break;
+      case '커뮤니티':
+        router.push('/community');
+        break;
+      case '용품':
+        router.push('/marketplace');
+        break;
+      case '장소':
+        router.push('/location');
+        break;
+      default:
+        break;
     }
+  };
 
-    // 카테고리 필터
-    if (newFilters.category && newFilters.category.length > 0) {
-      filtered = filtered.filter(product =>
-        newFilters.category!.includes(product.category)
-      )
-    }
+  const productCategories = [
+    { key: 'all', label: '전체', count: mockProducts.length },
+    { key: 'shoes', label: '댄스화', count: mockProducts.filter(p => p.category === 'shoes').length },
+    { key: 'clothing', label: '의류', count: mockProducts.filter(p => p.category === 'clothing').length },
+    { key: 'accessories', label: '액세서리', count: mockProducts.filter(p => p.category === 'accessories').length },
+  ];
 
-    // 가격 범위 필터
-    if (newFilters.priceRange) {
-      const { min, max } = newFilters.priceRange
-      filtered = filtered.filter(product =>
-        product.pricing.price >= (min || 0) &&
-        product.pricing.price <= (max || Infinity)
-      )
-    }
-
-    // 협상 가능 필터
-    if (newFilters.negotiable) {
-      filtered = filtered.filter(product => product.pricing.negotiable)
-    }
-
-    // 택배 가능 필터
-    if (newFilters.deliveryAvailable) {
-      filtered = filtered.filter(product => product.location.deliveryAvailable)
-    }
-
-    setFilteredProducts(filtered)
-  }
+  const filteredByCategory = activeCategory === 'all'
+    ? filteredProducts
+    : filteredProducts.filter(p => p.category === activeCategory);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center space-x-3">
-            <Link href="/">
-              <ArrowLeft className="h-6 w-6" />
-            </Link>
-            <span className="font-semibold text-lg">중고거래</span>
-          </div>
-          <Link href="/marketplace/write">
-            <Edit className="h-6 w-6" />
-          </Link>
-        </div>
-      </header>
+    <div className="page">
+      <Header />
 
-      <div className="container mx-auto px-4 py-6 max-w-6xl">
-        <div className="grid lg:grid-cols-4 gap-6">
-          {/* 필터 섹션 (데스크톱은 사이드바, 모바일은 접을 수 있음) */}
-          <div className="lg:col-span-1">
-            <FilterSection
-              filters={filters}
-              onFiltersChange={handleFiltersChange}
-              className="lg:sticky lg:top-24"
-              collapsible={true}
-            />
-          </div>
-
-          {/* 상품 목록 */}
-          <div className="lg:col-span-3">
-            <div className="mb-4 flex items-center justify-between">
-              <p className="text-sm text-gray-600">
-                총 <span className="font-medium text-gray-900">{filteredProducts.length}</span>개의 상품
-              </p>
-              <Link href="/marketplace/write">
-                <Button className="hidden sm:flex">
-                  <Edit className="h-4 w-4 mr-2" />
-                  상품 등록
-                </Button>
-              </Link>
+      {/* 2-Column Layout */}
+      <div className="main-layout">
+        <div className="layout-container">
+          {/* Left Sidebar - 카테고리 */}
+          <aside className="left-sidebar">
+            <div className="sidebar-card">
+              <h3 className="sidebar-title">카테고리</h3>
+              <nav className="category-list">
+                <button className="category-item" onClick={() => handleCategoryClick('전체')}>
+                  <span className="category-name">전체</span>
+                  <span className="category-count">1,234</span>
+                </button>
+                <button className="category-item" onClick={() => handleCategoryClick('레슨')}>
+                  <span className="category-icon">📚</span>
+                  <span className="category-name">레슨</span>
+                  <span className="category-count">456</span>
+                </button>
+                <button className="category-item" onClick={() => handleCategoryClick('파티')}>
+                  <span className="category-icon">🎉</span>
+                  <span className="category-name">파티</span>
+                  <span className="category-count">234</span>
+                </button>
+                <button className="category-item" onClick={() => handleCategoryClick('매칭')}>
+                  <span className="category-icon">🤝</span>
+                  <span className="category-name">매칭</span>
+                  <span className="category-count">345</span>
+                </button>
+                <button className="category-item active" onClick={() => handleCategoryClick('용품')}>
+                  <span className="category-icon">🛍️</span>
+                  <span className="category-name">용품</span>
+                  <span className="category-count">199</span>
+                </button>
+                <button className="category-item" onClick={() => handleCategoryClick('커뮤니티')}>
+                  <span className="category-icon">💬</span>
+                  <span className="category-name">커뮤니티</span>
+                  <span className="category-count">567</span>
+                </button>
+              </nav>
             </div>
+          </aside>
 
-            {/* 상품 그리드 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {filteredProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  item={product}
-                  showFavoriteButton={true}
-                  onFavoriteClick={(itemId) => {
-                    console.log('Favorite clicked:', itemId)
-                  }}
-                />
-              ))}
-            </div>
-
-            {/* 빈 상태 */}
-            {filteredProducts.length === 0 && (
-              <div className="text-center py-12">
-                <div className="text-gray-400 text-lg mb-2">🔍</div>
-                <p className="text-gray-500 mb-4">조건에 맞는 상품이 없습니다.</p>
-                <Button
-                  variant="outline"
-                  onClick={() => handleFiltersChange({})}
+          {/* Main Content - 상품 목록 */}
+          <main className="main-content">
+            <section className="content-section">
+              <div className="section-header">
+                <h2 className="section-title">🛍️ 용품 장터</h2>
+                <button
+                  className="write-button"
+                  onClick={() => router.push('/marketplace/write')}
                 >
-                  필터 초기화
-                </Button>
+                  상품 등록
+                </button>
               </div>
-            )}
-          </div>
-        </div>
 
-        {/* 모바일 플로팅 등록 버튼 */}
-        <div className="fixed bottom-20 right-4 sm:hidden">
-          <Link href="/marketplace/write">
-            <Button size="lg" className="rounded-full shadow-lg">
-              <Edit className="h-5 w-5 mr-2" />
-              등록
-            </Button>
-          </Link>
+              {/* 카테고리 탭 */}
+              <div className="category-tabs">
+                {productCategories.map(cat => (
+                  <button
+                    key={cat.key}
+                    className={`category-tab ${activeCategory === cat.key ? 'active' : ''}`}
+                    onClick={() => setActiveCategory(cat.key)}
+                  >
+                    {cat.label}
+                    <span className="tab-count">{cat.count}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* 상품 그리드 */}
+              {filteredByCategory.length > 0 ? (
+                <div className="products-grid">
+                  {filteredByCategory.map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      item={product}
+                      showFavoriteButton={true}
+                      onFavoriteClick={(itemId) => {
+                        console.log('Favorite clicked:', itemId)
+                      }}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="empty-state">
+                  <div className="empty-icon">🛍️</div>
+                  <p className="empty-text">등록된 상품이 없습니다.</p>
+                  <p className="empty-subtext">첫 번째 상품을 등록해보세요!</p>
+                </div>
+              )}
+            </section>
+          </main>
         </div>
       </div>
+
+      <Footer />
+
+      <style jsx>{`
+        .page {
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .main-layout {
+          flex: 1;
+          background: var(--warm-gray);
+        }
+
+        .layout-container {
+          max-width: 1400px;
+          margin: 0 auto;
+          padding: var(--space-2xl);
+          display: grid;
+          grid-template-columns: 280px 1fr;
+          gap: var(--space-2xl);
+          align-items: start;
+        }
+
+        /* Left Sidebar */
+        .left-sidebar {
+          position: sticky;
+          top: 80px;
+        }
+
+        .sidebar-card {
+          background: rgba(255, 255, 255, 0.9);
+          border-radius: 20px;
+          padding: var(--space-xl);
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .sidebar-title {
+          font-size: 18px;
+          font-weight: 700;
+          color: var(--gray-900);
+          margin-bottom: var(--space-lg);
+        }
+
+        .category-list {
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-xs);
+        }
+
+        .category-item {
+          display: flex;
+          align-items: center;
+          gap: var(--space-sm);
+          padding: var(--space-sm) var(--space-md);
+          background: transparent;
+          border: none;
+          border-radius: 12px;
+          cursor: pointer;
+          transition: all 0.2s;
+          text-align: left;
+        }
+
+        .category-item:hover {
+          background: rgba(102, 126, 234, 0.1);
+        }
+
+        .category-item.active {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+        }
+
+        .category-icon {
+          font-size: 18px;
+        }
+
+        .category-name {
+          flex: 1;
+          font-size: 14px;
+          font-weight: 600;
+        }
+
+        .category-count {
+          font-size: 12px;
+          color: rgba(255, 255, 255, 0.8);
+        }
+
+        .category-item:not(.active) .category-count {
+          color: var(--gray-500);
+        }
+
+        /* Main Content */
+        .main-content {
+          min-width: 0;
+        }
+
+        .content-section {
+          margin-bottom: var(--space-2xl);
+        }
+
+        .section-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: var(--space-xl);
+        }
+
+        .section-title {
+          font-size: 24px;
+          font-weight: 800;
+          color: var(--gray-900);
+        }
+
+        .write-button {
+          padding: 10px 20px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border: none;
+          border-radius: 12px;
+          color: white;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .write-button:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Category Tabs */
+        .category-tabs {
+          display: flex;
+          gap: var(--space-sm);
+          margin-bottom: var(--space-xl);
+          overflow-x: auto;
+          padding-bottom: var(--space-xs);
+        }
+
+        .category-tab {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 10px 18px;
+          background: rgba(255, 255, 255, 0.9);
+          border: 1.5px solid rgba(200, 200, 200, 0.3);
+          border-radius: 12px;
+          color: var(--gray-700);
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+          white-space: nowrap;
+        }
+
+        .category-tab:hover {
+          background: rgba(102, 126, 234, 0.1);
+          border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        .category-tab.active {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border-color: transparent;
+          color: white;
+        }
+
+        .tab-count {
+          font-size: 12px;
+          opacity: 0.8;
+        }
+
+        /* Products Grid */
+        .products-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: var(--space-lg);
+        }
+
+        /* Empty State */
+        .empty-state {
+          text-align: center;
+          padding: 80px 20px;
+          background: rgba(255, 255, 255, 0.9);
+          border-radius: 20px;
+          border: 1.5px solid rgba(200, 200, 200, 0.2);
+        }
+
+        .empty-icon {
+          font-size: 64px;
+          margin-bottom: var(--space-lg);
+        }
+
+        .empty-text {
+          font-size: 18px;
+          font-weight: 600;
+          color: var(--gray-900);
+          margin-bottom: var(--space-xs);
+        }
+
+        .empty-subtext {
+          font-size: 14px;
+          color: var(--gray-500);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+          .layout-container {
+            grid-template-columns: 1fr;
+          }
+
+          .left-sidebar {
+            position: static;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .layout-container {
+            padding: var(--space-lg);
+          }
+
+          .section-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: var(--space-md);
+          }
+
+          .write-button {
+            width: 100%;
+          }
+
+          .products-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+      `}</style>
     </div>
   )
 }
