@@ -77,89 +77,6 @@ export function PostList({ initialPosts, currentUserId, showActions = false }: P
 
   return (
     <div className="space-y-6">
-      {/* 검색 및 필터 */}
-      <div className="space-y-4">
-        {/* 검색바 */}
-        <div className="flex gap-2">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={handleSearchKeyPress}
-              placeholder="게시글 검색..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            />
-          </div>
-          <Button onClick={handleSearch} disabled={loading}>
-            검색
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => setShowFilters(!showFilters)}
-          >
-            <Filter className="h-4 w-4" />
-          </Button>
-        </div>
-
-        {/* 필터 옵션 */}
-        {showFilters && (
-          <div className="bg-gray-50 p-4 rounded-lg space-y-4">
-            {/* 카테고리 필터 */}
-            <div>
-              <label className="block text-sm font-medium mb-2">카테고리</label>
-              <div className="flex flex-wrap gap-2">
-                <Badge
-                  variant={filters.category === undefined ? 'default' : 'outline'}
-                  className="cursor-pointer"
-                  onClick={() => handleCategoryFilter(undefined)}
-                >
-                  전체
-                </Badge>
-                {Object.entries(POST_CATEGORIES).map(([key, label]) => (
-                  <Badge
-                    key={key}
-                    variant={filters.category === key ? 'default' : 'outline'}
-                    className="cursor-pointer"
-                    onClick={() => handleCategoryFilter(key as PostCategory)}
-                  >
-                    {label}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-
-            {/* 정렬 옵션 */}
-            <div>
-              <label className="block text-sm font-medium mb-2">정렬</label>
-              <div className="flex gap-2">
-                <Badge
-                  variant={filters.sortBy === 'latest' ? 'default' : 'outline'}
-                  className="cursor-pointer"
-                  onClick={() => handleSortChange('latest')}
-                >
-                  최신순
-                </Badge>
-                <Badge
-                  variant={filters.sortBy === 'popular' ? 'default' : 'outline'}
-                  className="cursor-pointer"
-                  onClick={() => handleSortChange('popular')}
-                >
-                  인기순
-                </Badge>
-                <Badge
-                  variant={filters.sortBy === 'views' ? 'default' : 'outline'}
-                  className="cursor-pointer"
-                  onClick={() => handleSortChange('views')}
-                >
-                  조회순
-                </Badge>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
 
       {/* 로딩 상태 */}
       {loading && (
@@ -203,17 +120,10 @@ export function PostList({ initialPosts, currentUserId, showActions = false }: P
             ))
           ) : (
             !loading && (
-              <div className="text-center py-12 bg-gray-50 rounded-lg">
-                <p className="text-gray-500 mb-4">
-                  {searchQuery || filters.category
-                    ? '검색 결과가 없습니다.'
-                    : '아직 게시글이 없습니다.'}
-                </p>
-                {(!searchQuery && !filters.category) && (
-                  <Button onClick={() => window.location.href = '/community/write'}>
-                    첫 번째 게시글 작성하기
-                  </Button>
-                )}
+              <div className="empty-state">
+                <div className="empty-icon">📝</div>
+                <p className="empty-text">아직 게시글이 없습니다.</p>
+                <p className="empty-subtext">첫 번째 게시글을 작성해보세요!</p>
               </div>
             )
           )}
@@ -228,6 +138,33 @@ export function PostList({ initialPosts, currentUserId, showActions = false }: P
           </Button>
         </div>
       )}
+
+      <style jsx>{`
+        .empty-state {
+          text-align: center;
+          padding: 60px 20px;
+          background: rgba(255, 255, 255, 0.9);
+          border-radius: 20px;
+          border: 1.5px solid rgba(200, 200, 200, 0.2);
+        }
+
+        .empty-icon {
+          font-size: 48px;
+          margin-bottom: var(--space-lg);
+        }
+
+        .empty-text {
+          font-size: 18px;
+          font-weight: 700;
+          color: var(--gray-900);
+          margin-bottom: var(--space-sm);
+        }
+
+        .empty-subtext {
+          font-size: 14px;
+          color: var(--gray-600);
+        }
+      `}</style>
     </div>
   )
 }
