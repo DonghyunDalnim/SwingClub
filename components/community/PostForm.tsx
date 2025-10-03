@@ -501,6 +501,7 @@ export function PostForm({ userId, userName, mode, initialData }: PostFormProps)
           color: var(--gray-900);
           background: rgba(255, 255, 255, 0.8);
           transition: all 0.2s;
+          box-sizing: border-box;
         }
 
         .form-input:focus,
