@@ -129,11 +129,19 @@ export function ProductCard({
       </div>
 
       <style jsx>{`
+        :global(a.product-card) {
+          text-decoration: none !important;
+        }
+
         .product-card {
           position: relative;
           display: block;
           text-decoration: none;
           animation: fadeInUp 0.6s ease-out backwards;
+        }
+
+        .product-card * {
+          text-decoration: none !important;
         }
 
         @keyframes fadeInUp {
