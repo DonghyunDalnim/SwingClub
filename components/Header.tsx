@@ -1,26 +1,39 @@
 'use client';
 
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+
 export default function Header() {
+  const router = useRouter();
+
   return (
     <header className="header">
       <div className="container">
         <div className="header-content">
           <div className="header-left">
-            <a href="/" className="logo">
+            <Link href="/" className="logo">
               <span className="logo-icon">🎺</span>
               <span className="logo-text">Swing Connect</span>
-            </a>
+            </Link>
           </div>
 
-          <nav className="header-nav">
-            <a href="/community" className="nav-link">커뮤니티</a>
-            <a href="/location" className="nav-link">장소</a>
-            <a href="/marketplace" className="nav-link">장터</a>
-          </nav>
-
           <div className="header-right">
-            <button className="button button-outline">로그인</button>
-            <button className="button button-primary">시작하기</button>
+            <button className="icon-button" aria-label="알림">
+              <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              <span className="notification-badge">3</span>
+            </button>
+
+            <button className="icon-button" aria-label="메시지">
+              <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+              </svg>
+            </button>
+
+            <button className="button button-outline" onClick={() => router.push('/login')}>
+              로그인
+            </button>
           </div>
         </div>
       </div>
@@ -78,47 +91,52 @@ export default function Header() {
           background-clip: text;
         }
 
-        .header-nav {
-          display: flex;
-          align-items: center;
-          gap: var(--space-xl);
-          flex: 1;
-          justify-content: center;
-        }
-
-        .nav-link {
-          text-decoration: none;
-          color: var(--gray-700);
-          font-weight: 600;
-          font-size: 15px;
-          transition: color 0.2s;
-          position: relative;
-        }
-
-        .nav-link:hover {
-          color: #667eea;
-        }
-
-        .nav-link::after {
-          content: '';
-          position: absolute;
-          bottom: -4px;
-          left: 0;
-          right: 0;
-          height: 2px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          transform: scaleX(0);
-          transition: transform 0.2s;
-        }
-
-        .nav-link:hover::after {
-          transform: scaleX(1);
-        }
-
         .header-right {
           display: flex;
           align-items: center;
           gap: var(--space-md);
+        }
+
+        .icon-button {
+          position: relative;
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: transparent;
+          border: none;
+          border-radius: 10px;
+          cursor: pointer;
+          transition: all 0.2s;
+          color: var(--gray-700);
+        }
+
+        .icon-button:hover {
+          background: var(--gray-100);
+          color: #667eea;
+        }
+
+        .icon {
+          width: 22px;
+          height: 22px;
+        }
+
+        .notification-badge {
+          position: absolute;
+          top: 6px;
+          right: 6px;
+          width: 18px;
+          height: 18px;
+          background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+          color: white;
+          border-radius: 50%;
+          font-size: 11px;
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 2px 8px rgba(245, 87, 108, 0.4);
         }
 
         .button {
@@ -155,7 +173,7 @@ export default function Header() {
         }
 
         @media (max-width: 768px) {
-          .header-nav {
+          .icon-button {
             display: none;
           }
 

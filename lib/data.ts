@@ -1,48 +1,47 @@
-export const spaces = [
+export interface Space {
+  id: string;
+  title: string;
+  category: string;
+  requests: number;
+  rating: number;
+  tags: string[];
+  rank?: number;
+}
+
+export const spaces: Space[] = [
   {
     id: '1',
-    name: '스윙타임 댄스홀',
-    category: '댄스홀',
-    rating: 4.8,
-    reviews: 156,
-    image: 'https://images.unsplash.com/photo-1504609813442-a8924e83f76e?w=800',
-    price: '시간당 50,000원',
-    location: '강남구',
-    tags: ['주차가능', '샤워실', '음향시설'],
+    title: '린디팝 레슨',
+    category: '레슨',
+    requests: 255555,
+    rating: 4.9,
+    tags: ['린디홉', '강남', '주말'],
+    rank: 1
   },
   {
     id: '2',
-    name: '재즈클럽 블루노트',
-    category: '클럽',
-    rating: 4.9,
-    reviews: 234,
-    image: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=800',
-    price: '시간당 80,000원',
-    location: '홍대',
-    tags: ['라이브 밴드', '바', '무대'],
+    title: '스윙 파티',
+    category: '파티',
+    requests: 123456,
+    rating: 4.8,
+    tags: ['주말', '홍대', '라이브밴드']
   },
   {
     id: '3',
-    name: '스윙앤롤 스튜디오',
-    category: '스튜디오',
+    title: '댄스 파트너 찾기',
+    category: '매칭',
+    requests: 98765,
     rating: 4.7,
-    reviews: 89,
-    image: 'https://images.unsplash.com/photo-1545128485-c400e7702796?w=800',
-    price: '시간당 40,000원',
-    location: '마포구',
-    tags: ['거울', '에어컨', 'WIFI'],
+    tags: ['초보환영', '강남', '평일']
   },
   {
     id: '4',
-    name: '린디팝 아카데미',
-    category: '학원',
+    title: '댄스화 판매',
+    category: '용품',
+    requests: 54321,
     rating: 4.9,
-    reviews: 312,
-    image: 'https://images.unsplash.com/photo-1483412468200-72182dbbc544?w=800',
-    price: '월 200,000원',
-    location: '서초구',
-    tags: ['전문강사', '소그룹', '주차'],
-  },
+    tags: ['새상품', '배송가능', '협상가능']
+  }
 ];
 
 export const stories = [
