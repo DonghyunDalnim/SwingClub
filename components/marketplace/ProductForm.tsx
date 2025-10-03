@@ -848,6 +848,7 @@ export function ProductForm({ userId, userName, mode }: ProductFormProps) {
           border-radius: 20px;
           padding: var(--space-2xl);
           box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+          max-width: 744px;
         }
 
         .error-message {
