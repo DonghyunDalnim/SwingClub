@@ -917,7 +917,7 @@ export function ProductForm({ userId, userName, mode }: ProductFormProps) {
 
         .form-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          grid-template-columns: repeat(2, 1fr);
           gap: var(--space-lg);
         }
 
