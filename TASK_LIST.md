@@ -77,6 +77,15 @@
   - [ ] 카카오 OAuth 실제 구현 (Phase 2)
   - [ ] 네이버 OAuth 실제 구현 (Phase 2)
 
+- [x] **로그아웃 시스템** (lib/auth/providers.ts - 완전 구현)
+  - [x] Firebase 로그아웃 기능 (signOut)
+  - [x] 쿠키 삭제 (firebase-token, user-data)
+  - [x] 전역 인증 상태 초기화
+  - [x] 프로필 페이지 로그아웃 버튼 (app/profile/page.tsx)
+  - [x] 로그아웃 후 자동 리디렉션 (/ 루트 페이지로)
+  - [x] 로그아웃 확인 다이얼로그 (사용자 확인)
+  - [x] 로딩 상태 표시 (로그아웃 중...)
+
 #### 1.3 로그인 페이지 UI ✅ **100% 완료**
 - [x] **로그인 페이지** (app/login/page.tsx - 180줄 완전 구현)
   - [x] Glassmorphism 스타일 카드 디자인
@@ -94,23 +103,126 @@
   - [x] 로그인 성공 시 의도된 페이지로 리다이렉션
 
 #### 1.4 회원가입 시스템 ⚠️ **30% 완료** (우선 구현 필요)
-- [x] 이메일 회원가입 백엔드 로직 (signUpWithEmail)
-- [ ] **회원가입 페이지 UI** (app/signup/page.tsx - 미구현)
-  - [ ] 3단계 회원가입 마법사 (Wizard) 컴포넌트
-  - [ ] Step 1: 계정 정보 (이메일, 비밀번호, 소셜 로그인 선택)
-  - [ ] Step 2: 프로필 정보 (닉네임, 댄스 레벨, 지역, 선호 스타일)
-  - [ ] Step 3: 약관 동의 (서비스 이용약관, 개인정보처리방침, 마케팅)
-  - [ ] 진행 상태 바 (ProgressBar)
-  - [ ] 입력 검증 (이메일 형식, 비밀번호 강도)
 
-- [ ] **회원가입 폼 컴포넌트**
-  - [ ] SignupWizard 컴포넌트
-  - [ ] Step1AccountInfo 컴포넌트
-  - [ ] Step2ProfileInfo 컴포넌트
-  - [ ] Step3Terms 컴포넌트
-  - [ ] 댄스 레벨 선택기 (드롭다운)
-  - [ ] 지역 선택기 (시/도, 구/군 2단계)
-  - [ ] 선호 스타일 다중 선택 (체크박스)
+**설계 문서**: [claudedocs/signup-system-design.md](claudedocs/signup-system-design.md)
+
+- [x] 이메일 회원가입 백엔드 로직 (signUpWithEmail)
+- [x] 회원가입 시스템 설계 완료 (3단계 마법사 아키텍처)
+
+##### Phase 1: 기본 컴포넌트 구현
+- [ ] **SignupButton 컴포넌트** (app/signup/components/SignupButton.tsx)
+  - [ ] 5가지 변형: primary, secondary, social-google, social-kakao, social-naver
+  - [ ] 로딩 상태 표시 (스피너 + "로그인 중..." 텍스트)
+  - [ ] Glassmorphism 스타일 (login 페이지와 동일)
+  - [ ] 호버/클릭 효과 (scale 애니메이션)
+
+- [ ] **StepIndicator 컴포넌트** (app/signup/components/StepIndicator.tsx)
+  - [ ] 3단계 진행 상태 표시 (1/3, 2/3, 3/3)
+  - [ ] 완료/진행중/대기 상태 시각화
+  - [ ] 원형 아이콘 + 단계 레이블
+  - [ ] 연결선 애니메이션 (완료 시 초록색)
+
+##### Phase 2: 마법사 컨테이너 구현
+- [ ] **SignupWizard 컴포넌트** (app/signup/components/SignupWizard.tsx)
+  - [ ] SignupState 상태 관리 (currentStep, accountData, profileData, termsData)
+  - [ ] localStorage 통합 (진행 상황 저장/복구)
+  - [ ] Step 전환 로직 (handleNextStep, handleBackStep)
+  - [ ] 최종 제출 로직 (handleSignupSubmit)
+  - [ ] 에러 처리 및 표시
+  - [ ] useSignIn hook 통합
+
+##### Phase 3: Step 1 - 계정 정보
+- [ ] **Step1AccountInfo 컴포넌트** (app/signup/components/Step1AccountInfo.tsx)
+  - [ ] **소셜 로그인 섹션**
+    - [ ] Google 로그인 버튼 (signInWithGoogle 연동)
+    - [ ] Kakao 로그인 버튼 (플레이스홀더 - "곧 지원 예정")
+    - [ ] Naver 로그인 버튼 (플레이스홀더 - "곧 지원 예정")
+    - [ ] 로딩 상태 표시 (프로바이더별)
+  - [ ] **OR 구분선** (시각적 구분)
+  - [ ] **이메일/비밀번호 입력 섹션**
+    - [ ] 이메일 입력 필드 (실시간 유효성 검증)
+    - [ ] 비밀번호 입력 필드 (강도 표시 바)
+    - [ ] 비밀번호 확인 필드 (일치 검증)
+    - [ ] 에러 메시지 표시 (shake 애니메이션)
+  - [ ] "다음" 버튼 (모든 필드 유효할 때만 활성화)
+
+##### Phase 4: Step 2 - 프로필 정보
+- [ ] **Step2ProfileInfo 컴포넌트** (app/signup/components/Step2ProfileInfo.tsx)
+  - [ ] **필수 필드**
+    - [ ] 닉네임 입력 (2-20자, 실시간 검증)
+    - [ ] 댄스 레벨 선택 (드롭다운 - 초급/중급/고급/전문가)
+    - [ ] 활동 지역 선택 (드롭다운 - 주요 도시)
+  - [ ] **선택 필드**
+    - [ ] 자기소개 textarea (최대 200자, 문자 카운터)
+    - [ ] 관심 댄스 스타일 (다중 선택 칩/배지)
+  - [ ] "이전" 버튼 (Step 1로 복귀)
+  - [ ] "다음" 버튼 (필수 필드만 입력 시 활성화)
+
+##### Phase 5: Step 3 - 약관 동의
+- [ ] **Step3Terms 컴포넌트** (app/signup/components/Step3Terms.tsx)
+  - [ ] **전체 동의 체크박스** (모든 항목 일괄 선택)
+  - [ ] **개별 약관 체크박스**
+    - [ ] 서비스 이용약관 (필수) + 보기 링크
+    - [ ] 개인정보 처리방침 (필수) + 보기 링크
+    - [ ] 마케팅 정보 수신 (선택) + 설명 텍스트
+  - [ ] 커스텀 체크박스 디자인 (숨고 스타일)
+  - [ ] "이전" 버튼 (Step 2로 복귀)
+  - [ ] "회원가입 완료" 버튼 (필수 약관 동의 시 활성화)
+  - [ ] 로딩 상태 표시 (제출 중)
+
+##### Phase 6: 메인 페이지 및 통합
+- [ ] **app/signup/page.tsx** (메인 페이지)
+  - [ ] Suspense 래퍼 (로딩 폴백)
+  - [ ] SignupWizard 컴포넌트 렌더링
+  - [ ] Meta 태그 (title, description)
+  - [ ] 로딩 폴백 UI (login 페이지 스타일)
+
+- [ ] **기존 시스템 통합**
+  - [ ] useSignIn hook 활용 (signInWithGoogle, signUp)
+  - [ ] lib/auth/utils.ts 유효성 검증 재사용
+  - [ ] Firestore 통합 (createOrUpdateUserDoc)
+  - [ ] AuthContext 자동 업데이트 확인
+
+##### Phase 7: 테스트 및 검증
+- [ ] **전체 플로우 테스트**
+  - [ ] 이메일 회원가입 플로우 (Step 1 → 2 → 3 → 제출)
+  - [ ] Google 소셜 로그인 플로우 (Step 1 → 2 → 3)
+  - [ ] Kakao/Naver 플레이스홀더 확인
+  - [ ] 뒤로가기/앞으로가기 네비게이션
+  - [ ] localStorage 상태 복구 (새로고침)
+
+- [ ] **유효성 검증 테스트**
+  - [ ] 이메일 형식 검증 (올바른/잘못된 형식)
+  - [ ] 비밀번호 강도 검증 (약함/중간/강함)
+  - [ ] 비밀번호 확인 일치 검증
+  - [ ] 닉네임 길이 및 문자 검증
+  - [ ] 필수 필드 누락 시 다음 버튼 비활성화
+
+- [ ] **에러 처리 테스트**
+  - [ ] 네트워크 에러 (인터넷 끊김)
+  - [ ] Firebase 에러 (이메일 중복, 약한 비밀번호)
+  - [ ] 유효성 검증 에러 표시 (실시간 피드백)
+  - [ ] 에러 복구 (재시도)
+
+- [ ] **반응형 테스트**
+  - [ ] 모바일 (320px - 768px)
+  - [ ] 태블릿 (768px - 1024px)
+  - [ ] 데스크톱 (1024px+)
+
+##### Phase 8: 품질 보증
+- [ ] **접근성 검증**
+  - [ ] 키보드 네비게이션 (Tab, Enter)
+  - [ ] ARIA 레이블 추가
+  - [ ] 포커스 표시 (#693BF2 아웃라인)
+  - [ ] 스크린 리더 테스트
+
+- [ ] **성능 최적화**
+  - [ ] React.memo 적용 (불필요한 리렌더링 방지)
+  - [ ] useMemo/useCallback 활용
+  - [ ] 이미지 최적화 (프로필 이미지 업로드 시)
+
+**예상 소요 시간**: 3-5일
+**완료 기준**: 모든 회원가입 플로우가 정상 작동하고, 사용자가 계정 생성 후 /home으로 리디렉션됨
 
 #### 1.5 사용자 프로필 관리 ✅ **70% 완료**
 - [x] **프로필 데이터 스키마** (lib/types/auth.ts)

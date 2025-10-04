@@ -1,6 +1,0 @@
-export { Header } from './Header'
-export { HeroSection } from './HeroSection'
-export { PopularServicesSection } from './PopularServicesSection'
-export { CommunitySection } from './CommunitySection'
-export { InstructorsSection } from './InstructorsSection'
-export { CallToActionSection } from './CallToActionSection'
