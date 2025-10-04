@@ -3,7 +3,7 @@
 import React from 'react';
 
 export interface SignupButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant: 'primary' | 'social-google' | 'social-kakao' | 'social-naver';
+  variant: 'primary' | 'social-google';
   loading?: boolean;
   children: React.ReactNode;
 }
@@ -42,18 +42,6 @@ const SignupButton = React.memo<SignupButtonProps>(
           color: white;
           box-shadow: 0 4px 16px rgba(66, 133, 244, 0.3);
         `,
-        'social-kakao': `
-          ${baseStyles}
-          background: #fee500;
-          color: #000000;
-          box-shadow: 0 4px 16px rgba(254, 229, 0, 0.3);
-        `,
-        'social-naver': `
-          ${baseStyles}
-          background: #03c75a;
-          color: white;
-          box-shadow: 0 4px 16px rgba(3, 199, 90, 0.3);
-        `,
       };
 
       return variantMap[variant];
@@ -63,8 +51,6 @@ const SignupButton = React.memo<SignupButtonProps>(
       const hoverMap = {
         'primary': 'box-shadow: 0 8px 24px rgba(102, 126, 234, 0.5);',
         'social-google': 'box-shadow: 0 8px 24px rgba(66, 133, 244, 0.5);',
-        'social-kakao': 'background: #fdd835; box-shadow: 0 8px 24px rgba(254, 229, 0, 0.5);',
-        'social-naver': 'background: #02b351; box-shadow: 0 8px 24px rgba(3, 199, 90, 0.5);',
       };
 
       return hoverMap[variant];
@@ -78,8 +64,6 @@ const SignupButton = React.memo<SignupButtonProps>(
       const iconMap = {
         'primary': null,
         'social-google': '🔵',
-        'social-kakao': '🟡',
-        'social-naver': '🟢',
       };
 
       const icon = iconMap[variant];

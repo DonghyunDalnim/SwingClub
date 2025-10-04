@@ -28,19 +28,6 @@ describe('SignupButton', () => {
       expect(button).toBeInTheDocument();
     });
 
-    test('social-kakao 변형으로 정확히 렌더링되어야 함', () => {
-      render(<SignupButton variant="social-kakao">카카오로 가입하기</SignupButton>);
-
-      const button = screen.getByRole('button', { name: /카카오로 가입하기/ });
-      expect(button).toBeInTheDocument();
-    });
-
-    test('social-naver 변형으로 정확히 렌더링되어야 함', () => {
-      render(<SignupButton variant="social-naver">네이버로 가입하기</SignupButton>);
-
-      const button = screen.getByRole('button', { name: /네이버로 가입하기/ });
-      expect(button).toBeInTheDocument();
-    });
 
     test('children 텍스트를 정확히 표시해야 함', () => {
       render(<SignupButton {...defaultProps} />);
@@ -54,24 +41,10 @@ describe('SignupButton', () => {
       expect(screen.getByText('🔵')).toBeInTheDocument();
     });
 
-    test('social-kakao 변형에서 올바른 아이콘을 표시해야 함', () => {
-      render(<SignupButton variant="social-kakao">카카오로 가입하기</SignupButton>);
-
-      expect(screen.getByText('🟡')).toBeInTheDocument();
-    });
-
-    test('social-naver 변형에서 올바른 아이콘을 표시해야 함', () => {
-      render(<SignupButton variant="social-naver">네이버로 가입하기</SignupButton>);
-
-      expect(screen.getByText('🟢')).toBeInTheDocument();
-    });
-
     test('primary 변형에서 아이콘이 표시되지 않아야 함', () => {
       render(<SignupButton {...defaultProps} />);
 
       expect(screen.queryByText('🔵')).not.toBeInTheDocument();
-      expect(screen.queryByText('🟡')).not.toBeInTheDocument();
-      expect(screen.queryByText('🟢')).not.toBeInTheDocument();
     });
   });
 
@@ -265,23 +238,6 @@ describe('SignupButton', () => {
       expect(styles.background).toContain('linear-gradient');
     });
 
-    test('social-kakao 변형에서 올바른 배경색을 가져야 함', () => {
-      render(<SignupButton variant="social-kakao">카카오로 가입하기</SignupButton>);
-
-      const button = screen.getByRole('button');
-      const styles = window.getComputedStyle(button);
-      // Background color is #fee500 in RGB
-      expect(styles.backgroundColor).toBe('rgb(254, 229, 0)');
-    });
-
-    test('social-naver 변형에서 올바른 배경색을 가져야 함', () => {
-      render(<SignupButton variant="social-naver">네이버로 가입하기</SignupButton>);
-
-      const button = screen.getByRole('button');
-      const styles = window.getComputedStyle(button);
-      // Background color is #03c75a in RGB
-      expect(styles.backgroundColor).toBe('rgb(3, 199, 90)');
-    });
 
     test('버튼 크기가 올바르게 설정되어야 함', () => {
       render(<SignupButton {...defaultProps} />);
@@ -430,22 +386,6 @@ describe('SignupButton', () => {
 
     test('social-google 변형에서 흰색 텍스트를 사용해야 함', () => {
       render(<SignupButton variant="social-google">구글로 가입하기</SignupButton>);
-
-      const button = screen.getByRole('button');
-      const styles = window.getComputedStyle(button);
-      expect(styles.color).toBe('rgb(255, 255, 255)');
-    });
-
-    test('social-kakao 변형에서 검은색 텍스트를 사용해야 함', () => {
-      render(<SignupButton variant="social-kakao">카카오로 가입하기</SignupButton>);
-
-      const button = screen.getByRole('button');
-      const styles = window.getComputedStyle(button);
-      expect(styles.color).toBe('rgb(0, 0, 0)');
-    });
-
-    test('social-naver 변형에서 흰색 텍스트를 사용해야 함', () => {
-      render(<SignupButton variant="social-naver">네이버로 가입하기</SignupButton>);
 
       const button = screen.getByRole('button');
       const styles = window.getComputedStyle(button);
