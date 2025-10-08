@@ -156,6 +156,26 @@ function LoginContent() {
               <span className="footer-divider">|</span>
               <a href="/privacy" className="footer-link">개인정보처리방침</a>
             </div>
+
+            {/* 회원가입 링크 */}
+            <p style={{
+              marginTop: '24px',
+              textAlign: 'center',
+              fontSize: '14px',
+              color: '#9ca3af'
+            }}>
+              아직 계정이 없으신가요?{' '}
+              <a
+                href="/signup"
+                style={{
+                  color: '#667eea',
+                  textDecoration: 'none',
+                  fontWeight: 600
+                }}
+              >
+                회원가입
+              </a>
+            </p>
           </div>
         </div>
       </div>
