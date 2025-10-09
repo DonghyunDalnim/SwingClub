@@ -1,8 +1,25 @@
+'use client'
+
+/**
+ * 프로필 조회 페이지
+ * Issue #83 - 프로필 편집 버튼 추가
+ */
+
+import { useRouter } from 'next/navigation'
 import { Button, Card, CardContent, CardHeader, CardTitle } from '@/components/core'
 import { Badge } from '@/components/core'
 import { ArrowLeft, Edit, Settings, MapPin, Calendar, Award, Heart, MessageCircle, Users, FileText, Bell, Lock, Smartphone, HelpCircle, Mail, LogOut } from 'lucide-react'
+import { useAuth } from '@/lib/auth/hooks'
 
 export default function ProfilePage() {
+  const router = useRouter()
+  const { user, isAuthenticated } = useAuth()
+
+  // 편집 버튼 클릭 핸들러
+  const handleEdit = () => {
+    router.push('/profile/edit')
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -13,8 +30,19 @@ export default function ProfilePage() {
             <span className="font-semibold text-lg">내 정보</span>
           </div>
           <div className="flex items-center space-x-3">
-            <Edit className="h-6 w-6" />
-            <Settings className="h-6 w-6" />
+            {/* 본인 프로필일 때만 편집 버튼 표시 */}
+            {isAuthenticated && (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleEdit}
+                className="flex items-center space-x-1"
+              >
+                <Edit className="h-4 w-4" />
+                <span className="hidden sm:inline">편집</span>
+              </Button>
+            )}
+            <Settings className="h-6 w-6 cursor-pointer" />
           </div>
         </div>
       </header>
