@@ -11,9 +11,21 @@ import {
   type User as FirebaseUser,
   type Auth
 } from 'firebase/auth'
-import { doc, setDoc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
+import {
+  doc,
+  setDoc,
+  getDoc,
+  updateDoc,
+  serverTimestamp,
+  runTransaction,
+  query,
+  collection,
+  where,
+  getDocs
+} from 'firebase/firestore'
 import { auth, db } from '../firebase'
 import type { User, AuthProvider, UserProfile, FirebaseUserToUser } from '../types/auth'
+import { validateProfileData, validateProfileImageUrl } from '../validators/profile'
 
 // Google Auth Provider
 const googleProvider = new GoogleAuthProvider()
@@ -142,17 +154,102 @@ export const signOut = async (): Promise<void> => {
   }
 }
 
-// Update User Profile
-export const updateUserProfile = async (userId: string, profile: Partial<UserProfile>): Promise<void> => {
+/**
+ * 닉네임 중복 검사 헬퍼 함수
+ */
+const checkNicknameDuplicate = async (
+  nickname: string,
+  currentUserId: string
+): Promise<boolean> => {
   try {
+    const usersRef = collection(db, 'users')
+    const nicknameQuery = query(
+      usersRef,
+      where('profile.nickname', '==', nickname)
+    )
+    const snapshot = await getDocs(nicknameQuery)
+
+    // 다른 사용자가 동일한 닉네임을 사용하고 있는지 확인
+    for (const docSnapshot of snapshot.docs) {
+      if (docSnapshot.id !== currentUserId) {
+        return true // 중복됨
+      }
+    }
+
+    return false // 중복되지 않음
+  } catch (error) {
+    console.error('Nickname duplicate check error:', error)
+    throw new Error('nickname-check-failed')
+  }
+}
+
+// Update User Profile (강화 버전)
+export const updateUserProfile = async (
+  userId: string,
+  profileData: Partial<UserProfile> & { photoURL?: string | null }
+): Promise<void> => {
+  try {
+    const { photoURL, ...profile } = profileData
+
+    // 유효성 검증
+    const profileValidation = validateProfileData(profile)
+    if (!profileValidation.valid) {
+      throw new Error(profileValidation.error || 'profile-validation-failed')
+    }
+
+    // 프로필 이미지 URL 검증
+    if (photoURL !== undefined) {
+      const photoURLValidation = validateProfileImageUrl(photoURL)
+      if (!photoURLValidation.valid) {
+        throw new Error(photoURLValidation.error || 'photourl-validation-failed')
+      }
+    }
+
+    // Transaction으로 닉네임 중복 검사 및 업데이트 원자적 처리
     const userRef = doc(db, 'users', userId)
-    await updateDoc(userRef, {
-      profile,
-      updatedAt: serverTimestamp()
+
+    await runTransaction(db, async (transaction) => {
+      // 사용자 문서 존재 확인
+      const userDoc = await transaction.get(userRef)
+      if (!userDoc.exists()) {
+        throw new Error('user-not-found')
+      }
+
+      const currentData = userDoc.data()
+      const currentNickname = currentData.profile?.nickname
+
+      // 닉네임이 변경되는 경우 중복 검사
+      if (profile.nickname && profile.nickname !== currentNickname) {
+        const isDuplicate = await checkNicknameDuplicate(profile.nickname, userId)
+        if (isDuplicate) {
+          throw new Error('nickname-already-in-use')
+        }
+      }
+
+      // 업데이트할 데이터 구성
+      const updateData: Record<string, any> = {
+        updatedAt: serverTimestamp()
+      }
+
+      // 프로필 필드 업데이트 (기존 프로필과 병합)
+      if (Object.keys(profile).length > 0) {
+        updateData.profile = {
+          ...currentData.profile,
+          ...profile
+        }
+      }
+
+      // 프로필 이미지 URL 업데이트 (최상위 필드)
+      if (photoURL !== undefined) {
+        updateData.photoURL = photoURL
+      }
+
+      // Transaction으로 업데이트
+      transaction.update(userRef, updateData)
     })
   } catch (error: any) {
     console.error('Profile update error:', error)
-    throw new Error(error.code || 'profile-update-failed')
+    throw new Error(error.message || error.code || 'profile-update-failed')
   }
 }
 
