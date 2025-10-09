@@ -6,6 +6,7 @@ export interface SignupButtonProps extends React.ButtonHTMLAttributes<HTMLButton
   variant: 'primary' | 'social-google';
   loading?: boolean;
   children: React.ReactNode;
+  'data-testid'?: string;
 }
 
 const SignupButton = React.memo<SignupButtonProps>(
@@ -77,10 +78,12 @@ const SignupButton = React.memo<SignupButtonProps>(
           disabled={disabled || loading}
           aria-busy={loading}
           aria-label={loading ? '로딩 중...' : props['aria-label']}
+          data-testid={props['data-testid']}
           {...props}
         >
           {getIcon()}
           <span>{loading ? '로딩 중...' : children}</span>
+          {loading && <span data-testid="loading-spinner" style={{ display: 'none' }} />}
         </button>
 
         <style jsx>{`

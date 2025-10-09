@@ -141,7 +141,7 @@ export default function SignupWizard() {
       justifyContent: 'center',
       padding: '24px'
     }}>
-      <div style={{
+      <div data-testid="signup-wizard" style={{
         width: '100%',
         maxWidth: '600px',
         background: 'rgba(255, 255, 255, 0.95)',

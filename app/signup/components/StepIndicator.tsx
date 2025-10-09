@@ -30,13 +30,13 @@ const StepIndicator = React.memo<StepIndicatorProps>(({ currentStep, steps }) =>
 
   return (
     <>
-      <div className="step-indicator" role="progressbar" aria-valuenow={currentStep} aria-valuemin={1} aria-valuemax={3}>
+      <div className="step-indicator" role="progressbar" aria-valuenow={currentStep} aria-valuemin={1} aria-valuemax={3} data-testid="step-indicator">
         {steps.map((step, index) => {
           const status = getStepStatus(step.number);
           const isLastStep = index === steps.length - 1;
 
           return (
-            <div key={step.number} className="step-item">
+            <div key={step.number} className="step-item" data-testid={`step-${step.number}`} data-active={status === 'in_progress'}>
               {/* Step Circle */}
               <div className={`step-circle ${status}`}>
                 {status === 'completed' ? (

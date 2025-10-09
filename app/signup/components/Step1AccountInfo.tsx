@@ -55,7 +55,7 @@ const Step1AccountInfo: React.FC<Step1AccountInfoProps> = ({ onNext, onUpdateAcc
 
   return (
     <>
-      <div className="step1-container">
+      <div className="step1-container" data-testid="step-1">
         <div className="step1-card">
           <div className="step1-header">
             <h2 className="step1-title">소셜 계정으로 시작하기</h2>
@@ -67,8 +67,8 @@ const Step1AccountInfo: React.FC<Step1AccountInfoProps> = ({ onNext, onUpdateAcc
 
           <div className="step1-content">
             {error && (
-              <div className="error-message" role="alert">
-                <span className="error-icon">⚠️</span>
+              <div className="error-message" role="alert" data-testid="error-message">
+                <span className="error-icon" data-testid="error-icon">⚠️</span>
                 <span className="error-text">{error}</span>
               </div>
             )}
@@ -78,6 +78,7 @@ const Step1AccountInfo: React.FC<Step1AccountInfoProps> = ({ onNext, onUpdateAcc
               loading={loading}
               onClick={handleGoogleLogin}
               aria-label="Google로 계속하기"
+              data-testid="google-signup-button"
             >
               Google로 계속하기
             </SignupButton>
