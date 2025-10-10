@@ -30,7 +30,9 @@ function LoginContent() {
       switch (provider) {
         case 'google':
           await signInWithGoogle()
-          // Redirect will be handled by useEffect when isAuthenticated changes
+          const redirectTo = searchParams?.get('redirectTo')
+          const targetPath = redirectTo || '/home'
+          router.push(targetPath)
           break
         case 'kakao':
           await signInWithKakao()
