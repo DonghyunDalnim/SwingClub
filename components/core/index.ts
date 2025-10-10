@@ -80,3 +80,6 @@ export {
   ErrorState
 } from './EmptyState';
 export type { EmptyStateProps } from './EmptyState';
+
+export { ConfirmDialog } from './ConfirmDialog';
+export type { ConfirmDialogProps } from './ConfirmDialog';
