@@ -1,7 +1,9 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import BottomNav from '../components/navigation/BottomNav'
+import { TopNav } from '../components/navigation/TopNav'
 import { AuthProvider } from '../lib/auth/context'
+import { Toaster } from 'react-hot-toast'
 
 export const metadata: Metadata = {
   title: 'Swing Connect - 스윙댄스 커뮤니티',
@@ -35,6 +37,12 @@ export default function RootLayout({
         </a>
 
         <AuthProvider>
+          {/* Toast notifications */}
+          <Toaster position="top-center" />
+
+          {/* Top navigation */}
+          <TopNav />
+
           {/* ARIA-live region for announcements */}
           <div
             id="aria-live-region"

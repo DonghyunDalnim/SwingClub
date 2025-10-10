@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useIsAuthenticated, useUser } from '@/lib/auth/hooks';
-import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 export default function HomePage() {
@@ -49,8 +48,6 @@ export default function HomePage() {
 
   return (
     <div className="page">
-      <Header />
-
       {/* 2-Column Layout */}
       <div className="main-layout">
         <div className="layout-container">

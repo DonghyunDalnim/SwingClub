@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { ProductCard } from '@/components/marketplace/ProductCard'
 import type { MarketplaceItem, ItemSearchFilters } from '@/lib/types/marketplace'
 import { Timestamp } from 'firebase/firestore'
-import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 
 // 더미 데이터 (실제로는 서버에서 가져올 데이터)
@@ -161,8 +160,6 @@ export default function MarketplacePage() {
 
   return (
     <div className="page">
-      <Header />
-
       {/* 2-Column Layout */}
       <div className="main-layout">
         <div className="layout-container">
