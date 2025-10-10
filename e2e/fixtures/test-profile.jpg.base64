@@ -1,0 +1,4 @@
+# This is a placeholder for test image
+# In real testing, this would be an actual small JPEG image (1x1 pixel)
+# For CI/CD, you can generate a small test image using ImageMagick or similar
+# Example: convert -size 100x100 xc:blue test-profile.jpg
