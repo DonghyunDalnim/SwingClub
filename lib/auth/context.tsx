@@ -227,24 +227,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             // Store authentication state in cookies for server-side access (client-side only)
             if (typeof window !== 'undefined') {
               try {
-                // Get Firebase ID token for middleware validation with retry
-                let idToken: string | null = null
-                let retries = 3
-
-                while (retries > 0 && !idToken) {
-                  try {
-                    idToken = await firebaseUser.getIdToken(true) // Force refresh
-                    break
-                  } catch (tokenError: any) {
-                    retries--
-                    if (retries > 0) {
-                      console.warn(`Token fetch failed, retrying... (${retries} left)`)
-                      await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 second
-                    } else {
-                      throw tokenError
-                    }
-                  }
-                }
+                // Get Firebase ID token for middleware validation
+                const idToken = await firebaseUser.getIdToken(true) // Force refresh
 
                 if (idToken) {
                   const isSecure = location.protocol === 'https:'
@@ -252,7 +236,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                   document.cookie = `user-data=${encodeURIComponent(JSON.stringify(userWithProfile))}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax${isSecure ? '; Secure' : ''}`
                 }
               } catch (tokenError: any) {
-                console.warn('Failed to get Firebase ID token after retries:', tokenError)
+                console.warn('Failed to get Firebase ID token:', tokenError)
                 // Continue without token - user might need to re-authenticate
                 // Still set basic auth state
                 if (typeof window !== 'undefined') {
