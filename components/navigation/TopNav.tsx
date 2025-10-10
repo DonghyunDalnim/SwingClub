@@ -15,7 +15,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { User, Settings, LogOut, ChevronDown } from 'lucide-react'
+import { User, Settings, LogOut, ChevronDown, Bell, Search, Home, MapPin, MessageSquare, ShoppingBag } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAuth } from '@/lib/auth/hooks'
 import { signOut } from '@/lib/auth/providers'
@@ -138,50 +138,107 @@ export function TopNav() {
 
   return (
     <>
-      <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <div className="flex items-center">
-              <h1 className="text-xl font-bold text-[#693BF2] cursor-pointer" onClick={() => router.push('/home')}>
+            {/* Left: Logo */}
+            <div className="flex items-center flex-shrink-0">
+              <h1
+                className="text-xl font-bold text-[#693BF2] cursor-pointer hover:text-[#5A2FD9] transition-colors"
+                onClick={() => router.push('/home')}
+                aria-label="Swing Connect 홈으로"
+              >
                 SWING CONNECT
               </h1>
             </div>
 
-            {/* User Menu */}
-            <div className="relative" ref={dropdownRef}>
+            {/* Center: Navigation Menu (Desktop) */}
+            <div className="hidden md:flex items-center space-x-1">
               <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#693BF2] focus:ring-offset-2"
-                aria-label="사용자 메뉴"
-                aria-expanded={isDropdownOpen}
-                aria-haspopup="true"
+                onClick={() => router.push('/home')}
+                className="flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-[#F1EEFF] hover:text-[#693BF2] transition-colors"
               >
-                {/* Avatar */}
-                <div className="w-8 h-8 bg-gradient-to-br from-[#693BF2] to-[#5A2FD9] rounded-full flex items-center justify-center">
+                <Home className="w-4 h-4" />
+                <span className="text-sm font-medium">홈</span>
+              </button>
+              <button
+                onClick={() => router.push('/location')}
+                className="flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-[#F1EEFF] hover:text-[#693BF2] transition-colors"
+              >
+                <MapPin className="w-4 h-4" />
+                <span className="text-sm font-medium">장소</span>
+              </button>
+              <button
+                onClick={() => router.push('/community')}
+                className="flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-[#F1EEFF] hover:text-[#693BF2] transition-colors"
+              >
+                <MessageSquare className="w-4 h-4" />
+                <span className="text-sm font-medium">커뮤니티</span>
+              </button>
+              <button
+                onClick={() => router.push('/marketplace')}
+                className="flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-[#F1EEFF] hover:text-[#693BF2] transition-colors"
+              >
+                <ShoppingBag className="w-4 h-4" />
+                <span className="text-sm font-medium">마켓</span>
+              </button>
+            </div>
+
+            {/* Right: Actions */}
+            <div className="flex items-center space-x-2">
+              {/* Search Button */}
+              <button
+                className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-[#693BF2] transition-colors"
+                aria-label="검색"
+              >
+                <Search className="w-5 h-5" />
+              </button>
+
+              {/* Notification Button */}
+              <button
+                onClick={() => router.push('/notifications')}
+                className="relative p-2 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-[#693BF2] transition-colors"
+                aria-label="알림"
+              >
+                <Bell className="w-5 h-5" />
+                {/* Notification Badge (if has unread) */}
+                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+              </button>
+
+              {/* User Menu */}
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="flex items-center space-x-2 p-1.5 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#693BF2] focus:ring-offset-2"
+                  aria-label="사용자 메뉴"
+                  aria-expanded={isDropdownOpen}
+                  aria-haspopup="true"
+                >
+                  {/* Avatar */}
                   {user.photoURL ? (
                     <img
                       src={user.photoURL}
                       alt={user.profile?.nickname || user.displayName || '사용자'}
-                      className="w-8 h-8 rounded-full object-cover"
+                      className="w-9 h-9 rounded-full object-cover ring-2 ring-gray-200"
                     />
                   ) : (
-                    <User className="w-5 h-5 text-white" />
+                    <div className="w-9 h-9 bg-gradient-to-br from-[#693BF2] to-[#5A2FD9] rounded-full flex items-center justify-center">
+                      <User className="w-5 h-5 text-white" />
+                    </div>
                   )}
-                </div>
 
-                {/* Username (desktop only) */}
-                <span className="hidden md:block text-sm font-medium text-gray-700">
-                  {user.profile?.nickname || user.displayName || user.email?.split('@')[0] || '사용자'}
-                </span>
+                  {/* Username (desktop only) */}
+                  <span className="hidden lg:block text-sm font-medium text-gray-700 max-w-[120px] truncate">
+                    {user.profile?.nickname || user.displayName || user.email?.split('@')[0] || '사용자'}
+                  </span>
 
-                {/* Chevron */}
-                <ChevronDown
-                  className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${
-                    isDropdownOpen ? 'rotate-180' : ''
-                  }`}
-                />
-              </button>
+                  {/* Chevron */}
+                  <ChevronDown
+                    className={`hidden lg:block w-4 h-4 text-gray-500 transition-transform duration-200 ${
+                      isDropdownOpen ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
 
               {/* Dropdown Menu */}
               {isDropdownOpen && (
@@ -243,6 +300,7 @@ export function TopNav() {
                   </div>
                 </div>
               )}
+              </div>
             </div>
           </div>
         </div>
