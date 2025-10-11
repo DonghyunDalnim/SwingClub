@@ -10,25 +10,31 @@ import type { User } from 'firebase/auth'
 // 서버에서 현재 사용자 정보 가져오기
 export async function getCurrentUser(): Promise<User | null> {
   try {
-    // 쿠키에서 인증 상태 확인
+    // 쿠키에서 인증 상태 확인 (firebase-token으로 변경)
     const cookieStore = await cookies()
-    const authToken = cookieStore.get('auth-token')
+    const authToken = cookieStore.get('firebase-token')  // 'auth-token' -> 'firebase-token'
     const userDataCookie = cookieStore.get('user-data')
 
+    console.log('[Server] getCurrentUser - authToken exists:', !!authToken)
+    console.log('[Server] getCurrentUser - userDataCookie exists:', !!userDataCookie)
+
     if (!authToken || !userDataCookie) {
+      console.warn('[Server] Missing cookies - authToken:', !!authToken, 'userData:', !!userDataCookie)
       return null
     }
 
-    // 쿠키에서 사용자 데이터 파싱
+    // 쿠키에서 사용자 데이터 파싱 (decodeURIComponent 추가)
     try {
-      const userData = JSON.parse(userDataCookie.value)
+      const userData = JSON.parse(decodeURIComponent(userDataCookie.value))
+      console.log('[Server] User data parsed successfully, uid:', userData.uid || userData.id)
       return userData
     } catch (parseError) {
-      console.error('사용자 데이터 파싱 실패:', parseError)
+      console.error('[Server] 사용자 데이터 파싱 실패:', parseError)
+      console.error('[Server] Raw cookie value:', userDataCookie.value)
       return null
     }
   } catch (error) {
-    console.error('getCurrentUser 실패:', error)
+    console.error('[Server] getCurrentUser 실패:', error)
     return null
   }
 }
