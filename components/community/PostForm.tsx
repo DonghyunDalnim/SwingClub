@@ -8,7 +8,6 @@ import { ImageUpload } from './ImageUpload'
 import { createPostAction, updatePostAction } from '@/lib/actions/posts'
 import { POST_CATEGORIES } from '@/lib/types/community'
 import type { Post, PostCategory, CreatePostData, UpdatePostData } from '@/lib/types/community'
-import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 
 interface PostFormProps {
@@ -160,7 +159,6 @@ export function PostForm({ userId, userName, mode, initialData }: PostFormProps)
 
   return (
     <div className="page">
-      <Header />
 
       {/* 2-Column Layout */}
       <div className="main-layout">

@@ -13,7 +13,6 @@ import {
   type TradeMethod,
   type CreateItemData
 } from '@/lib/types/marketplace'
-import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 
 interface ProductFormProps {
