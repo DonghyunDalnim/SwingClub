@@ -27,8 +27,21 @@ import { getCurrentUser } from '@/lib/auth/server'
 export async function createPostAction(data: CreatePostData): Promise<{ success: boolean; postId?: string; error?: string }> {
   try {
     const user = await getCurrentUser()
+    console.log('[createPostAction] User from getCurrentUser:', user)
+
     if (!user) {
       return { success: false, error: '로그인이 필요합니다.' }
+    }
+
+    // userId 추출 (uid 또는 id 필드 지원)
+    const userId = user.uid || (user as any).id
+    const userName = user.displayName || (user as any).profile?.nickname || (user as any).displayName || '익명'
+
+    console.log('[createPostAction] Using userId:', userId, 'userName:', userName)
+
+    if (!userId) {
+      console.error('[createPostAction] No valid userId found in user object:', user)
+      return { success: false, error: '사용자 ID를 확인할 수 없습니다.' }
     }
 
     // 콘텐츠 검증
@@ -44,12 +57,14 @@ export async function createPostAction(data: CreatePostData): Promise<{ success:
       tags: data.tags?.map(tag => tag.trim()).filter(Boolean) || []
     }
 
-    const postId = await createPost(sanitizedData, user.uid, user.displayName || '익명')
+    console.log('[createPostAction] Calling createPost with userId:', userId)
+    const postId = await createPost(sanitizedData, userId, userName)
+    console.log('[createPostAction] Post created successfully, postId:', postId)
 
     revalidatePath('/community')
     return { success: true, postId }
   } catch (error) {
-    console.error('게시글 생성 실패:', error)
+    console.error('[createPostAction] 게시글 생성 실패:', error)
     return { success: false, error: '게시글 생성에 실패했습니다.' }
   }
 }
