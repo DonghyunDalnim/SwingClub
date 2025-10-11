@@ -13,6 +13,18 @@ function LoginContent() {
   const isAuthenticated = useIsAuthenticated()
   const [activeProvider, setActiveProvider] = useState<string | null>(null)
 
+  // Redirect when authenticated
+  useEffect(() => {
+    if (isAuthenticated && !loading) {
+      const redirectTo = searchParams?.get('redirectTo') || searchParams?.get('redirect')
+      const targetPath = redirectTo || '/home'
+      console.log('[Login] User is authenticated, redirecting to:', targetPath)
+
+      // Use window.location for hard redirect
+      window.location.href = targetPath
+    }
+  }, [isAuthenticated, loading, searchParams])
+
   const handleProviderSignIn = async (provider: 'google' | 'kakao' | 'naver') => {
     setActiveProvider(provider)
     clearError()
@@ -20,13 +32,10 @@ function LoginContent() {
     try {
       switch (provider) {
         case 'google':
-          await signInWithGoogle()
-          // Redirect immediately after successful Google login
-          const redirectTo = searchParams?.get('redirectTo') || searchParams?.get('redirect')
-          const targetPath = redirectTo || '/home'
-
-          // Use window.location for immediate redirect, bypassing Next.js router
-          window.location.href = targetPath
+          console.log('[Login] Starting Google sign-in...')
+          const result = await signInWithGoogle()
+          console.log('[Login] Google sign-in successful:', result)
+          // Auth state change will trigger redirect via useEffect
           break
         case 'kakao':
           await signInWithKakao()
@@ -38,8 +47,7 @@ function LoginContent() {
           break
       }
     } catch (error) {
-      console.error('Login error:', error)
-    } finally {
+      console.error('[Login] Login error:', error)
       setActiveProvider(null)
     }
   }

@@ -200,8 +200,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     try {
       unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
+        console.log('[AuthContext] Auth state changed:', firebaseUser ? 'User logged in' : 'User logged out')
         try {
           if (firebaseUser) {
+            console.log('[AuthContext] Processing logged in user:', firebaseUser.email)
             // Convert Firebase user and fetch profile
             const user: User = {
               id: firebaseUser.uid,
@@ -227,16 +229,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             // Store authentication state in cookies for server-side access (client-side only)
             if (typeof window !== 'undefined') {
               try {
+                console.log('[AuthContext] Getting Firebase ID token...')
                 // Get Firebase ID token for middleware validation
                 const idToken = await firebaseUser.getIdToken(true) // Force refresh
 
                 if (idToken) {
+                  console.log('[AuthContext] Token obtained, setting cookies...')
                   const isSecure = location.protocol === 'https:'
                   document.cookie = `firebase-token=${idToken}; path=/; max-age=${60 * 60}; SameSite=Lax${isSecure ? '; Secure' : ''}`
                   document.cookie = `user-data=${encodeURIComponent(JSON.stringify(userWithProfile))}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax${isSecure ? '; Secure' : ''}`
+                  console.log('[AuthContext] Cookies set successfully')
                 }
               } catch (tokenError: any) {
-                console.warn('Failed to get Firebase ID token:', tokenError)
+                console.error('[AuthContext] Failed to get Firebase ID token:', tokenError)
                 // Continue without token - user might need to re-authenticate
                 // Still set basic auth state
                 if (typeof window !== 'undefined') {
@@ -245,6 +250,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               }
             }
 
+            console.log('[AuthContext] Dispatching AUTH_SUCCESS, isAuthenticated will be true')
             dispatch({ type: 'AUTH_SUCCESS', payload: userWithProfile })
           } else {
             // Clear cookies on logout (client-side only)
