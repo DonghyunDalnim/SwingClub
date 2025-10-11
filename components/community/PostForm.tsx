@@ -88,6 +88,8 @@ export function PostForm({ userId, userName, mode, initialData }: PostFormProps)
     e.preventDefault()
     setError('')
 
+    console.log('[PostForm] Submit started - userId:', userId, 'userName:', userName)
+
     // 기본 검증
     if (!formData.title.trim()) {
       setError('제목을 입력해주세요.')
@@ -96,6 +98,13 @@ export function PostForm({ userId, userName, mode, initialData }: PostFormProps)
 
     if (!formData.content.trim()) {
       setError('내용을 입력해주세요.')
+      return
+    }
+
+    // userId 검증
+    if (!userId || userId === 'anonymous') {
+      setError('로그인 정보를 확인할 수 없습니다. 페이지를 새로고침하거나 다시 로그인해주세요.')
+      console.error('[PostForm] Invalid userId:', userId)
       return
     }
 
@@ -118,12 +127,15 @@ export function PostForm({ userId, userName, mode, initialData }: PostFormProps)
             }))
           }
 
+          console.log('[PostForm] Calling createPostAction...', createData)
           const result = await createPostAction(createData)
+          console.log('[PostForm] Result:', result)
 
           if (result.success && result.postId) {
             router.push(`/community/${result.postId}`)
           } else {
             setError(result.error || '게시글 작성에 실패했습니다.')
+            console.error('[PostForm] Failed:', result.error)
           }
         } else if (mode === 'edit' && initialData) {
           const updateData: UpdatePostData = {
