@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/core/Button'
 import { Badge } from '@/components/core/Badge'
@@ -19,7 +19,7 @@ interface PostFormProps {
 
 export function PostForm({ userId, userName, mode, initialData }: PostFormProps) {
   const router = useRouter()
-  const [isPending, startTransition] = useTransition()
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Form state
   const [formData, setFormData] = useState({
@@ -87,86 +87,92 @@ export function PostForm({ userId, userName, mode, initialData }: PostFormProps)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setIsSubmitting(true)
 
     console.log('[PostForm] Submit started - userId:', userId, 'userName:', userName)
 
-    // 기본 검증
-    if (!formData.title.trim()) {
-      setError('제목을 입력해주세요.')
-      return
-    }
-
-    if (!formData.content.trim()) {
-      setError('내용을 입력해주세요.')
-      return
-    }
-
-    // userId 검증
-    if (!userId || userId === 'anonymous') {
-      setError('로그인 정보를 확인할 수 없습니다. 페이지를 새로고침하거나 다시 로그인해주세요.')
-      console.error('[PostForm] Invalid userId:', userId)
-      return
-    }
-
-    startTransition(async () => {
-      try {
-        if (mode === 'create') {
-          const createData: CreatePostData = {
-            title: formData.title.trim(),
-            content: formData.content.trim(),
-            category: formData.category,
-            tags: formData.tags,
-            visibility: formData.visibility,
-            attachments: formData.images.map((url, index) => ({
-              id: `img_${index}`,
-              fileName: `image_${index}.jpg`,
-              fileUrl: url,
-              fileSize: 0,
-              mimeType: 'image/jpeg',
-              uploadedAt: new Date() as any
-            }))
-          }
-
-          console.log('[PostForm] Calling createPostAction...', createData)
-          const result = await createPostAction(createData)
-          console.log('[PostForm] Result:', result)
-
-          if (result.success && result.postId) {
-            router.push(`/community/${result.postId}`)
-          } else {
-            setError(result.error || '게시글 작성에 실패했습니다.')
-            console.error('[PostForm] Failed:', result.error)
-          }
-        } else if (mode === 'edit' && initialData) {
-          const updateData: UpdatePostData = {
-            title: formData.title.trim(),
-            content: formData.content.trim(),
-            category: formData.category,
-            tags: formData.tags,
-            visibility: formData.visibility,
-            attachments: formData.images.map((url, index) => ({
-              id: `img_${index}`,
-              fileName: `image_${index}.jpg`,
-              fileUrl: url,
-              fileSize: 0,
-              mimeType: 'image/jpeg',
-              uploadedAt: new Date() as any
-            }))
-          }
-
-          const result = await updatePostAction(initialData.id, updateData)
-
-          if (result.success) {
-            router.push(`/community/${initialData.id}`)
-          } else {
-            setError(result.error || '게시글 수정에 실패했습니다.')
-          }
-        }
-      } catch (error) {
-        console.error('폼 제출 실패:', error)
-        setError('오류가 발생했습니다. 다시 시도해주세요.')
+    try {
+      // 기본 검증
+      if (!formData.title.trim()) {
+        setError('제목을 입력해주세요.')
+        setIsSubmitting(false)
+        return
       }
-    })
+
+      if (!formData.content.trim()) {
+        setError('내용을 입력해주세요.')
+        setIsSubmitting(false)
+        return
+      }
+
+      // userId 검증
+      if (!userId || userId === 'anonymous') {
+        setError('로그인 정보를 확인할 수 없습니다. 페이지를 새로고침하거나 다시 로그인해주세요.')
+        console.error('[PostForm] Invalid userId:', userId)
+        setIsSubmitting(false)
+        return
+      }
+
+      if (mode === 'create') {
+        const createData: CreatePostData = {
+          title: formData.title.trim(),
+          content: formData.content.trim(),
+          category: formData.category,
+          tags: formData.tags,
+          visibility: formData.visibility,
+          attachments: formData.images.map((url, index) => ({
+            id: `img_${index}`,
+            fileName: `image_${index}.jpg`,
+            fileUrl: url,
+            fileSize: 0,
+            mimeType: 'image/jpeg',
+            uploadedAt: new Date() as any
+          }))
+        }
+
+        console.log('[PostForm] Calling createPostAction...', createData)
+        const result = await createPostAction(createData)
+        console.log('[PostForm] Result:', result)
+
+        if (result.success && result.postId) {
+          console.log('[PostForm] Redirecting to:', `/community/${result.postId}`)
+          router.push(`/community/${result.postId}`)
+        } else {
+          setError(result.error || '게시글 작성에 실패했습니다.')
+          console.error('[PostForm] Failed:', result.error)
+          setIsSubmitting(false)
+        }
+      } else if (mode === 'edit' && initialData) {
+        const updateData: UpdatePostData = {
+          title: formData.title.trim(),
+          content: formData.content.trim(),
+          category: formData.category,
+          tags: formData.tags,
+          visibility: formData.visibility,
+          attachments: formData.images.map((url, index) => ({
+            id: `img_${index}`,
+            fileName: `image_${index}.jpg`,
+            fileUrl: url,
+            fileSize: 0,
+            mimeType: 'image/jpeg',
+            uploadedAt: new Date() as any
+          }))
+        }
+
+        const result = await updatePostAction(initialData.id, updateData)
+
+        if (result.success) {
+          router.push(`/community/${initialData.id}`)
+        } else {
+          setError(result.error || '게시글 수정에 실패했습니다.')
+          setIsSubmitting(false)
+        }
+      }
+    } catch (error) {
+      console.error('폼 제출 실패:', error)
+      setError('오류가 발생했습니다. 다시 시도해주세요.')
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -329,17 +335,17 @@ export function PostForm({ userId, userName, mode, initialData }: PostFormProps)
                   <button
                     type="button"
                     onClick={() => router.back()}
-                    disabled={isPending}
+                    disabled={isSubmitting}
                     className="cancel-button"
                   >
                     취소
                   </button>
                   <button
                     type="submit"
-                    disabled={isPending || !formData.title.trim() || !formData.content.trim()}
+                    disabled={isSubmitting || !formData.title.trim() || !formData.content.trim()}
                     className="submit-button"
                   >
-                    {isPending ? (
+                    {isSubmitting ? (
                       <>
                         <div className="spinner" />
                         {mode === 'create' ? '작성 중...' : '수정 중...'}
