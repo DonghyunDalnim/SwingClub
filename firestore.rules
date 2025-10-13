@@ -115,6 +115,72 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    // Posts collection rules (Community, Marketplace, Events)
+    match /posts/{postId} {
+      // Anyone can read posts
+      allow read: if true;
+
+      // Authenticated users can create posts
+      allow create: if isAuthenticated() &&
+                       request.resource.data.metadata.authorId == request.auth.uid &&
+                       request.resource.data.keys().hasAll(['title', 'content', 'category', 'metadata']) &&
+                       request.resource.data.title is string &&
+                       request.resource.data.title.size() > 0 &&
+                       request.resource.data.content is string &&
+                       request.resource.data.category in ['general', 'partner-search', 'marketplace', 'events', 'qna'];
+
+      // Post authors can update their own posts
+      allow update: if isAuthenticated() &&
+                       resource.data.metadata.authorId == request.auth.uid &&
+                       request.resource.data.metadata.authorId == resource.data.metadata.authorId;
+
+      // Post authors or admins can delete posts
+      allow delete: if isAuthenticated() &&
+                       (resource.data.metadata.authorId == request.auth.uid || isAdmin());
+    }
+
+    // Comments collection rules
+    match /comments/{commentId} {
+      // Anyone can read comments
+      allow read: if true;
+
+      // Authenticated users can create comments
+      allow create: if isAuthenticated() &&
+                       request.resource.data.authorId == request.auth.uid;
+
+      // Comment authors can update their own comments
+      allow update: if isAuthenticated() &&
+                       resource.data.authorId == request.auth.uid;
+
+      // Comment authors or admins can delete comments
+      allow delete: if isAuthenticated() &&
+                       (resource.data.authorId == request.auth.uid || isAdmin());
+    }
+
+    // Notifications collection rules
+    match /notifications/{notificationId} {
+      // Users can only read their own notifications
+      allow read: if isAuthenticated() &&
+                     resource.data.userId == request.auth.uid;
+
+      // System can create notifications (server-side)
+      allow create: if isAuthenticated();
+
+      // Users can update their own notifications (mark as read)
+      allow update: if isAuthenticated() &&
+                       resource.data.userId == request.auth.uid;
+
+      // Users can delete their own notifications
+      allow delete: if isAuthenticated() &&
+                       resource.data.userId == request.auth.uid;
+    }
+
+    // Regions collection (read-only for users)
+    match /regions/{regionId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // Batch operations for seeding (temporary - remove in production)
     match /{document=**} {
       allow read, write: if false; // Explicitly deny all other operations
