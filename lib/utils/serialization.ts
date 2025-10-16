@@ -76,30 +76,36 @@ export function serializeTimestamps<T extends Record<string, any>>(obj: T): T {
   if (typeof obj === 'object') {
     const result: any = {}
 
-    for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        const value = obj[key]
+    // Object.keys()를 사용하여 모든 enumerable 속성 포함
+    // hasOwnProperty 제거로 프로토타입 체인 문제 해결
+    const keys = Object.keys(obj)
 
-        // null/undefined는 그대로 유지
-        if (value === null || value === undefined) {
-          result[key] = value
-        }
-        // Timestamp 변환
-        else if (isFirestoreTimestamp(value)) {
-          result[key] = serializeTimestamp(value)
-        }
-        // Date 변환
-        else if (value instanceof Date) {
-          result[key] = value.toISOString()
-        }
-        // 중첩 객체/배열 재귀 처리
-        else if (typeof value === 'object') {
-          result[key] = serializeTimestamps(value)
-        }
-        // 원시 타입은 그대로 복사
-        else {
-          result[key] = value
-        }
+    for (const key of keys) {
+      const value = obj[key]
+
+      // null/undefined는 그대로 유지
+      if (value === null || value === undefined) {
+        result[key] = value
+      }
+      // Timestamp 변환
+      else if (isFirestoreTimestamp(value)) {
+        result[key] = serializeTimestamp(value)
+      }
+      // Date 변환
+      else if (value instanceof Date) {
+        result[key] = value.toISOString()
+      }
+      // 배열 재귀 처리
+      else if (Array.isArray(value)) {
+        result[key] = serializeTimestamps(value)
+      }
+      // 중첩 객체 재귀 처리
+      else if (typeof value === 'object') {
+        result[key] = serializeTimestamps(value)
+      }
+      // 원시 타입은 그대로 복사
+      else {
+        result[key] = value
       }
     }
 
