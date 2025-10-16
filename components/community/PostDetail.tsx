@@ -12,6 +12,7 @@ import { ArrowLeft, Heart, MessageCircle, Eye, Edit, Trash2, Share2 } from 'luci
 import { deletePostAction } from '@/lib/actions/posts'
 import { POST_CATEGORIES } from '@/lib/types/community'
 import type { Post } from '@/lib/types/community'
+import { formatDateTime } from '@/lib/utils/date'
 
 interface PostDetailProps {
   post: Post
@@ -30,17 +31,6 @@ export function PostDetail({ post, currentUserId, currentUserName, currentUserPr
   // 작성자인지 확인
   const isAuthor = currentUserId === post.metadata.authorId
 
-  // 시간 포맷팅
-  const formatDateTime = (timestamp: Timestamp) => {
-    const date = timestamp.toDate()
-    return new Intl.DateTimeFormat('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date)
-  }
 
   // 게시글 삭제
   const handleDelete = async () => {

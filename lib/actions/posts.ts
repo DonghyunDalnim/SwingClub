@@ -22,6 +22,7 @@ import type {
   PostCategory
 } from '@/lib/types/community'
 import { getCurrentUser } from '@/lib/auth/server'
+import { serializePost, serializePosts } from '@/lib/utils/serialization'
 
 // 게시글 생성
 export async function createPostAction(data: CreatePostData): Promise<{ success: boolean; postId?: string; error?: string }> {
@@ -135,7 +136,9 @@ export async function deletePostAction(postId: string): Promise<{ success: boole
 export async function getPostsAction(filters?: PostSearchFilters) {
   try {
     const posts = await getPosts(filters)
-    return { success: true, data: posts }
+    // Firestore Timestamp를 문자열로 직렬화하여 클라이언트로 전달
+    const serializedPosts = serializePosts(posts)
+    return { success: true, data: serializedPosts }
   } catch (error) {
     console.error('게시글 목록 조회 실패:', error)
     return { success: false, error: '게시글을 불러오는데 실패했습니다.', data: [] }
@@ -149,7 +152,9 @@ export async function getPostAction(postId: string) {
     if (!post) {
       return { success: false, error: '게시글을 찾을 수 없습니다.' }
     }
-    return { success: true, data: post }
+    // Firestore Timestamp를 문자열로 직렬화하여 클라이언트로 전달
+    const serializedPost = serializePost(post)
+    return { success: true, data: serializedPost }
   } catch (error) {
     console.error('게시글 조회 실패:', error)
     return { success: false, error: '게시글을 불러오는데 실패했습니다.' }
