@@ -9,6 +9,7 @@ import { POST_CATEGORIES, POST_STATUS_LABELS } from '@/lib/types/community'
 import type { Post } from '@/lib/types/community'
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { toDate } from '@/lib/utils/date'
 
 interface PostCardProps {
   post: Post
@@ -124,13 +125,13 @@ export function PostCard({ post, currentUserId, showActions = false, isPinned = 
                 <div className="flex items-center space-x-2 mt-1">
                   <time
                     className="text-xs text-gray-500"
-                    dateTime={post.metadata.createdAt.toDate().toISOString()}
-                    title={post.metadata.createdAt.toDate().toLocaleString()}
+                    dateTime={toDate(post.metadata.createdAt).toISOString()}
+                    title={toDate(post.metadata.createdAt).toLocaleString()}
                   >
-                    {formatTime(post.metadata.createdAt.toDate())}
+                    {formatTime(toDate(post.metadata.createdAt))}
                   </time>
                   {/* 새 게시글 표시 */}
-                  {new Date().getTime() - post.metadata.createdAt.toDate().getTime() < 24 * 60 * 60 * 1000 && (
+                  {new Date().getTime() - toDate(post.metadata.createdAt).getTime() < 24 * 60 * 60 * 1000 && (
                     <Badge variant="destructive" className="text-xs" aria-label="새 게시글">NEW</Badge>
                   )}
                 </div>
@@ -183,16 +184,16 @@ export function PostCard({ post, currentUserId, showActions = false, isPinned = 
                   </Badge>
 
                   {/* 새 게시글 표시 */}
-                  {new Date().getTime() - post.metadata.createdAt.toDate().getTime() < 24 * 60 * 60 * 1000 && (
+                  {new Date().getTime() - toDate(post.metadata.createdAt).getTime() < 24 * 60 * 60 * 1000 && (
                     <Badge variant="destructive" className="text-xs" aria-label="새 게시글">NEW</Badge>
                   )}
 
                   <time
                     className="text-xs text-gray-500"
-                    dateTime={post.metadata.createdAt.toDate().toISOString()}
-                    title={post.metadata.createdAt.toDate().toLocaleString()}
+                    dateTime={toDate(post.metadata.createdAt).toISOString()}
+                    title={toDate(post.metadata.createdAt).toLocaleString()}
                   >
-                    {formatTime(post.metadata.createdAt.toDate())}
+                    {formatTime(toDate(post.metadata.createdAt))}
                   </time>
                 </div>
               </div>
