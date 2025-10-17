@@ -2,23 +2,27 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useIsAuthenticated, useUser } from '@/lib/auth/hooks';
+import { useIsAuthenticated, useUser, useAuthLoading } from '@/lib/auth/hooks';
 import Footer from '@/components/Footer';
 
 export default function HomePage() {
   const router = useRouter();
   const isAuthenticated = useIsAuthenticated();
   const user = useUser();
+  const loading = useAuthLoading();
 
   // 로그인하지 않은 사용자는 랜딩 페이지로 리디렉션
   useEffect(() => {
+    // 로딩 중일 때는 리디렉션하지 않음 (무한 루프 방지)
+    if (loading) return;
+
     if (!isAuthenticated) {
       router.push('/');
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, loading, router]);
 
   // 로딩 중일 때 표시
-  if (!isAuthenticated || !user) {
+  if (loading || !isAuthenticated || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-indigo-50 to-pink-50">
         <div className="text-center">

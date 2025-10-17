@@ -2,13 +2,17 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useIsAuthenticated } from '@/lib/auth/hooks';
+import { useIsAuthenticated, useAuthLoading } from '@/lib/auth/hooks';
 
 export default function RootPage() {
   const router = useRouter();
   const isAuthenticated = useIsAuthenticated();
+  const loading = useAuthLoading();
 
   useEffect(() => {
+    // 로딩 중일 때는 리디렉션하지 않음 (무한 루프 방지)
+    if (loading) return;
+
     if (isAuthenticated) {
       // 로그인된 사용자는 홈으로
       router.push('/home');
@@ -16,7 +20,7 @@ export default function RootPage() {
       // 로그인 안 된 사용자는 로그인 페이지로
       router.push('/login');
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, loading, router]);
 
   // 리디렉션 중 로딩 표시
   return (
