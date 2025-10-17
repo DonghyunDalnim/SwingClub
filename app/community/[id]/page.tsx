@@ -22,12 +22,10 @@ export default async function PostPage({ params }: PostPageProps) {
   const currentUser = await getCurrentUser()
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <PostDetail
-        post={postResult.data}
-        currentUserId={currentUser?.uid}
-      />
-    </div>
+    <PostDetail
+      post={postResult.data}
+      currentUserId={currentUser?.uid}
+    />
   )
 }
 

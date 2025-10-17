@@ -275,17 +275,17 @@ export function PostDetail({ post, currentUserId, currentUserName, currentUserPr
         </div>
       )}
 
-        {/* 댓글 섹션 */}
-        <Card>
-          <CommentSection
-            postId={post.id}
-            currentUserId={currentUserId}
-            currentUserName={currentUserName}
-            currentUserProfile={currentUserProfile}
-            initialCommentCount={post.stats.comments}
-          />
-        </Card>
-      </div>
+      {/* 댓글 섹션 */}
+      <Card>
+        <CommentSection
+          postId={post.id}
+          currentUserId={currentUserId}
+          currentUserName={currentUserName}
+          currentUserProfile={currentUserProfile}
+          initialCommentCount={post.stats.comments}
+        />
+      </Card>
     </div>
-  )
+  </div>
+)
 }
