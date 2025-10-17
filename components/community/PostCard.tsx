@@ -1,11 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import { Card, CardContent, Badge, Button } from '@/components/core'
+import { Badge, Button } from '@/components/core'
 import { Heart, MessageCircle, Eye, Pin, Edit, Trash2 } from 'lucide-react'
-import { cn } from '@/lib/utils'
 import { deletePostAction } from '@/lib/actions/posts'
-import { POST_CATEGORIES, POST_STATUS_LABELS } from '@/lib/types/community'
+import { POST_CATEGORIES } from '@/lib/types/community'
 import type { Post } from '@/lib/types/community'
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
@@ -41,10 +40,11 @@ export function PostCard({ post, currentUserId, showActions = false, isPinned = 
     const hours = Math.floor(diff / (1000 * 60 * 60))
     const days = Math.floor(diff / (1000 * 60 * 60 * 24))
 
-    if (minutes < 60) return `${minutes}분전`
-    if (hours < 24) return `${hours}시간전`
-    if (days < 7) return `${days}일전`
-    return date.toLocaleDateString()
+    if (minutes < 1) return '방금 전'
+    if (minutes < 60) return `${minutes}분 전`
+    if (hours < 24) return `${hours}시간 전`
+    if (days < 7) return `${days}일 전`
+    return date.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })
   }
 
   // 게시글 삭제
@@ -73,254 +73,498 @@ export function PostCard({ post, currentUserId, showActions = false, isPinned = 
   const isAuthor = currentUserId === post.metadata.authorId
 
   return (
-    <Card
-      className={cn(
-        'hover:shadow-lg hover:-translate-y-1 transition-all duration-300 bg-white border border-gray-100',
-        isPinned ? 'border-blue-200 bg-blue-50 shadow-md' : 'hover:border-gray-200'
-      )}
-      role="article"
-      aria-labelledby={`post-title-${post.id}`}
-      aria-describedby={`post-meta-${post.id}`}
-      style={{
-        borderRadius: '12px',
-        boxShadow: isPinned ? '0 4px 12px rgba(59, 130, 246, 0.15)' : '0 2px 8px rgba(0, 0, 0, 0.04)'
-      }}
-    >
-      <CardContent className="p-5">
-        <article className="space-y-4">
-          {/* 작성자 정보 및 메타데이터 */}
-          <header className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              {/* 작성자 아바타 */}
-              <div className="relative">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-md">
-                  {post.metadata.authorName.charAt(0).toUpperCase()}
-                </div>
-                {isPinned && (
-                  <Pin className="absolute -top-1 -right-1 h-4 w-4 text-blue-600 bg-white rounded-full p-0.5" />
-                )}
+    <article className="post-card">
+      <Link href={`/community/${post.id}`} className="post-card-link">
+        <div className="post-card-content">
+          {/* 상단: 카테고리 + 고정 표시 */}
+          <div className="post-header">
+            <div className="category-badge">
+              <span className="category-emoji" aria-hidden="true">
+                {categoryEmojis[post.category]}
+              </span>
+              <span className="category-text">{POST_CATEGORIES[post.category]}</span>
+            </div>
+            {isPinned && (
+              <div className="pinned-badge">
+                <Pin className="pin-icon" aria-hidden="true" />
+                <span>고정</span>
               </div>
+            )}
+          </div>
 
-              {/* 작성자 이름 및 카테고리 */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center space-x-2">
-                  <span className="font-medium text-gray-900 text-sm">
-                    {post.metadata.authorName}
-                  </span>
-                  <Badge
-                    variant={isPinned ? 'default' : 'outline'}
-                    className="text-xs px-2 py-0.5"
-                    style={{
-                      backgroundColor: isPinned ? '#693BF2' : '#F1EEFF',
-                      color: isPinned ? 'white' : '#693BF2',
-                      border: isPinned ? 'none' : '1px solid #693BF2'
-                    }}
-                  >
-                    <span className="mr-1" aria-hidden="true">
-                      {categoryEmojis[post.category]}
-                    </span>
-                    {POST_CATEGORIES[post.category]}
-                  </Badge>
-                </div>
-                <div className="flex items-center space-x-2 mt-1">
-                  <time
-                    className="text-xs text-gray-500"
-                    dateTime={toDate(post.metadata.createdAt).toISOString()}
-                    title={toDate(post.metadata.createdAt).toLocaleString()}
-                  >
-                    {formatTime(toDate(post.metadata.createdAt))}
-                  </time>
-                  {/* 새 게시글 표시 */}
-                  {new Date().getTime() - toDate(post.metadata.createdAt).getTime() < 24 * 60 * 60 * 1000 && (
-                    <Badge variant="destructive" className="text-xs" aria-label="새 게시글">NEW</Badge>
-                  )}
-                </div>
+          {/* 제목 */}
+          <h3 className="post-title">{post.title}</h3>
+
+          {/* 내용 미리보기 */}
+          {post.content && (
+            <p className="post-preview">
+              {post.content.slice(0, 120)}{post.content.length > 120 ? '...' : ''}
+            </p>
+          )}
+
+          {/* 하단: 작성자 + 통계 */}
+          <div className="post-footer">
+            <div className="author-info">
+              <div className="author-avatar">
+                {post.metadata.authorName.charAt(0).toUpperCase()}
+              </div>
+              <div className="author-details">
+                <span className="author-name">{post.metadata.authorName}</span>
+                <time className="post-time" dateTime={toDate(post.metadata.createdAt).toISOString()}>
+                  {formatTime(toDate(post.metadata.createdAt))}
+                </time>
               </div>
             </div>
 
-            {/* 작성자 액션 버튼 */}
-            {showActions && isAuthor && (
-              <div className="flex gap-1" role="group" aria-label="게시글 관리">
-                <Link href={`/community/${post.id}/edit`}>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="p-1 h-7 w-7 border-gray-200 hover:border-[#693BF2] hover:text-[#693BF2]"
-                    aria-label={`"${post.title}" 게시글 수정`}
-                  >
-                    <Edit className="h-3 w-3" aria-hidden="true" />
-                  </Button>
-                </Link>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className={cn(
-                    'p-1 h-7 w-7 border-gray-200 hover:border-red-500 hover:text-red-500',
-                    showDeleteConfirm && 'bg-red-50 border-red-200 text-red-600'
-                  )}
-                  onClick={handleDelete}
-                  disabled={isPending}
-                  aria-label={`"${post.title}" 게시글 삭제${showDeleteConfirm ? ' - 다시 클릭하여 확인' : ''}`}
-                >
-                  <Trash2 className="h-3 w-3" aria-hidden="true" />
-                </Button>
-              </div>
-            )}
-          </header>
+            <div className="post-stats">
+              <span className="stat-item">
+                <Eye className="stat-icon" aria-hidden="true" />
+                <span className="stat-value">{post.stats.views}</span>
+              </span>
+              <span className="stat-item stat-interactive">
+                <Heart className="stat-icon" aria-hidden="true" />
+                <span className="stat-value">{post.stats.likes}</span>
+              </span>
+              <span className="stat-item stat-interactive">
+                <MessageCircle className="stat-icon" aria-hidden="true" />
+                <span className="stat-value">{post.stats.comments}</span>
+              </span>
+            </div>
+          </div>
 
-          <div className="space-y-3">
-            {/* 제목과 뱃지 */}
-            <header className="flex items-start justify-between mb-2">
-              <div className="flex-1 min-w-0">
-                <Link href={`/community/${post.id}`} className="hover:text-purple-600">
-                  <h3 id={`post-title-${post.id}`} className="font-semibold text-sm truncate pr-2">
-                    {post.title}
-                  </h3>
-                </Link>
-
-                <div id={`post-meta-${post.id}`} className="flex items-center gap-2 mt-1">
-                  <Badge variant={isPinned ? 'default' : 'outline'} className="text-xs">
-                    {POST_CATEGORIES[post.category]}
-                  </Badge>
-
-                  {/* 새 게시글 표시 */}
-                  {new Date().getTime() - toDate(post.metadata.createdAt).getTime() < 24 * 60 * 60 * 1000 && (
-                    <Badge variant="destructive" className="text-xs" aria-label="새 게시글">NEW</Badge>
-                  )}
-
-                  <time
-                    className="text-xs text-gray-500"
-                    dateTime={toDate(post.metadata.createdAt).toISOString()}
-                    title={toDate(post.metadata.createdAt).toLocaleString()}
-                  >
-                    {formatTime(toDate(post.metadata.createdAt))}
-                  </time>
-                </div>
-              </div>
-
-              {/* 작성자 액션 버튼 */}
-              {showActions && isAuthor && (
-                <div className="flex gap-1 ml-2" role="group" aria-label="게시글 관리">
-                  <Link href={`/community/${post.id}/edit`}>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="p-1 h-7 w-7"
-                      aria-label={`"${post.title}" 게시글 수정`}
-                    >
-                      <Edit className="h-3 w-3" aria-hidden="true" />
-                    </Button>
-                  </Link>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className={`p-1 h-7 w-7 ${showDeleteConfirm ? 'bg-red-50 border-red-200' : ''}`}
-                    onClick={handleDelete}
-                    disabled={isPending}
-                    aria-label={`"${post.title}" 게시글 삭제${showDeleteConfirm ? ' - 다시 클릭하여 확인' : ''}`}
-                  >
-                    <Trash2 className="h-3 w-3" aria-hidden="true" />
-                  </Button>
-                </div>
+          {/* 태그 및 첨부파일 */}
+          {(post.attachments?.length || post.tags?.length) && (
+            <div className="post-meta">
+              {post.attachments && post.attachments.length > 0 && (
+                <span className="meta-badge">
+                  📎 {post.attachments.length}
+                </span>
               )}
-            </header>
-
-            {/* 게시글 내용 미리보기 */}
-            {post.content && (
-              <div className="text-sm text-gray-600 leading-relaxed">
-                <p className="line-clamp-2">
-                  {post.content.slice(0, 120)}{post.content.length > 120 ? '...' : ''}
-                </p>
-              </div>
-            )}
-
-            {/* 통계 및 첨부파일 */}
-            <footer className="flex items-center justify-between">
-              <div className="flex items-center space-x-4 text-xs text-gray-600" role="group" aria-label="게시글 통계">
-                <span className="flex items-center hover:text-[#693BF2] transition-colors cursor-pointer" aria-label={`좋아요 ${post.stats.likes}개`}>
-                  <Heart className="h-4 w-4 mr-1.5" style={{ color: '#693BF2' }} aria-hidden="true" />
-                  <span className="font-medium">{post.stats.likes}</span>
+              {post.tags && post.tags.length > 0 && (
+                <span className="meta-badge tag-badge">
+                  #{post.tags[0]}{post.tags.length > 1 ? ` +${post.tags.length - 1}` : ''}
                 </span>
-                <span className="flex items-center hover:text-[#693BF2] transition-colors cursor-pointer" aria-label={`댓글 ${post.stats.comments}개`}>
-                  <MessageCircle className="h-4 w-4 mr-1.5" style={{ color: '#693BF2' }} aria-hidden="true" />
-                  <span className="font-medium">{post.stats.comments}</span>
-                </span>
-                <span className="flex items-center" aria-label={`조회수 ${post.stats.views}회`}>
-                  <Eye className="h-4 w-4 mr-1.5 text-gray-400" aria-hidden="true" />
-                  <span className="text-gray-500">{post.stats.views}</span>
-                </span>
-              </div>
-
-              {/* 첨부파일 표시 */}
-              <div className="flex gap-2" role="group" aria-label="첨부파일 및 태그">
-                {post.attachments && post.attachments.length > 0 && (
-                  <Badge
-                    variant="outline"
-                    className="text-xs px-2 py-1 bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100 transition-colors"
-                    aria-label={`첨부 이미지 ${post.attachments.length}장`}
-                  >
-                    📎 {post.attachments.length}장
-                  </Badge>
-                )}
-
-                {post.tags && post.tags.length > 0 && (
-                  <Badge
-                    variant="outline"
-                    className="text-xs px-2 py-1 bg-purple-50 text-[#693BF2] border-purple-200 hover:bg-purple-100 transition-colors"
-                    aria-label={`태그: ${post.tags.join(', ')}`}
-                  >
-                    #{post.tags[0]}{post.tags.length > 1 ? ` +${post.tags.length - 1}` : ''}
-                  </Badge>
-                )}
-              </div>
-            </footer>
-          </div>
-        </article>
-
-        {/* 삭제 확인 메시지 */}
-        {showDeleteConfirm && (
-          <div
-            className="mt-3 p-2 bg-red-50 rounded-lg border border-red-200"
-            role="dialog"
-            aria-labelledby={`delete-confirm-title-${post.id}`}
-            aria-describedby={`delete-confirm-desc-${post.id}`}
-          >
-            <p
-              id={`delete-confirm-title-${post.id}`}
-              className="text-sm text-red-700 mb-2"
-            >
-              정말 삭제하시겠습니까?
-            </p>
-            <p
-              id={`delete-confirm-desc-${post.id}`}
-              className="sr-only"
-            >
-              &quot;{post.title}&quot; 게시글을 영구적으로 삭제합니다. 이 작업은 되돌릴 수 없습니다.
-            </p>
-            <div className="flex gap-2" role="group" aria-label="삭제 확인 액션">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setShowDeleteConfirm(false)}
-                disabled={isPending}
-                className="text-xs"
-                aria-label="삭제 취소"
-              >
-                취소
-              </Button>
-              <Button
-                size="sm"
-                onClick={handleDelete}
-                disabled={isPending}
-                className="text-xs bg-red-600 hover:bg-red-700 text-white"
-                aria-label={`"${post.title}" 게시글 삭제 확인`}
-              >
-                {isPending ? '삭제 중...' : '삭제'}
-              </Button>
+              )}
             </div>
+          )}
+        </div>
+      </Link>
+
+      {/* 작성자 액션 버튼 */}
+      {showActions && isAuthor && (
+        <div className="post-actions">
+          <Link href={`/community/${post.id}/edit`}>
+            <button className="action-button edit-button" aria-label="게시글 수정">
+              <Edit className="action-icon" aria-hidden="true" />
+            </button>
+          </Link>
+          <button
+            className={`action-button delete-button ${showDeleteConfirm ? 'delete-confirm' : ''}`}
+            onClick={handleDelete}
+            disabled={isPending}
+            aria-label="게시글 삭제"
+          >
+            <Trash2 className="action-icon" aria-hidden="true" />
+          </button>
+        </div>
+      )}
+
+      {/* 삭제 확인 메시지 */}
+      {showDeleteConfirm && (
+        <div className="delete-confirm-dialog">
+          <p className="confirm-message">정말 삭제하시겠습니까?</p>
+          <div className="confirm-actions">
+            <button
+              className="confirm-button cancel-button"
+              onClick={() => setShowDeleteConfirm(false)}
+              disabled={isPending}
+            >
+              취소
+            </button>
+            <button
+              className="confirm-button delete-button-final"
+              onClick={handleDelete}
+              disabled={isPending}
+            >
+              {isPending ? '삭제 중...' : '삭제'}
+            </button>
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </div>
+      )}
+
+      <style jsx>{`
+        .post-card {
+          position: relative;
+          background: rgba(255, 255, 255, 0.95);
+          border-radius: 20px;
+          overflow: hidden;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+          border: 1px solid rgba(200, 200, 200, 0.15);
+        }
+
+        .post-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 12px 32px rgba(102, 126, 234, 0.15);
+          border-color: rgba(102, 126, 234, 0.2);
+        }
+
+        .post-card-link {
+          display: block;
+          text-decoration: none;
+          color: inherit;
+        }
+
+        .post-card-content {
+          padding: var(--space-xl);
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-md);
+        }
+
+        /* 상단: 카테고리 + 고정 */
+        .post-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: var(--space-sm);
+        }
+
+        .category-badge {
+          display: flex;
+          align-items: center;
+          gap: var(--space-xs);
+          padding: 6px 12px;
+          background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+          border-radius: 10px;
+          border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .category-emoji {
+          font-size: 14px;
+          line-height: 1;
+        }
+
+        .category-text {
+          font-size: 12px;
+          font-weight: 600;
+          color: #667eea;
+        }
+
+        .pinned-badge {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          padding: 4px 10px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border-radius: 8px;
+          color: white;
+          font-size: 11px;
+          font-weight: 600;
+        }
+
+        .pin-icon {
+          width: 12px;
+          height: 12px;
+        }
+
+        /* 제목 */
+        .post-title {
+          font-size: 18px;
+          font-weight: 700;
+          color: var(--gray-900);
+          line-height: 1.4;
+          margin: 0;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          transition: color 0.2s;
+        }
+
+        .post-card:hover .post-title {
+          color: #667eea;
+        }
+
+        /* 내용 미리보기 */
+        .post-preview {
+          font-size: 14px;
+          line-height: 1.6;
+          color: var(--gray-600);
+          margin: 0;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+
+        /* 하단: 작성자 + 통계 */
+        .post-footer {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: var(--space-md);
+          padding-top: var(--space-sm);
+          border-top: 1px solid rgba(200, 200, 200, 0.15);
+        }
+
+        .author-info {
+          display: flex;
+          align-items: center;
+          gap: var(--space-sm);
+          min-width: 0;
+          flex: 1;
+        }
+
+        .author-avatar {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-size: 13px;
+          font-weight: 600;
+          flex-shrink: 0;
+          box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .author-details {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          min-width: 0;
+        }
+
+        .author-name {
+          font-size: 13px;
+          font-weight: 600;
+          color: var(--gray-900);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .post-time {
+          font-size: 11px;
+          color: var(--gray-500);
+        }
+
+        .post-stats {
+          display: flex;
+          align-items: center;
+          gap: var(--space-md);
+          flex-shrink: 0;
+        }
+
+        .stat-item {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          font-size: 13px;
+          color: var(--gray-600);
+          transition: all 0.2s;
+        }
+
+        .stat-interactive {
+          cursor: pointer;
+        }
+
+        .stat-interactive:hover {
+          color: #667eea;
+          transform: scale(1.1);
+        }
+
+        .stat-icon {
+          width: 16px;
+          height: 16px;
+          color: var(--gray-400);
+          transition: color 0.2s;
+        }
+
+        .stat-interactive:hover .stat-icon {
+          color: #667eea;
+        }
+
+        .stat-value {
+          font-weight: 600;
+          min-width: 20px;
+          text-align: center;
+        }
+
+        /* 메타 정보 (태그, 첨부파일) */
+        .post-meta {
+          display: flex;
+          align-items: center;
+          gap: var(--space-xs);
+          flex-wrap: wrap;
+        }
+
+        .meta-badge {
+          padding: 4px 10px;
+          background: rgba(200, 200, 200, 0.15);
+          border-radius: 8px;
+          font-size: 11px;
+          font-weight: 600;
+          color: var(--gray-600);
+        }
+
+        .tag-badge {
+          background: rgba(102, 126, 234, 0.1);
+          color: #667eea;
+        }
+
+        /* 작성자 액션 */
+        .post-actions {
+          position: absolute;
+          top: var(--space-md);
+          right: var(--space-md);
+          display: flex;
+          gap: var(--space-xs);
+          opacity: 0;
+          transition: opacity 0.2s;
+        }
+
+        .post-card:hover .post-actions {
+          opacity: 1;
+        }
+
+        .action-button {
+          width: 32px;
+          height: 32px;
+          border-radius: 8px;
+          background: white;
+          border: 1px solid rgba(200, 200, 200, 0.3);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.2s;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .action-button:hover {
+          transform: scale(1.05);
+        }
+
+        .edit-button:hover {
+          border-color: #667eea;
+          background: rgba(102, 126, 234, 0.1);
+        }
+
+        .delete-button:hover {
+          border-color: #ef4444;
+          background: rgba(239, 68, 68, 0.1);
+        }
+
+        .delete-button.delete-confirm {
+          border-color: #ef4444;
+          background: rgba(239, 68, 68, 0.2);
+        }
+
+        .action-icon {
+          width: 14px;
+          height: 14px;
+          color: var(--gray-600);
+        }
+
+        .edit-button:hover .action-icon {
+          color: #667eea;
+        }
+
+        .delete-button:hover .action-icon {
+          color: #ef4444;
+        }
+
+        /* 삭제 확인 */
+        .delete-confirm-dialog {
+          margin: 0 var(--space-xl) var(--space-xl);
+          padding: var(--space-md);
+          background: rgba(239, 68, 68, 0.05);
+          border: 1px solid rgba(239, 68, 68, 0.2);
+          border-radius: 12px;
+        }
+
+        .confirm-message {
+          font-size: 13px;
+          font-weight: 600;
+          color: #dc2626;
+          margin: 0 0 var(--space-sm);
+        }
+
+        .confirm-actions {
+          display: flex;
+          gap: var(--space-xs);
+        }
+
+        .confirm-button {
+          flex: 1;
+          padding: 8px 16px;
+          border-radius: 8px;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+          border: none;
+        }
+
+        .cancel-button {
+          background: white;
+          color: var(--gray-700);
+          border: 1px solid rgba(200, 200, 200, 0.3);
+        }
+
+        .cancel-button:hover {
+          background: var(--gray-50);
+        }
+
+        .delete-button-final {
+          background: #ef4444;
+          color: white;
+        }
+
+        .delete-button-final:hover {
+          background: #dc2626;
+        }
+
+        .delete-button-final:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+          .post-card-content {
+            padding: var(--space-lg);
+            gap: var(--space-sm);
+          }
+
+          .post-title {
+            font-size: 16px;
+          }
+
+          .post-preview {
+            font-size: 13px;
+          }
+
+          .post-footer {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: var(--space-sm);
+          }
+
+          .post-stats {
+            width: 100%;
+            justify-content: space-between;
+          }
+
+          .post-actions {
+            opacity: 1;
+          }
+        }
+      `}</style>
+    </article>
   )
 }
