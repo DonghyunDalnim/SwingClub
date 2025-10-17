@@ -48,22 +48,27 @@ export function useComments(
 
   const { enabled = true, onError } = options
 
-  // 댓글 구독
+  // 쿼리를 useMemo로 캐싱 (무한 루프 방지)
+  const commentsQuery = useMemo(() => {
+    if (!enabled || !postId) return null
+
+    return query(
+      collection(db, 'comments'),
+      where('postId', '==', postId),
+      where('status', '==', 'active'),
+      orderBy('createdAt', 'asc')
+    )
+  }, [postId, enabled])
+
+  // 댓글 구독 (최초 1회만 실행)
   useEffect(() => {
-    if (!enabled || !postId) {
+    if (!commentsQuery) {
       setLoading(false)
       return
     }
 
     setLoading(true)
     setError(null)
-
-    const commentsQuery = query(
-      collection(db, 'comments'),
-      where('postId', '==', postId),
-      where('status', '==', 'active'),
-      orderBy('createdAt', 'asc')
-    )
 
     const unsubscribe: Unsubscribe = onSnapshot(
       commentsQuery,
@@ -74,7 +79,18 @@ export function useComments(
             ...doc.data()
           })) as Comment[]
 
-          setComments(commentsData)
+          // 상태 비교 후 변경사항이 있을 때만 업데이트
+          setComments(prevComments => {
+            // 댓글 ID 비교로 변경 감지
+            const prevIds = prevComments.map(c => c.id).sort().join(',')
+            const newIds = commentsData.map(c => c.id).sort().join(',')
+
+            if (prevIds === newIds && prevComments.length === commentsData.length) {
+              return prevComments // 변경사항 없으면 이전 상태 유지
+            }
+
+            return commentsData
+          })
           setLoading(false)
         } catch (err) {
           const error = err instanceof Error ? err : new Error('댓글 조회 중 오류가 발생했습니다.')
@@ -94,7 +110,9 @@ export function useComments(
     return () => {
       unsubscribe()
     }
-  }, [postId, enabled, onError])
+    // ✅ onError 제거: 매번 새로운 함수 참조로 인한 무한 루프 방지
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [commentsQuery])
 
   // 댓글을 트리 구조로 변환
   const commentTree = useMemo(() => {
@@ -200,21 +218,26 @@ export function useCommentReplies(
 
   const { enabled = true, onError } = options
 
+  // 쿼리를 useMemo로 캐싱 (무한 루프 방지)
+  const repliesQuery = useMemo(() => {
+    if (!enabled || !parentCommentId) return null
+
+    return query(
+      collection(db, 'comments'),
+      where('parentId', '==', parentCommentId),
+      where('status', '==', 'active'),
+      orderBy('createdAt', 'asc')
+    )
+  }, [parentCommentId, enabled])
+
   useEffect(() => {
-    if (!enabled || !parentCommentId) {
+    if (!repliesQuery) {
       setLoading(false)
       return
     }
 
     setLoading(true)
     setError(null)
-
-    const repliesQuery = query(
-      collection(db, 'comments'),
-      where('parentId', '==', parentCommentId),
-      where('status', '==', 'active'),
-      orderBy('createdAt', 'asc')
-    )
 
     const unsubscribe: Unsubscribe = onSnapshot(
       repliesQuery,
@@ -225,7 +248,17 @@ export function useCommentReplies(
             ...doc.data()
           })) as Comment[]
 
-          setReplies(repliesData)
+          // 상태 비교 후 변경사항이 있을 때만 업데이트
+          setReplies(prevReplies => {
+            const prevIds = prevReplies.map(r => r.id).sort().join(',')
+            const newIds = repliesData.map(r => r.id).sort().join(',')
+
+            if (prevIds === newIds && prevReplies.length === repliesData.length) {
+              return prevReplies
+            }
+
+            return repliesData
+          })
           setLoading(false)
         } catch (err) {
           const error = err instanceof Error ? err : new Error('대댓글 조회 중 오류가 발생했습니다.')
@@ -245,7 +278,9 @@ export function useCommentReplies(
     return () => {
       unsubscribe()
     }
-  }, [parentCommentId, enabled, onError])
+    // ✅ onError 제거: 매번 새로운 함수 참조로 인한 무한 루프 방지
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [repliesQuery])
 
   const commentTree = useMemo(() => {
     return replies.map(reply => ({
