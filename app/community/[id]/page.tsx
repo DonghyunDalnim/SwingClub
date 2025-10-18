@@ -24,7 +24,9 @@ export default async function PostPage({ params }: PostPageProps) {
   return (
     <PostDetail
       post={postResult.data}
-      currentUserId={currentUser?.uid}
+      currentUserId={(currentUser as any)?.id || (currentUser as any)?.uid}
+      currentUserName={currentUser?.displayName || currentUser?.email || '익명'}
+      currentUserProfile={currentUser?.photoURL || undefined}
     />
   )
 }

@@ -18,6 +18,7 @@ import {
   deleteDoc,
   increment,
   serverTimestamp,
+  Timestamp,
   type DocumentReference,
   type CollectionReference,
   type QueryConstraint,
@@ -339,19 +340,17 @@ export async function createComment(
     }
   }
 
-  const commentData: Omit<CommentDocument, 'id'> = {
+  // Firestore는 undefined를 허용하지 않으므로 조건부로 필드 추가
+  const commentData: any = {
     postId: data.postId,
     content: data.content,
 
-    // 계층 구조
-    parentId: data.parentId,
+    // 계층 구조 (undefined 제거)
     depth,
-    rootId,
 
     // 작성자
     authorId,
     authorName,
-    authorProfileUrl: undefined, // TODO: 사용자 프로필에서 가져오기
 
     // 상태
     status: 'active',
@@ -361,8 +360,18 @@ export async function createComment(
     reports: 0,
 
     // 메타데이터
-    createdAt: now as any,
-    updatedAt: now as any
+    createdAt: now,
+    updatedAt: now
+  }
+
+  // parentId가 있을 때만 추가
+  if (data.parentId) {
+    commentData.parentId = data.parentId
+  }
+
+  // rootId가 있을 때만 추가
+  if (rootId) {
+    commentData.rootId = rootId
   }
 
   const docRef = await addDoc(collections.comments, commentData)
@@ -446,7 +455,7 @@ export async function getComments(
 /**
  * 댓글 업데이트 (권한 검증 포함)
  */
-export async function updateComment(commentId: string, data: UpdateCommentData, userId: string): Promise<void> {
+export async function updateComment(commentId: string, data: UpdateCommentData, userId: string): Promise<{ postId: string } | null> {
   const docRef = doc(collections.comments, commentId)
 
   // 권한 확인
@@ -461,22 +470,26 @@ export async function updateComment(commentId: string, data: UpdateCommentData, 
   }
 
   const updateData: any = {
-    ...data,
     updatedAt: serverTimestamp()
   }
 
-  // 수정 기록 추가
-  if (data.content) {
+  // content 업데이트
+  if (data.content !== undefined) {
+    updateData.content = data.content
+
+    // 수정 기록 추가 (배열 안에는 serverTimestamp 사용 불가, Timestamp.now() 사용)
     updateData.editHistory = [
       ...(currentData.editHistory || []),
       {
-        editedAt: serverTimestamp(),
+        editedAt: Timestamp.now(),
         previousContent: currentData.content
       }
     ]
   }
 
   await updateDoc(docRef, updateData)
+
+  return { postId: currentData.postId }
 }
 
 /**

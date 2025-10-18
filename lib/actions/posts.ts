@@ -28,7 +28,6 @@ import { serializePost, serializePosts } from '@/lib/utils/serialization'
 export async function createPostAction(data: CreatePostData): Promise<{ success: boolean; postId?: string; error?: string }> {
   try {
     const user = await getCurrentUser()
-    console.log('[createPostAction] User from getCurrentUser:', user)
 
     if (!user) {
       return { success: false, error: '로그인이 필요합니다.' }
@@ -38,10 +37,7 @@ export async function createPostAction(data: CreatePostData): Promise<{ success:
     const userId = user.uid || (user as any).id
     const userName = user.displayName || (user as any).profile?.nickname || (user as any).displayName || '익명'
 
-    console.log('[createPostAction] Using userId:', userId, 'userName:', userName)
-
     if (!userId) {
-      console.error('[createPostAction] No valid userId found in user object:', user)
       return { success: false, error: '사용자 ID를 확인할 수 없습니다.' }
     }
 
@@ -58,9 +54,7 @@ export async function createPostAction(data: CreatePostData): Promise<{ success:
       tags: data.tags?.map(tag => tag.trim()).filter(Boolean) || []
     }
 
-    console.log('[createPostAction] Calling createPost with userId:', userId)
     const postId = await createPost(sanitizedData, userId, userName)
-    console.log('[createPostAction] Post created successfully, postId:', postId)
 
     revalidatePath('/community')
     return { success: true, postId }
@@ -78,9 +72,14 @@ export async function updatePostAction(postId: string, data: UpdatePostData): Pr
       return { success: false, error: '로그인이 필요합니다.' }
     }
 
+    const userId = (user as any)?.id || (user as any)?.uid
+    if (!userId) {
+      return { success: false, error: '사용자 정보를 찾을 수 없습니다.' }
+    }
+
     // 작성자 권한 확인
     const post = await getPost(postId)
-    if (!post || post.metadata.authorId !== user.uid) {
+    if (!post || post.metadata.authorId !== userId) {
       return { success: false, error: '수정 권한이 없습니다.' }
     }
 
@@ -116,9 +115,14 @@ export async function deletePostAction(postId: string): Promise<{ success: boole
       return { success: false, error: '로그인이 필요합니다.' }
     }
 
+    const userId = (user as any)?.id || (user as any)?.uid
+    if (!userId) {
+      return { success: false, error: '사용자 정보를 찾을 수 없습니다.' }
+    }
+
     // 작성자 권한 확인
     const post = await getPost(postId)
-    if (!post || post.metadata.authorId !== user.uid) {
+    if (!post || post.metadata.authorId !== userId) {
       return { success: false, error: '삭제 권한이 없습니다.' }
     }
 

@@ -60,53 +60,51 @@ export function CommentSection({
   }
 
   return (
-    <div className={`bg-white ${className}`}>
+    <div className={`comment-section ${className}`}>
       {/* 댓글 섹션 헤더 */}
-      <div className="flex items-center justify-between p-4 border-b">
-        <div className="flex items-center gap-2">
-          <MessageCircle className="h-5 w-5 text-gray-600" />
-          <h3 className="text-lg font-semibold text-gray-900">
-            댓글 {totalCount > 0 ? totalCount : initialCommentCount}
+      <div className="comment-header">
+        <div className="header-left">
+          <MessageCircle className="comment-icon" />
+          <h3 className="comment-title">
+            댓글 <span className="comment-count">{totalCount > 0 ? totalCount : initialCommentCount}</span>
           </h3>
-          {loading && <Loader2 className="h-4 w-4 animate-spin text-purple-600" />}
+          {loading && <Loader2 className="loading-spinner" />}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="header-right">
           {/* 정렬 옵션 */}
           <select
             value={sortOrder}
             onChange={(e) => setSortOrder(e.target.value as 'newest' | 'oldest')}
-            className="text-sm border rounded px-2 py-1 text-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="sort-select"
           >
             <option value="newest">최신순</option>
             <option value="oldest">오래된 순</option>
           </select>
 
           {/* 댓글 접기/펼치기 */}
-          <Button
-            variant="ghost"
-            size="sm"
+          <button
             onClick={() => setExpandedComments(!expandedComments)}
-            className="text-gray-600"
+            className="toggle-button"
           >
             {expandedComments ? (
               <>
-                <ChevronUp className="h-4 w-4" />
-                접기
+                <ChevronUp className="toggle-icon" />
+                <span>접기</span>
               </>
             ) : (
               <>
-                <ChevronDown className="h-4 w-4" />
-                펼치기
+                <ChevronDown className="toggle-icon" />
+                <span>펼치기</span>
               </>
             )}
-          </Button>
+          </button>
         </div>
       </div>
 
-      {/* 댓글 작성 영역 */}
-      {currentUserId ? (
-        <div className="p-4 border-b bg-gray-50">
+      {/* 댓글 작성 영역 - 로그인 사용자에게만 표시 */}
+      {currentUserId && (
+        <div className="comment-write-section">
           {showCommentForm ? (
             <CommentForm
               postId={postId}
@@ -119,58 +117,46 @@ export function CommentSection({
           ) : (
             <button
               onClick={() => setShowCommentForm(true)}
-              className="w-full p-3 text-left text-gray-500 bg-white border rounded-lg hover:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
+              className="comment-write-trigger"
             >
               댓글을 작성해주세요...
             </button>
           )}
         </div>
-      ) : (
-        <div className="p-4 border-b bg-gray-50 text-center">
-          <p className="text-gray-600">
-            댓글을 작성하려면{' '}
-            <a href="/login" className="text-purple-600 hover:underline">
-              로그인
-            </a>
-            이 필요합니다.
-          </p>
-        </div>
       )}
 
       {/* 댓글 목록 */}
       {expandedComments && (
-        <div className="divide-y divide-gray-100">
+        <div className="comment-list">
           {/* 로딩 상태 */}
           {loading && comments.length === 0 && (
-            <div className="p-8 text-center">
-              <Loader2 className="h-6 w-6 animate-spin text-purple-600 mx-auto mb-2" />
-              <p className="text-gray-500">댓글을 불러오는 중...</p>
+            <div className="comment-loading">
+              <Loader2 className="loading-spinner-large" />
+              <p className="loading-text">댓글을 불러오는 중...</p>
             </div>
           )}
 
           {/* 에러 상태 */}
           {error && (
-            <div className="p-4 text-center">
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="text-red-600 mb-2">댓글을 불러오는데 실패했습니다.</p>
-                <Button
-                  variant="secondary"
-                  size="sm"
+            <div className="comment-error">
+              <div className="error-card">
+                <p className="error-message">댓글을 불러오는데 실패했습니다.</p>
+                <button
                   onClick={handleRefresh}
-                  className="text-red-600 border-red-200 hover:bg-red-50"
+                  className="error-retry-button"
                 >
                   다시 시도
-                </Button>
+                </button>
               </div>
             </div>
           )}
 
           {/* 댓글이 없는 경우 */}
           {!loading && !error && comments.length === 0 && (
-            <div className="p-8 text-center">
-              <MessageCircle className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500 mb-2">아직 댓글이 없습니다.</p>
-              <p className="text-gray-400 text-sm">첫 번째 댓글을 작성해보세요!</p>
+            <div className="comment-empty">
+              <MessageCircle className="empty-icon" />
+              <p className="empty-text">아직 댓글이 없습니다.</p>
+              <p className="empty-subtext">첫 번째 댓글을 작성해보세요!</p>
             </div>
           )}
 
@@ -183,21 +169,19 @@ export function CommentSection({
               currentUserName={currentUserName}
               currentUserProfile={currentUserProfile}
               onReplySuccess={handleRefresh}
-              className="hover:bg-gray-50 transition-colors"
+              className="comment-item-wrapper"
             />
           ))}
 
           {/* 더 많은 댓글 로드 버튼 (필요시) */}
           {comments.length >= 20 && (
-            <div className="p-4 text-center border-t">
-              <Button
-                variant="secondary"
-                size="sm"
+            <div className="load-more-section">
+              <button
                 onClick={handleRefresh}
-                className="text-purple-600"
+                className="load-more-button"
               >
                 더 많은 댓글 보기
-              </Button>
+              </button>
             </div>
           )}
         </div>
@@ -205,10 +189,301 @@ export function CommentSection({
 
       {/* 댓글 통계 (접힌 상태일 때) */}
       {!expandedComments && totalCount > 0 && (
-        <div className="p-4 text-center text-gray-500 text-sm">
+        <div className="comment-collapsed">
           {totalCount}개의 댓글이 있습니다.
         </div>
       )}
+
+      <style jsx>{`
+        .comment-section {
+          background: transparent;
+        }
+
+        /* 헤더 */
+        .comment-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: var(--space-xl);
+          border-bottom: 1px solid rgba(200, 200, 200, 0.15);
+          gap: var(--space-md);
+        }
+
+        .header-left {
+          display: flex;
+          align-items: center;
+          gap: var(--space-sm);
+          flex: 1;
+          min-width: 0;
+        }
+
+        .comment-icon {
+          width: 22px;
+          height: 22px;
+          color: #667eea;
+          flex-shrink: 0;
+        }
+
+        .comment-title {
+          font-size: 18px;
+          font-weight: 700;
+          color: var(--gray-900);
+          margin: 0;
+        }
+
+        .comment-count {
+          color: #667eea;
+        }
+
+        .loading-spinner {
+          width: 16px;
+          height: 16px;
+          color: #667eea;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+
+        .header-right {
+          display: flex;
+          align-items: center;
+          gap: var(--space-sm);
+          flex-shrink: 0;
+        }
+
+        .sort-select {
+          padding: 8px 12px;
+          font-size: 13px;
+          font-weight: 600;
+          color: var(--gray-700);
+          background: rgba(255, 255, 255, 0.8);
+          border: 1px solid rgba(200, 200, 200, 0.3);
+          border-radius: 10px;
+          cursor: pointer;
+          transition: all 0.2s;
+          outline: none;
+        }
+
+        .sort-select:hover {
+          background: white;
+          border-color: #667eea;
+        }
+
+        .sort-select:focus {
+          border-color: #667eea;
+          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .toggle-button {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 8px 14px;
+          font-size: 13px;
+          font-weight: 600;
+          color: var(--gray-700);
+          background: rgba(255, 255, 255, 0.8);
+          border: 1px solid rgba(200, 200, 200, 0.3);
+          border-radius: 10px;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .toggle-button:hover {
+          background: rgba(102, 126, 234, 0.1);
+          border-color: #667eea;
+          color: #667eea;
+        }
+
+        .toggle-icon {
+          width: 16px;
+          height: 16px;
+        }
+
+        /* 댓글 작성 영역 */
+        .comment-write-section {
+          padding: var(--space-lg);
+          background: transparent;
+        }
+
+        .comment-write-trigger {
+          width: 100%;
+          padding: 14px 18px;
+          text-align: left;
+          font-size: 14px;
+          color: var(--gray-500);
+          background: white;
+          border: 2px solid rgba(200, 200, 200, 0.2);
+          border-radius: 12px;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .comment-write-trigger:hover {
+          border-color: #667eea;
+          background: rgba(102, 126, 234, 0.02);
+        }
+
+        .comment-write-trigger:focus {
+          outline: none;
+          border-color: #667eea;
+          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* 댓글 목록 */
+        .comment-list {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .comment-item-wrapper {
+          transition: background-color 0.2s;
+        }
+
+        .comment-item-wrapper:hover {
+          background: rgba(249, 250, 251, 0.8);
+        }
+
+        /* 로딩 */
+        .comment-loading {
+          padding: var(--space-2xl);
+          text-align: center;
+        }
+
+        .loading-spinner-large {
+          width: 32px;
+          height: 32px;
+          color: #667eea;
+          margin: 0 auto var(--space-sm);
+          animation: spin 1s linear infinite;
+        }
+
+        .loading-text {
+          font-size: 14px;
+          color: var(--gray-500);
+          margin: 0;
+        }
+
+        /* 에러 */
+        .comment-error {
+          padding: var(--space-lg);
+        }
+
+        .error-card {
+          padding: var(--space-lg);
+          background: rgba(239, 68, 68, 0.05);
+          border: 1px solid rgba(239, 68, 68, 0.2);
+          border-radius: 12px;
+          text-align: center;
+        }
+
+        .error-message {
+          font-size: 14px;
+          color: #dc2626;
+          margin: 0 0 var(--space-md);
+          font-weight: 600;
+        }
+
+        .error-retry-button {
+          padding: 8px 16px;
+          font-size: 13px;
+          font-weight: 600;
+          color: #dc2626;
+          background: white;
+          border: 1px solid rgba(239, 68, 68, 0.3);
+          border-radius: 10px;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .error-retry-button:hover {
+          background: rgba(239, 68, 68, 0.1);
+          border-color: #dc2626;
+        }
+
+        /* 빈 상태 */
+        .comment-empty {
+          padding: var(--space-2xl);
+          text-align: center;
+        }
+
+        .empty-icon {
+          width: 48px;
+          height: 48px;
+          color: var(--gray-300);
+          margin: 0 auto var(--space-lg);
+        }
+
+        .empty-text {
+          font-size: 16px;
+          font-weight: 600;
+          color: var(--gray-600);
+          margin: 0 0 var(--space-xs);
+        }
+
+        .empty-subtext {
+          font-size: 13px;
+          color: var(--gray-400);
+          margin: 0;
+        }
+
+        /* 더보기 */
+        .load-more-section {
+          padding: var(--space-lg);
+          text-align: center;
+          border-top: 1px solid rgba(200, 200, 200, 0.15);
+        }
+
+        .load-more-button {
+          padding: 10px 20px;
+          font-size: 14px;
+          font-weight: 600;
+          color: #667eea;
+          background: rgba(102, 126, 234, 0.1);
+          border: 1px solid rgba(102, 126, 234, 0.2);
+          border-radius: 10px;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .load-more-button:hover {
+          background: rgba(102, 126, 234, 0.15);
+          transform: translateY(-2px);
+        }
+
+        /* 접힌 상태 */
+        .comment-collapsed {
+          padding: var(--space-lg);
+          text-align: center;
+          font-size: 13px;
+          color: var(--gray-500);
+        }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+          .comment-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: var(--space-md);
+          }
+
+          .header-left {
+            width: 100%;
+          }
+
+          .header-right {
+            width: 100%;
+            justify-content: space-between;
+          }
+
+          .sort-select,
+          .toggle-button {
+            flex: 1;
+          }
+        }
+      `}</style>
     </div>
   )
 }

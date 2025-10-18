@@ -1,8 +1,6 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Button } from '@/components/core/Button'
-import { Card, CardContent } from '@/components/core/Card'
 import { Send, X } from 'lucide-react'
 import { createCommentAction } from '@/lib/actions/comments'
 import type { CreateCommentData } from '@/lib/types/community'
@@ -83,114 +81,345 @@ export function CommentForm({
   const remainingChars = maxLength - content.length
 
   return (
-    <Card className={`${className}`}>
-      <CardContent className="p-4">
-        <form onSubmit={handleSubmit} className="space-y-3">
-          {/* 작성자 정보 */}
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
-              {authorProfileUrl ? (
-                <img
-                  src={authorProfileUrl}
-                  alt={authorName}
-                  className="w-8 h-8 rounded-full object-cover"
-                />
-              ) : (
-                <span className="text-purple-600 text-sm font-medium">
-                  {authorName.charAt(0)}
-                </span>
-              )}
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-900">{authorName}</p>
-              {isReply && (
-                <p className="text-xs text-gray-500">답글 작성 중</p>
-              )}
-            </div>
+    <div className={`comment-form-container ${className}`}>
+      <form onSubmit={handleSubmit} className="comment-form">
+        {/* 작성자 정보 */}
+        <div className="author-section">
+          <div className="author-avatar">
+            {authorProfileUrl ? (
+              <img
+                src={authorProfileUrl}
+                alt={authorName}
+                className="avatar-image"
+              />
+            ) : (
+              <div className="avatar-placeholder">
+                {authorName.charAt(0).toUpperCase()}
+              </div>
+            )}
+          </div>
+          <div className="author-info">
+            <span className="author-name">{authorName}</span>
+            {isReply && <span className="reply-badge">답글 작성 중</span>}
+          </div>
+        </div>
+
+        {/* 텍스트 입력 */}
+        <div className="textarea-wrapper">
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder={placeholder}
+            autoFocus={autoFocus}
+            rows={isReply ? 3 : 4}
+            maxLength={maxLength}
+            disabled={isPending}
+            className={`textarea ${isPending ? 'disabled' : ''} ${error ? 'error' : ''}`}
+          />
+
+          {/* 글자 수 카운터 */}
+          <div className="char-counter">
+            <span className={remainingChars < 50 ? 'warning' : ''}>
+              {content.length}
+            </span>
+            <span className="separator">/</span>
+            <span>{maxLength}</span>
+          </div>
+        </div>
+
+        {/* 에러 메시지 */}
+        {error && (
+          <div className="error-message">
+            {error}
+          </div>
+        )}
+
+        {/* 버튼 영역 */}
+        <div className="button-section">
+          <div className="hint-text">
+            {isReply ? '답글로 작성됩니다' : 'Shift + Enter로 줄바꿈'}
           </div>
 
-          {/* 텍스트 에리어 */}
-          <div className="relative">
-            <textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder={placeholder}
-              autoFocus={autoFocus}
-              rows={isReply ? 3 : 4}
-              maxLength={maxLength}
-              disabled={isPending}
-              className={`
-                w-full px-3 py-3 border rounded-lg resize-none
-                focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
-                ${isPending ? 'bg-gray-50 cursor-not-allowed' : 'bg-white'}
-                ${error ? 'border-red-300' : 'border-gray-300'}
-              `}
-            />
-
-            {/* 글자 수 표시 */}
-            <div className="absolute bottom-2 right-2 text-xs text-gray-400">
-              <span className={remainingChars < 50 ? 'text-orange-500' : ''}>
-                {content.length}
-              </span>
-              <span>/{maxLength}</span>
-            </div>
-          </div>
-
-          {/* 에러 메시지 */}
-          {error && (
-            <p className="text-sm text-red-600 bg-red-50 p-2 rounded">
-              {error}
-            </p>
-          )}
-
-          {/* 버튼 영역 */}
-          <div className="flex items-center justify-between">
-            <div className="text-xs text-gray-500">
-              {isReply ? (
-                <span>답글로 작성됩니다</span>
-              ) : (
-                <span>Enter + Shift로 줄바꿈, Enter로 전송</span>
-              )}
-            </div>
-
-            <div className="flex items-center gap-2">
-              {onCancel && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleCancel}
-                  disabled={isPending}
-                  className="text-gray-600"
-                >
-                  <X className="h-4 w-4 mr-1" />
-                  취소
-                </Button>
-              )}
-
-              <Button
-                type="submit"
-                size="sm"
-                disabled={!content.trim() || isPending || remainingChars < 0}
-                className="bg-purple-600 hover:bg-purple-700"
+          <div className="button-group">
+            {onCancel && (
+              <button
+                type="button"
+                onClick={handleCancel}
+                disabled={isPending}
+                className="btn-cancel"
               >
-                {isPending ? (
-                  <div className="flex items-center">
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
-                    작성 중...
-                  </div>
-                ) : (
-                  <div className="flex items-center">
-                    <Send className="h-4 w-4 mr-1" />
-                    {isReply ? '답글' : '댓글'} 작성
-                  </div>
-                )}
-              </Button>
-            </div>
+                <X className="btn-icon" />
+                <span>취소</span>
+              </button>
+            )}
+
+            <button
+              type="submit"
+              disabled={!content.trim() || isPending || remainingChars < 0}
+              className="btn-submit"
+            >
+              {isPending ? (
+                <>
+                  <div className="spinner" />
+                  <span>작성 중...</span>
+                </>
+              ) : (
+                <>
+                  <Send className="btn-icon" />
+                  <span>{isReply ? '답글' : '댓글'} 작성</span>
+                </>
+              )}
+            </button>
           </div>
-        </form>
-      </CardContent>
-    </Card>
+        </div>
+      </form>
+
+      <style jsx>{`
+        .comment-form-container {
+          background: white;
+          border-radius: 16px;
+          padding: var(--space-lg);
+          border: 1px solid rgba(200, 200, 200, 0.2);
+        }
+
+        .comment-form {
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-md);
+        }
+
+        /* 작성자 섹션 */
+        .author-section {
+          display: flex;
+          align-items: center;
+          gap: var(--space-sm);
+        }
+
+        .author-avatar {
+          width: 36px;
+          height: 36px;
+          flex-shrink: 0;
+        }
+
+        .avatar-image {
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          object-fit: cover;
+          box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+        }
+
+        .avatar-placeholder {
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-size: 14px;
+          font-weight: 700;
+          box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .author-info {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          flex: 1;
+        }
+
+        .author-name {
+          font-size: 14px;
+          font-weight: 600;
+          color: var(--gray-900);
+        }
+
+        .reply-badge {
+          font-size: 12px;
+          color: #667eea;
+        }
+
+        /* 텍스트 영역 */
+        .textarea-wrapper {
+          position: relative;
+        }
+
+        .textarea {
+          width: 100%;
+          padding: 14px;
+          padding-bottom: 36px;
+          border: 2px solid rgba(200, 200, 200, 0.2);
+          border-radius: 12px;
+          resize: none;
+          font-size: 14px;
+          line-height: 1.6;
+          color: var(--gray-900);
+          background: white;
+          transition: all 0.2s;
+          outline: none;
+        }
+
+        .textarea:focus {
+          border-color: #667eea;
+          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .textarea.disabled {
+          background: rgba(249, 250, 251, 0.8);
+          cursor: not-allowed;
+          color: var(--gray-500);
+        }
+
+        .textarea.error {
+          border-color: #ef4444;
+        }
+
+        .textarea::placeholder {
+          color: var(--gray-400);
+        }
+
+        .char-counter {
+          position: absolute;
+          bottom: 10px;
+          right: 14px;
+          font-size: 12px;
+          color: var(--gray-400);
+          pointer-events: none;
+        }
+
+        .char-counter .warning {
+          color: #f97316;
+          font-weight: 600;
+        }
+
+        .char-counter .separator {
+          margin: 0 2px;
+        }
+
+        /* 에러 메시지 */
+        .error-message {
+          padding: 10px 14px;
+          background: rgba(239, 68, 68, 0.05);
+          border: 1px solid rgba(239, 68, 68, 0.2);
+          border-radius: 10px;
+          color: #dc2626;
+          font-size: 13px;
+          font-weight: 500;
+        }
+
+        /* 버튼 섹션 */
+        .button-section {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: var(--space-md);
+        }
+
+        .hint-text {
+          font-size: 12px;
+          color: var(--gray-500);
+        }
+
+        .button-group {
+          display: flex;
+          align-items: center;
+          gap: var(--space-xs);
+        }
+
+        .btn-cancel,
+        .btn-submit {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 10px 18px;
+          border-radius: 10px;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+          border: none;
+          outline: none;
+        }
+
+        .btn-cancel {
+          background: rgba(249, 250, 251, 0.8);
+          color: var(--gray-700);
+          border: 1px solid rgba(200, 200, 200, 0.2);
+        }
+
+        .btn-cancel:hover:not(:disabled) {
+          background: rgba(243, 244, 246, 1);
+          transform: translateY(-1px);
+        }
+
+        .btn-submit {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-submit:hover:not(:disabled) {
+          box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+          transform: translateY(-2px);
+        }
+
+        .btn-submit:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+          transform: none;
+        }
+
+        .btn-cancel:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .btn-icon {
+          width: 16px;
+          height: 16px;
+        }
+
+        .spinner {
+          width: 16px;
+          height: 16px;
+          border: 2px solid rgba(255, 255, 255, 0.3);
+          border-top-color: white;
+          border-radius: 50%;
+          animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+          .comment-form-container {
+            padding: var(--space-md);
+          }
+
+          .button-section {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: var(--space-sm);
+          }
+
+          .button-group {
+            width: 100%;
+            justify-content: flex-end;
+          }
+
+          .btn-cancel span,
+          .btn-submit span {
+            font-size: 13px;
+          }
+        }
+      `}</style>
+    </div>
   )
 }
 
@@ -247,7 +476,7 @@ export function InlineCommentForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2">
+    <form onSubmit={handleSubmit} className="inline-form">
       <input
         type="text"
         value={content}
@@ -256,30 +485,87 @@ export function InlineCommentForm({
         placeholder={placeholder}
         disabled={isPending}
         autoFocus
-        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm
-                   focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+        className="inline-input"
       />
 
-      <Button
+      <button
         type="submit"
-        size="sm"
         disabled={!content.trim() || isPending}
-        className="bg-purple-600 hover:bg-purple-700"
+        className="inline-submit"
       >
         {isPending ? '...' : '전송'}
-      </Button>
+      </button>
 
       {onCancel && (
-        <Button
+        <button
           type="button"
-          variant="ghost"
-          size="sm"
           onClick={onCancel}
           disabled={isPending}
+          className="inline-cancel"
         >
           취소
-        </Button>
+        </button>
       )}
+
+      <style jsx>{`
+        .inline-form {
+          display: flex;
+          gap: var(--space-xs);
+          align-items: center;
+        }
+
+        .inline-input {
+          flex: 1;
+          padding: 10px 14px;
+          border: 1px solid rgba(200, 200, 200, 0.3);
+          border-radius: 10px;
+          font-size: 13px;
+          outline: none;
+          transition: all 0.2s;
+        }
+
+        .inline-input:focus {
+          border-color: #667eea;
+          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .inline-submit,
+        .inline-cancel {
+          padding: 10px 16px;
+          font-size: 13px;
+          font-weight: 600;
+          border-radius: 10px;
+          cursor: pointer;
+          transition: all 0.2s;
+          border: none;
+          outline: none;
+        }
+
+        .inline-submit {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+        }
+
+        .inline-submit:hover:not(:disabled) {
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .inline-submit:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .inline-cancel {
+          background: transparent;
+          color: var(--gray-600);
+          border: 1px solid rgba(200, 200, 200, 0.3);
+        }
+
+        .inline-cancel:hover:not(:disabled) {
+          background: rgba(249, 250, 251, 0.8);
+        }
+      `}</style>
     </form>
   )
 }

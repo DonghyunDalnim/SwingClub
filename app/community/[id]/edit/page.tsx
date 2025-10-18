@@ -42,15 +42,18 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
 
   const post = postResult.data
 
+  // userId 추출 (id 또는 uid 필드 지원)
+  const userId = (user as any)?.id || (user as any)?.uid
+
   // 작성자 권한 확인
-  if (post.metadata.authorId !== user.uid) {
+  if (post.metadata.authorId !== userId) {
     redirect('/community/' + id)
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <PostForm
-        userId={user.uid}
+        userId={userId}
         userName={user.displayName || '익명'}
         mode="edit"
         initialData={post}

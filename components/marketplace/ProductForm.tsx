@@ -259,7 +259,6 @@ export function ProductForm({ userId, userName, mode }: ProductFormProps) {
 
   return (
     <div className="page">
-      <Header />
 
       {/* 2-Column Layout */}
       <div className="main-layout">

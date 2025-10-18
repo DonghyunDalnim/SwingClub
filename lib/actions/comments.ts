@@ -30,6 +30,12 @@ export async function createCommentAction(data: CreateCommentData): Promise<{ su
       return { success: false, error: '로그인이 필요합니다.' }
     }
 
+    // 사용자 ID 추출 (id 또는 uid 필드 지원)
+    const userId = (user as any)?.id || (user as any)?.uid
+    if (!userId) {
+      return { success: false, error: '사용자 정보를 찾을 수 없습니다.' }
+    }
+
     // 콘텐츠 검증
     if (!data.content?.trim()) {
       return { success: false, error: '댓글 내용을 입력해주세요.' }
@@ -45,15 +51,15 @@ export async function createCommentAction(data: CreateCommentData): Promise<{ su
       content: data.content.trim()
     }
 
-    const commentId = await createComment(sanitizedData, user.uid, user.displayName || '익명')
+    const commentId = await createComment(sanitizedData, userId, user.displayName || '익명')
 
     // 알림 생성 (댓글이 대댓글인 경우와 원댓글인 경우 다르게 처리)
     if (data.parentId) {
       // 대댓글인 경우: 부모 댓글 작성자에게 알림
-      await createCommentReplyNotification(data.postId, commentId, data.parentId, user.uid)
+      await createCommentReplyNotification(data.postId, commentId, data.parentId, userId)
     } else {
       // 원댓글인 경우: 게시글 작성자에게 알림
-      await createNewCommentNotification(data.postId, commentId, user.uid)
+      await createNewCommentNotification(data.postId, commentId, userId)
     }
 
     revalidatePath(`/community/${data.postId}`)
@@ -79,6 +85,11 @@ export async function updateCommentAction(
       return { success: false, error: '로그인이 필요합니다.' }
     }
 
+    const userId = (user as any)?.id || (user as any)?.uid
+    if (!userId) {
+      return { success: false, error: '사용자 정보를 찾을 수 없습니다.' }
+    }
+
     // 콘텐츠 검증
     if (data.content && !data.content.trim()) {
       return { success: false, error: '댓글 내용을 입력해주세요.' }
@@ -89,9 +100,14 @@ export async function updateCommentAction(
     }
 
     // 댓글 수정 권한 확인 및 실행
-    await updateComment(commentId, data, user.uid)
+    const comment = await updateComment(commentId, data, userId)
 
+    // 해당 게시글 페이지 갱신
     revalidatePath('/community')
+    if (comment?.postId) {
+      revalidatePath(`/community/${comment.postId}`)
+    }
+
     return { success: true }
 
   } catch (error) {
@@ -111,8 +127,13 @@ export async function deleteCommentAction(commentId: string): Promise<{ success:
       return { success: false, error: '로그인이 필요합니다.' }
     }
 
+    const userId = (user as any)?.id || (user as any)?.uid
+    if (!userId) {
+      return { success: false, error: '사용자 정보를 찾을 수 없습니다.' }
+    }
+
     // 댓글 삭제 권한 확인 및 실행
-    await deleteComment(commentId, user.uid)
+    await deleteComment(commentId, userId)
 
     revalidatePath('/community')
     return { success: true }
@@ -134,7 +155,12 @@ export async function likeCommentAction(commentId: string): Promise<{ success: b
       return { success: false, error: '로그인이 필요합니다.' }
     }
 
-    await likeComment(commentId, user.uid)
+    const userId = (user as any)?.id || (user as any)?.uid
+    if (!userId) {
+      return { success: false, error: '사용자 정보를 찾을 수 없습니다.' }
+    }
+
+    await likeComment(commentId, userId)
 
     revalidatePath('/community')
     return { success: true }
@@ -156,7 +182,12 @@ export async function unlikeCommentAction(commentId: string): Promise<{ success:
       return { success: false, error: '로그인이 필요합니다.' }
     }
 
-    await unlikeComment(commentId, user.uid)
+    const userId = (user as any)?.id || (user as any)?.uid
+    if (!userId) {
+      return { success: false, error: '사용자 정보를 찾을 수 없습니다.' }
+    }
+
+    await unlikeComment(commentId, userId)
 
     revalidatePath('/community')
     return { success: true }

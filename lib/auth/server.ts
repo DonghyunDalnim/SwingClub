@@ -15,22 +15,16 @@ export async function getCurrentUser(): Promise<User | null> {
     const authToken = cookieStore.get('firebase-token')  // 'auth-token' -> 'firebase-token'
     const userDataCookie = cookieStore.get('user-data')
 
-    console.log('[Server] getCurrentUser - authToken exists:', !!authToken)
-    console.log('[Server] getCurrentUser - userDataCookie exists:', !!userDataCookie)
-
     if (!authToken || !userDataCookie) {
-      console.warn('[Server] Missing cookies - authToken:', !!authToken, 'userData:', !!userDataCookie)
       return null
     }
 
     // 쿠키에서 사용자 데이터 파싱 (decodeURIComponent 추가)
     try {
       const userData = JSON.parse(decodeURIComponent(userDataCookie.value))
-      console.log('[Server] User data parsed successfully, uid:', userData.uid || userData.id)
       return userData
     } catch (parseError) {
       console.error('[Server] 사용자 데이터 파싱 실패:', parseError)
-      console.error('[Server] Raw cookie value:', userDataCookie.value)
       return null
     }
   } catch (error) {

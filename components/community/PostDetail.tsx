@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { CommentSection } from './CommentSection'
-import { ArrowLeft, Heart, MessageCircle, Eye, Edit, Trash2, Share2, Calendar, MapPin, DollarSign, Package } from 'lucide-react'
+import { ArrowLeft, Heart, MessageCircle, Eye, Edit, Trash2, Calendar, MapPin, DollarSign, Package } from 'lucide-react'
 import { deletePostAction } from '@/lib/actions/posts'
 import { POST_CATEGORIES } from '@/lib/types/community'
 import type { Post } from '@/lib/types/community'
@@ -62,19 +62,6 @@ export function PostDetail({ post, currentUserId, currentUserName, currentUserPr
     setLikeCount(prev => liked ? prev - 1 : prev + 1)
   }
 
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: post.title,
-        text: post.content.slice(0, 100) + '...',
-        url: window.location.href
-      })
-    } else {
-      navigator.clipboard.writeText(window.location.href)
-      alert('링크가 클립보드에 복사되었습니다.')
-    }
-  }
-
   return (
     <div className="detail-container">
       <div className="detail-wrapper">
@@ -86,10 +73,6 @@ export function PostDetail({ post, currentUserId, currentUserName, currentUserPr
           </Link>
 
           <div className="header-actions">
-            <button className="action-btn share-btn" onClick={handleShare}>
-              <Share2 className="action-icon" />
-            </button>
-
             {isAuthor && (
               <>
                 <Link href={`/community/${post.id}/edit`}>
