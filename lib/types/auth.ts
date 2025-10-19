@@ -21,6 +21,20 @@ export interface UserProfile {
   location: string
   bio?: string
   interests: string[]
+  /**
+   * 사용자의 댄스 스타일 목록
+   * List of user's dance styles with proficiency levels
+   *
+   * @optional 기존 사용자와의 하위 호환성을 위해 optional
+   * @example
+   * ```typescript
+   * danceStyles: [
+   *   { name: 'Lindy Hop', level: 3 },
+   *   { name: 'Charleston', level: 2 }
+   * ]
+   * ```
+   */
+  danceStyles?: DanceStyle[]
   socialLinks?: {
     kakao?: string
     instagram?: string
