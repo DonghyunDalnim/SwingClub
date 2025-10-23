@@ -1,5 +1,13 @@
 /**
  * Authentication related type definitions for Swing Connect
+ *
+ * @module lib/types/auth
+ * @description User authentication and profile type definitions
+ *
+ * @changelog
+ * - 2025-01-19: Added DanceStyle interface and UserProfile.danceStyles field (Issue #93, #94)
+ *   - New DanceStyle interface for storing dance style proficiency
+ *   - UserProfile extended with optional danceStyles field for backward compatibility
  */
 
 import type { User as FirebaseUser } from 'firebase/auth'
@@ -15,17 +23,79 @@ export interface User {
   profile?: UserProfile
 }
 
+/**
+ * 사용자 프로필 정보
+ * User profile information
+ *
+ * @interface UserProfile
+ * @description
+ * Stores user profile data including nickname, dance level, location, interests, and dance styles.
+ * The interface supports optional fields for backward compatibility with existing data.
+ *
+ * @example
+ * ```typescript
+ * // Basic profile (backward compatible)
+ * const basicProfile: UserProfile = {
+ *   nickname: '스윙댄서',
+ *   danceLevel: 'intermediate',
+ *   location: '서울',
+ *   interests: ['Swing Dance']
+ * }
+ *
+ * // Profile with dance styles (new feature)
+ * const detailedProfile: UserProfile = {
+ *   nickname: '스윙댄서',
+ *   danceLevel: 'intermediate',
+ *   location: '서울',
+ *   bio: '스윙댄스를 사랑합니다',
+ *   interests: ['Swing Dance', 'Social Dancing'],
+ *   danceStyles: [
+ *     { name: 'Lindy Hop', level: 3 },
+ *     { name: 'Charleston', level: 2 }
+ *   ],
+ *   socialLinks: {
+ *     kakao: 'swing_dancer',
+ *     instagram: '@swing_dancer'
+ *   }
+ * }
+ *
+ * // Profile update (Partial support)
+ * const profileUpdate: Partial<UserProfile> = {
+ *   bio: '업데이트된 소개',
+ *   danceStyles: [
+ *     { name: 'Lindy Hop', level: 4 }  // Level increased
+ *   ]
+ * }
+ * ```
+ *
+ * @since 2025-01-19 - Added danceStyles field (Issue #94)
+ *
+ * @see {@link DanceStyle} for dance style proficiency levels
+ * @see {@link DanceLevel} for overall dance skill level
+ */
 export interface UserProfile {
+  /** 사용자 닉네임 (User nickname) */
   nickname: string
+
+  /** 전반적인 댄스 레벨 (Overall dance level) */
   danceLevel: DanceLevel
+
+  /** 위치/지역 (Location/region) */
   location: string
+
+  /** 자기소개 (Bio) - optional */
   bio?: string
+
+  /** 관심사 목록 (List of interests) */
   interests: string[]
+
   /**
    * 사용자의 댄스 스타일 목록
    * List of user's dance styles with proficiency levels
    *
-   * @optional 기존 사용자와의 하위 호환성을 위해 optional
+   * @optional 기존 사용자와의 하위 호환성을 위해 optional (Optional for backward compatibility)
+   * @since 2025-01-19 (Issue #94)
+   *
    * @example
    * ```typescript
    * danceStyles: [
@@ -33,8 +103,16 @@ export interface UserProfile {
    *   { name: 'Charleston', level: 2 }
    * ]
    * ```
+   *
+   * @remarks
+   * - Can be undefined for existing users who haven't set their dance styles
+   * - Can be an empty array [] for users who cleared their styles
+   * - Recommended maximum: 10 dance styles for UI performance
+   * - Each style uses 1-5 level system (different from DanceLevel)
    */
   danceStyles?: DanceStyle[]
+
+  /** 소셜 미디어 링크 (Social media links) - optional */
   socialLinks?: {
     kakao?: string
     instagram?: string
