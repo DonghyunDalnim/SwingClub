@@ -21,6 +21,20 @@ export interface UserProfile {
   location: string
   bio?: string
   interests: string[]
+  /**
+   * 사용자의 댄스 스타일 목록
+   * List of user's dance styles with proficiency levels
+   *
+   * @optional 기존 사용자와의 하위 호환성을 위해 optional
+   * @example
+   * ```typescript
+   * danceStyles: [
+   *   { name: 'Lindy Hop', level: 3 },
+   *   { name: 'Charleston', level: 2 }
+   * ]
+   * ```
+   */
+  danceStyles?: DanceStyle[]
   socialLinks?: {
     kakao?: string
     instagram?: string
@@ -28,6 +42,39 @@ export interface UserProfile {
 }
 
 export type DanceLevel = 'beginner' | 'intermediate' | 'advanced' | 'professional'
+
+/**
+ * 댄스 스타일 및 레벨 정보
+ * Dance style and proficiency level information
+ *
+ * @interface DanceStyle
+ * @example
+ * ```typescript
+ * const userDanceStyles: DanceStyle[] = [
+ *   { name: 'Lindy Hop', level: 3 },
+ *   { name: 'Charleston', level: 2 },
+ *   { name: 'Balboa', level: 4 }
+ * ]
+ * ```
+ */
+export interface DanceStyle {
+  /**
+   * 댄스 스타일 이름
+   * Dance style name (e.g., Lindy Hop, Charleston, Balboa, Collegiate Shag)
+   */
+  name: string
+
+  /**
+   * 숙련도 레벨 (1-5)
+   * Proficiency level (1-5)
+   * - 1: 초급 (Beginner)
+   * - 2: 초중급 (Elementary)
+   * - 3: 중급 (Intermediate)
+   * - 4: 중상급 (Upper-Intermediate)
+   * - 5: 상급 (Advanced)
+   */
+  level: number
+}
 
 export type AuthProvider = 'google' | 'kakao' | 'naver' | 'email'
 
