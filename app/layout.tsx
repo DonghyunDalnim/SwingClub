@@ -5,6 +5,8 @@ import { TopNav } from '../components/navigation/TopNav'
 import { AuthProvider } from '../lib/auth/context'
 import { Toaster } from 'react-hot-toast'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'Swing Connect - 스윙댄스 커뮤니티',
   description: '스윙댄스 애호가들을 위한 통합 커뮤니티 플랫폼',

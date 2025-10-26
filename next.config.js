@@ -14,6 +14,10 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  // Disable static page generation for error pages
+  generateBuildId: async () => {
+    return 'swing-connect-build'
+  },
 }
 
 module.exports = nextConfig
