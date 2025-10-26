@@ -15,12 +15,21 @@ export interface User {
   profile?: UserProfile
 }
 
+/**
+ * Dance style with proficiency level
+ */
+export interface DanceStyle {
+  name: string
+  level: number // 1-5 (1: beginner, 5: expert)
+}
+
 export interface UserProfile {
   nickname: string
   danceLevel: DanceLevel
   location: string
   bio?: string
   interests: string[]
+  danceStyles?: DanceStyle[] // User's dance styles with proficiency levels
   socialLinks?: {
     kakao?: string
     instagram?: string
