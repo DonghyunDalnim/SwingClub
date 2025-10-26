@@ -8,12 +8,11 @@ const nextConfig = {
       },
     ],
   },
-  eslint: {
-    ignoreDuringBuilds: false,
-  },
   typescript: {
     ignoreBuildErrors: false,
   },
+  // Use standalone output to avoid static generation issues
+  output: 'standalone',
   // Disable static page generation for error pages
   generateBuildId: async () => {
     return 'swing-connect-build'
