@@ -8,9 +8,13 @@ import { doc, updateDoc, getDoc } from 'firebase/firestore'
 import type { DanceStyle } from '@/lib/types/auth'
 
 // Mock Firebase
-jest.mock('firebase/firestore')
+jest.mock('firebase/firestore', () => ({
+  doc: jest.fn(() => ({ id: 'mocked-doc-ref' })),
+  updateDoc: jest.fn(),
+  getDoc: jest.fn()
+}))
 jest.mock('@/lib/auth/server')
-jest.mock('@/lib/firebase/config', () => ({
+jest.mock('@/lib/firebase', () => ({
   db: {}
 }))
 
@@ -176,12 +180,13 @@ describe('updateUserProfile Server Action', () => {
       })
 
       expect(updateDoc).toHaveBeenCalledWith(
-        expect.anything(),
+        { id: 'mocked-doc-ref' },
         expect.objectContaining({
           profile: expect.objectContaining({
             nickname: 'Test User',
             location: 'Seoul'
-          })
+          }),
+          updatedAt: expect.any(Date)
         })
       )
     })
@@ -258,11 +263,14 @@ describe('updateUserProfile Server Action', () => {
       })
 
       expect(updateDoc).toHaveBeenCalledWith(
-        expect.anything(),
+        { id: 'mocked-doc-ref' },
         expect.objectContaining({
           profile: expect.objectContaining({
-            nickname: 'New Name'
-          })
+            nickname: 'New Name',
+            location: 'Old Location',
+            bio: 'Old Bio'
+          }),
+          updatedAt: expect.any(Date)
         })
       )
     })
