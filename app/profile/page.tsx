@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth/hooks'
 import { useState } from 'react'
+import { DanceStyleDisplay } from './components/DanceStyleDisplay'
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -100,25 +101,13 @@ export default function ProfilePage() {
                 {/* Dance Styles */}
                 <section className="content-section">
                   <div className="section-header">
-                    <h2 className="section-title">🎵 선호 스타일</h2>
+                    <h2 className="section-title">🎵 댄스 스타일</h2>
                   </div>
-                  <div className="dance-styles-grid">
-                    {[
-                      { name: '린디합', level: 3 },
-                      { name: '찰스턴', level: 2 },
-                      { name: '발보아', level: 1 },
-                      { name: '이스트코스트', level: 0 }
-                    ].map((style, i) => (
-                      <div key={i} className={`dance-style-card ${style.level > 0 ? 'active' : ''}`}>
-                        <div className="dance-name">{style.name}</div>
-                        <div className="dance-stars">
-                          {[1, 2, 3].map(star => (
-                            <span key={star} className={star <= style.level ? 'star-filled' : 'star-empty'}>⭐</span>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <DanceStyleDisplay
+                    danceStyles={user?.profile?.danceStyles || []}
+                    isOwnProfile={true}
+                    onEdit={() => router.push('/profile/edit')}
+                  />
                 </section>
 
                 {/* Badges */}
@@ -488,55 +477,6 @@ export default function ProfilePage() {
           color: var(--gray-900);
         }
 
-        /* Dance Styles */
-        .dance-styles-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-          gap: var(--space-md);
-        }
-
-        .dance-style-card {
-          background: rgba(255, 255, 255, 0.9);
-          border-radius: 16px;
-          padding: var(--space-lg);
-          text-align: center;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-          transition: all 0.2s;
-        }
-
-        .dance-style-card.active {
-          background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-          border: 2px solid rgba(102, 126, 234, 0.3);
-        }
-
-        .dance-style-card:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
-        }
-
-        .dance-name {
-          font-size: 16px;
-          font-weight: 700;
-          color: var(--gray-900);
-          margin-bottom: var(--space-sm);
-        }
-
-        .dance-stars {
-          display: flex;
-          justify-content: center;
-          gap: 2px;
-        }
-
-        .star-filled {
-          filter: grayscale(0);
-          opacity: 1;
-        }
-
-        .star-empty {
-          filter: grayscale(1);
-          opacity: 0.3;
-        }
-
         /* Badges */
         .badges-grid {
           display: grid;
@@ -723,10 +663,6 @@ export default function ProfilePage() {
 
           .tab-item {
             white-space: nowrap;
-          }
-
-          .dance-styles-grid {
-            grid-template-columns: repeat(2, 1fr);
           }
 
           .badges-grid {
