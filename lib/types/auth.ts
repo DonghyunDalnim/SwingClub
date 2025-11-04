@@ -3,6 +3,7 @@
  */
 
 import type { User as FirebaseUser } from 'firebase/auth'
+import type { DanceStyle } from './user'
 
 export interface User {
   id: string
@@ -25,6 +26,7 @@ export interface UserProfile {
     kakao?: string
     instagram?: string
   }
+  danceStyles?: DanceStyle[]
 }
 
 export type DanceLevel = 'beginner' | 'intermediate' | 'advanced' | 'professional'
