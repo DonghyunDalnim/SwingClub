@@ -1,0 +1,339 @@
+/**
+ * useToast hook tests
+ */
+
+import { renderHook, act, waitFor } from '@testing-library/react'
+import { useToast } from '@/hooks/useToast'
+
+jest.useFakeTimers()
+
+describe('useToast hook', () => {
+  describe('Initial state', () => {
+    it('starts with empty toasts array', () => {
+      const { result } = renderHook(() => useToast())
+
+      expect(result.current.toasts).toEqual([])
+    })
+
+    it('has all functions defined', () => {
+      const { result } = renderHook(() => useToast())
+
+      expect(typeof result.current.showToast).toBe('function')
+      expect(typeof result.current.showSuccess).toBe('function')
+      expect(typeof result.current.showError).toBe('function')
+      expect(typeof result.current.showInfo).toBe('function')
+      expect(typeof result.current.showWarning).toBe('function')
+      expect(typeof result.current.removeToast).toBe('function')
+    })
+  })
+
+  describe('showToast', () => {
+    it('adds a new toast', () => {
+      const { result } = renderHook(() => useToast())
+
+      act(() => {
+        result.current.showToast('Test message')
+      })
+
+      expect(result.current.toasts).toHaveLength(1)
+      expect(result.current.toasts[0].message).toBe('Test message')
+      expect(result.current.toasts[0].type).toBe('info')
+    })
+
+    it('default duration is 3000ms', () => {
+      const { result } = renderHook(() => useToast())
+
+      act(() => {
+        result.current.showToast('Message')
+      })
+
+      expect(result.current.toasts[0].duration).toBe(3000)
+    })
+
+    it('can set custom type', () => {
+      const { result } = renderHook(() => useToast())
+
+      act(() => {
+        result.current.showToast('Success message', 'success')
+      })
+
+      expect(result.current.toasts[0].type).toBe('success')
+    })
+
+    it('can set custom duration', () => {
+      const { result } = renderHook(() => useToast())
+
+      act(() => {
+        result.current.showToast('Message', 'info', 5000)
+      })
+
+      expect(result.current.toasts[0].duration).toBe(5000)
+    })
+
+    it('can add multiple toasts', () => {
+      const { result } = renderHook(() => useToast())
+
+      act(() => {
+        result.current.showToast('First')
+        result.current.showToast('Second')
+        result.current.showToast('Third')
+      })
+
+      expect(result.current.toasts).toHaveLength(3)
+    })
+
+    it('each toast has unique ID', () => {
+      const { result } = renderHook(() => useToast())
+
+      act(() => {
+        result.current.showToast('First')
+        result.current.showToast('Second')
+      })
+
+      const ids = result.current.toasts.map(t => t.id)
+      expect(new Set(ids).size).toBe(2)
+    })
+  })
+
+  describe('Auto removal', () => {
+    it('automatically removes toast after duration', async () => {
+      const { result } = renderHook(() => useToast())
+
+      act(() => {
+        result.current.showToast('Message', 'info', 1000)
+      })
+
+      expect(result.current.toasts).toHaveLength(1)
+
+      act(() => {
+        jest.advanceTimersByTime(1300)
+      })
+
+      await waitFor(() => {
+        expect(result.current.toasts).toHaveLength(0)
+      })
+    })
+
+    it('does not auto remove when duration is 0', () => {
+      const { result } = renderHook(() => useToast())
+
+      act(() => {
+        result.current.showToast('Message', 'info', 0)
+      })
+
+      act(() => {
+        jest.advanceTimersByTime(10000)
+      })
+
+      expect(result.current.toasts).toHaveLength(1)
+    })
+
+    it('does not auto remove when duration is negative', () => {
+      const { result } = renderHook(() => useToast())
+
+      act(() => {
+        result.current.showToast('Message', 'info', -1)
+      })
+
+      act(() => {
+        jest.advanceTimersByTime(10000)
+      })
+
+      expect(result.current.toasts).toHaveLength(1)
+    })
+  })
+
+  describe('removeToast', () => {
+    it('removes toast by ID', () => {
+      const { result } = renderHook(() => useToast())
+
+      act(() => {
+        result.current.showToast('First')
+        result.current.showToast('Second')
+      })
+
+      const firstToastId = result.current.toasts[0].id
+
+      act(() => {
+        result.current.removeToast(firstToastId)
+      })
+
+      expect(result.current.toasts).toHaveLength(1)
+      expect(result.current.toasts[0].message).toBe('Second')
+    })
+
+    it('does not throw error for non-existent ID', () => {
+      const { result } = renderHook(() => useToast())
+
+      act(() => {
+        result.current.showToast('Message')
+      })
+
+      expect(() => {
+        act(() => {
+          result.current.removeToast('non-existent-id')
+        })
+      }).not.toThrow()
+
+      expect(result.current.toasts).toHaveLength(1)
+    })
+  })
+
+  describe('showSuccess', () => {
+    it('adds success type toast', () => {
+      const { result } = renderHook(() => useToast())
+
+      act(() => {
+        result.current.showSuccess('Success message')
+      })
+
+      expect(result.current.toasts[0].type).toBe('success')
+      expect(result.current.toasts[0].message).toBe('Success message')
+    })
+
+    it('can set custom duration', () => {
+      const { result } = renderHook(() => useToast())
+
+      act(() => {
+        result.current.showSuccess('Success message', 5000)
+      })
+
+      expect(result.current.toasts[0].duration).toBe(5000)
+    })
+  })
+
+  describe('showError', () => {
+    it('adds error type toast', () => {
+      const { result } = renderHook(() => useToast())
+
+      act(() => {
+        result.current.showError('Error message')
+      })
+
+      expect(result.current.toasts[0].type).toBe('error')
+      expect(result.current.toasts[0].message).toBe('Error message')
+    })
+
+    it('can set custom duration', () => {
+      const { result } = renderHook(() => useToast())
+
+      act(() => {
+        result.current.showError('Error message', 5000)
+      })
+
+      expect(result.current.toasts[0].duration).toBe(5000)
+    })
+  })
+
+  describe('showInfo', () => {
+    it('adds info type toast', () => {
+      const { result } = renderHook(() => useToast())
+
+      act(() => {
+        result.current.showInfo('Info message')
+      })
+
+      expect(result.current.toasts[0].type).toBe('info')
+      expect(result.current.toasts[0].message).toBe('Info message')
+    })
+
+    it('can set custom duration', () => {
+      const { result } = renderHook(() => useToast())
+
+      act(() => {
+        result.current.showInfo('Info message', 5000)
+      })
+
+      expect(result.current.toasts[0].duration).toBe(5000)
+    })
+  })
+
+  describe('showWarning', () => {
+    it('adds warning type toast', () => {
+      const { result } = renderHook(() => useToast())
+
+      act(() => {
+        result.current.showWarning('Warning message')
+      })
+
+      expect(result.current.toasts[0].type).toBe('warning')
+      expect(result.current.toasts[0].message).toBe('Warning message')
+    })
+
+    it('can set custom duration', () => {
+      const { result } = renderHook(() => useToast())
+
+      act(() => {
+        result.current.showWarning('Warning message', 5000)
+      })
+
+      expect(result.current.toasts[0].duration).toBe(5000)
+    })
+  })
+
+  describe('Complex scenarios', () => {
+    it('can manage multiple toast types simultaneously', () => {
+      const { result } = renderHook(() => useToast())
+
+      act(() => {
+        result.current.showSuccess('Success')
+        result.current.showError('Error')
+        result.current.showWarning('Warning')
+        result.current.showInfo('Info')
+      })
+
+      expect(result.current.toasts).toHaveLength(4)
+      expect(result.current.toasts[0].type).toBe('success')
+      expect(result.current.toasts[1].type).toBe('error')
+      expect(result.current.toasts[2].type).toBe('warning')
+      expect(result.current.toasts[3].type).toBe('info')
+    })
+
+    it('can remove specific toasts', () => {
+      const { result } = renderHook(() => useToast())
+
+      act(() => {
+        result.current.showToast('First')
+        result.current.showToast('Second')
+        result.current.showToast('Third')
+      })
+
+      const secondToastId = result.current.toasts[1].id
+
+      act(() => {
+        result.current.removeToast(secondToastId)
+      })
+
+      expect(result.current.toasts).toHaveLength(2)
+      expect(result.current.toasts[0].message).toBe('First')
+      expect(result.current.toasts[1].message).toBe('Third')
+    })
+
+    it('can mix auto and manual removal', async () => {
+      const { result } = renderHook(() => useToast())
+
+      act(() => {
+        result.current.showToast('Auto remove', 'info', 1000)
+        result.current.showToast('Manual remove', 'info', 0)
+      })
+
+      expect(result.current.toasts).toHaveLength(2)
+
+      act(() => {
+        jest.advanceTimersByTime(1300)
+      })
+
+      await waitFor(() => {
+        expect(result.current.toasts).toHaveLength(1)
+        expect(result.current.toasts[0].message).toBe('Manual remove')
+      })
+
+      const remainingToastId = result.current.toasts[0].id
+      act(() => {
+        result.current.removeToast(remainingToastId)
+      })
+
+      expect(result.current.toasts).toHaveLength(0)
+    })
+  })
+})

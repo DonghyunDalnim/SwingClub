@@ -1,0 +1,200 @@
+/**
+ * Toast component tests
+ */
+
+import React from 'react'
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { Toast, ToastContainer } from '@/components/ui/Toast'
+
+jest.useFakeTimers()
+
+describe('Toast Component', () => {
+  describe('Rendering', () => {
+    it('displays the message', () => {
+      render(<Toast message="Test message" />)
+
+      expect(screen.getByText('Test message')).toBeInTheDocument()
+    })
+
+    it('has default type of info', () => {
+      render(<Toast message="Info message" />)
+
+      const toast = screen.getByRole('alert')
+      expect(toast).toBeInTheDocument()
+    })
+
+    it('displays success icon', () => {
+      render(<Toast message="Success message" type="success" />)
+
+      expect(screen.getByText('✓')).toBeInTheDocument()
+    })
+
+    it('displays error icon', () => {
+      const { container } = render(<Toast message="Error message" type="error" />)
+
+      const icon = container.querySelector('.toast-icon')
+      expect(icon).toHaveTextContent('✕')
+    })
+
+    it('displays warning icon', () => {
+      render(<Toast message="Warning message" type="warning" />)
+
+      expect(screen.getByText('⚠')).toBeInTheDocument()
+    })
+
+    it('displays info icon', () => {
+      render(<Toast message="Info message" type="info" />)
+
+      expect(screen.getByText('ℹ')).toBeInTheDocument()
+    })
+  })
+
+  describe('Accessibility', () => {
+    it('has role="alert"', () => {
+      render(<Toast message="Alert" />)
+
+      expect(screen.getByRole('alert')).toBeInTheDocument()
+    })
+
+    it('has aria-live="polite"', () => {
+      render(<Toast message="Alert" />)
+
+      const toast = screen.getByRole('alert')
+      expect(toast).toHaveAttribute('aria-live', 'polite')
+    })
+
+    it('close button has aria-label', () => {
+      render(<Toast message="Alert" />)
+
+      expect(screen.getByLabelText('알림 닫기')).toBeInTheDocument()
+    })
+  })
+
+  describe('Auto close', () => {
+    it('auto closes after duration', async () => {
+      const onClose = jest.fn()
+      render(<Toast message="Alert" duration={1000} onClose={onClose} />)
+
+      jest.advanceTimersByTime(1000)
+
+      await waitFor(() => {
+        expect(onClose).toHaveBeenCalledTimes(1)
+      })
+    })
+
+    it('does not auto close when duration is 0', () => {
+      const onClose = jest.fn()
+      render(<Toast message="Alert" duration={0} onClose={onClose} />)
+
+      jest.advanceTimersByTime(5000)
+
+      expect(onClose).not.toHaveBeenCalled()
+    })
+
+    it('does not auto close when duration is negative', () => {
+      const onClose = jest.fn()
+      render(<Toast message="Alert" duration={-1} onClose={onClose} />)
+
+      jest.advanceTimersByTime(5000)
+
+      expect(onClose).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('Manual close', () => {
+    it('calls onClose when close button clicked', async () => {
+      const user = userEvent.setup({ delay: null })
+      const onClose = jest.fn()
+      render(<Toast message="Alert" onClose={onClose} />)
+
+      const closeButton = screen.getByLabelText('알림 닫기')
+      await user.click(closeButton)
+
+      jest.advanceTimersByTime(300)
+
+      await waitFor(() => {
+        expect(onClose).toHaveBeenCalledTimes(1)
+      })
+    })
+
+    it('sets isVisible to false immediately on close', async () => {
+      const user = userEvent.setup({ delay: null })
+      const onClose = jest.fn()
+      const { container } = render(<Toast message="Alert" onClose={onClose} />)
+
+      const closeButton = screen.getByLabelText('알림 닫기')
+      await user.click(closeButton)
+
+      const toast = container.querySelector('.toast')
+      expect(toast).toHaveClass('toast-hidden')
+    })
+  })
+
+  describe('Type styling', () => {
+    it('renders success type', () => {
+      const { container } = render(<Toast message="Success" type="success" />)
+
+      const toast = container.querySelector('.toast')
+      expect(toast).toBeInTheDocument()
+    })
+
+    it('renders error type', () => {
+      const { container } = render(<Toast message="Error" type="error" />)
+
+      const toast = container.querySelector('.toast')
+      expect(toast).toBeInTheDocument()
+    })
+
+    it('renders warning type', () => {
+      const { container } = render(<Toast message="Warning" type="warning" />)
+
+      const toast = container.querySelector('.toast')
+      expect(toast).toBeInTheDocument()
+    })
+
+    it('renders info type', () => {
+      const { container } = render(<Toast message="Info" type="info" />)
+
+      const toast = container.querySelector('.toast')
+      expect(toast).toBeInTheDocument()
+    })
+  })
+})
+
+describe('ToastContainer Component', () => {
+  it('renders children', () => {
+    render(
+      <ToastContainer>
+        <div data-testid="child">Child Content</div>
+      </ToastContainer>
+    )
+
+    expect(screen.getByTestId('child')).toBeInTheDocument()
+  })
+
+  it('can render multiple toasts', () => {
+    render(
+      <ToastContainer>
+        <Toast message="First toast" />
+        <Toast message="Second toast" />
+        <Toast message="Third toast" />
+      </ToastContainer>
+    )
+
+    expect(screen.getByText('First toast')).toBeInTheDocument()
+    expect(screen.getByText('Second toast')).toBeInTheDocument()
+    expect(screen.getByText('Third toast')).toBeInTheDocument()
+  })
+
+  it('has correct class', () => {
+    const { container } = render(
+      <ToastContainer>
+        <div>Content</div>
+      </ToastContainer>
+    )
+
+    const toastContainer = container.querySelector('.toast-container')
+    expect(toastContainer).toBeInTheDocument()
+  })
+})
