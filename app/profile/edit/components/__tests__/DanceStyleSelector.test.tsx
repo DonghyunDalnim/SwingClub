@@ -263,6 +263,70 @@ describe('DanceStyleSelector', () => {
       expect(mockOnChange).not.toHaveBeenCalled()
     })
 
+    it('10개 도달 직전에 스타일을 추가하려고 시도할 때 early return이 동작해야 함', async () => {
+      const user = userEvent.setup()
+      // 정확히 10개의 스타일을 가진 상태
+      const allStyles = [
+        'Lindy Hop', 'Charleston', 'Balboa', 'Shag', 'Blues',
+        'Collegiate Shag', 'St. Louis Shag', 'Slow Drag', 'Authentic Jazz', 'Solo Jazz'
+      ]
+      const mockData: DanceStyle[] = allStyles.map(name => ({ name, level: 3 }))
+
+      const { rerender } = render(<DanceStyleSelector value={mockData} onChange={mockOnChange} />)
+
+      // 최대 개수 도달 상태 확인
+      expect(screen.getByText('최대 개수 도달')).toBeInTheDocument()
+      expect(screen.queryByText(/\+ 스타일 추가/)).not.toBeInTheDocument()
+
+      // 9개로 줄이고 다시 렌더링
+      const nineStyles = mockData.slice(0, 9)
+      rerender(<DanceStyleSelector value={nineStyles} onChange={mockOnChange} />)
+
+      // 이제 추가 버튼이 보여야 함
+      expect(screen.getByText(/\+ 스타일 추가/)).toBeInTheDocument()
+    })
+
+    it('handleAddStyle 함수가 10개 제한을 올바르게 처리해야 함', async () => {
+      const user = userEvent.setup()
+
+      // 9개의 스타일로 시작
+      let currentStyles: DanceStyle[] = [
+        'Lindy Hop', 'Charleston', 'Balboa', 'Shag', 'Blues',
+        'Collegiate Shag', 'St. Louis Shag', 'Slow Drag', 'Authentic Jazz'
+      ].map(name => ({ name, level: 3 }))
+
+      // onChange를 통해 상태를 업데이트하도록 mock 수정
+      const mockOnChangeWithState = jest.fn((newStyles: DanceStyle[]) => {
+        currentStyles = newStyles
+      })
+
+      const { rerender } = render(
+        <DanceStyleSelector value={currentStyles} onChange={mockOnChangeWithState} />
+      )
+
+      // 추가 버튼 클릭
+      const addButton = screen.getByText(/\+ 스타일 추가/)
+      await user.click(addButton)
+
+      // Solo Jazz 추가 (10번째)
+      await waitFor(() => {
+        const soloJazzButton = screen.getByLabelText(/Solo Jazz 추가/)
+        return user.click(soloJazzButton)
+      })
+
+      // onChange가 호출되어야 함 (10개가 됨)
+      expect(mockOnChangeWithState).toHaveBeenCalled()
+
+      // 10개로 리렌더링
+      rerender(
+        <DanceStyleSelector value={[...currentStyles, { name: 'Solo Jazz', level: 1 }]} onChange={mockOnChangeWithState} />
+      )
+
+      // 이제 최대 개수 도달 상태여야 함
+      expect(screen.getByText('최대 개수 도달')).toBeInTheDocument()
+      expect(screen.queryByText(/\+ 스타일 추가/)).not.toBeInTheDocument()
+    })
+
     it('9개일 때는 1개 더 추가할 수 있어야 함', async () => {
       const user = userEvent.setup()
       const mockData: DanceStyle[] = Array.from({ length: 9 }, (_, i) => ({
@@ -464,6 +528,55 @@ describe('DanceStyleSelector', () => {
 
       // onChange가 호출되지 않아야 함
       expect(mockOnChange).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('조건부 렌더링', () => {
+    it('선택 가능한 스타일이 없을 때 추가 버튼이 표시되지 않아야 함', () => {
+      // 모든 스타일을 선택한 상태
+      const allStyles = [
+        'Lindy Hop', 'Charleston', 'Balboa', 'Shag', 'Blues',
+        'Collegiate Shag', 'St. Louis Shag', 'Slow Drag', 'Authentic Jazz', 'Solo Jazz'
+      ]
+      const mockData: DanceStyle[] = allStyles.map(name => ({ name, level: 3 }))
+
+      render(<DanceStyleSelector value={mockData} onChange={mockOnChange} />)
+
+      // 추가 버튼이 없어야 함 (모든 스타일이 선택되었으므로)
+      expect(screen.queryByText(/\+ 스타일 추가/)).not.toBeInTheDocument()
+    })
+
+    it('최대 개수 미만이고 선택 가능한 스타일이 있을 때만 추가 버튼이 표시되어야 함', () => {
+      const mockData: DanceStyle[] = [
+        { name: 'Lindy Hop', level: 3 }
+      ]
+
+      render(<DanceStyleSelector value={mockData} onChange={mockOnChange} />)
+
+      // 추가 버튼이 있어야 함
+      expect(screen.getByText(/\+ 스타일 추가/)).toBeInTheDocument()
+      expect(screen.queryByText('최대 개수 도달')).not.toBeInTheDocument()
+    })
+
+    it('showAvailable이 false일 때 선택 목록이 표시되지 않아야 함', () => {
+      render(<DanceStyleSelector value={[]} onChange={mockOnChange} />)
+
+      // 초기 상태에서는 목록이 보이지 않아야 함
+      expect(screen.queryByRole('list', { name: /선택 가능한 댄스 스타일/ })).not.toBeInTheDocument()
+    })
+
+    it('showAvailable이 true이고 canAddMore가 true일 때만 선택 목록이 표시되어야 함', async () => {
+      const user = userEvent.setup()
+      render(<DanceStyleSelector value={[]} onChange={mockOnChange} />)
+
+      // 추가 버튼 클릭
+      const addButton = screen.getByText(/\+ 스타일 추가/)
+      await user.click(addButton)
+
+      // 이제 목록이 보여야 함
+      await waitFor(() => {
+        expect(screen.getByRole('list', { name: /선택 가능한 댄스 스타일/ })).toBeInTheDocument()
+      })
     })
   })
 })
