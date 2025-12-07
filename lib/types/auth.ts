@@ -25,9 +25,20 @@ export interface UserProfile {
     kakao?: string
     instagram?: string
   }
+  danceStyles?: DanceStyle[]
 }
 
 export type DanceLevel = 'beginner' | 'intermediate' | 'advanced' | 'professional'
+
+/**
+ * Dance style with proficiency level
+ */
+export interface DanceStyle {
+  /** Name of the dance style */
+  name: string
+  /** Proficiency level from 1 (beginner) to 5 (expert) */
+  level: number
+}
 
 export type AuthProvider = 'google' | 'kakao' | 'naver' | 'email'
 
