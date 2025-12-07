@@ -14,7 +14,12 @@
     "accessibility:validate": "npx ts-node scripts/validate-accessibility.ts",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:report": "playwright show-report"
   },
   "keywords": [],
   "author": "",
@@ -45,6 +50,7 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@playwright/test": "^1.56.1",
     "@testing-library/jest-dom": "^6.8.0",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
